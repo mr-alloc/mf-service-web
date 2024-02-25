@@ -1,5 +1,8 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
+import {call, dispatchIf} from "@/utils/NetworkUtil";
+import MemberAPI from "@/constant/api-meta/Member";
+import {removeAccessToken} from "@/utils/LocalCache";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<MemberInfo>(MemberInfo.ofDefault());
@@ -16,24 +19,55 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         memberInfo.value = MemberInfo.ofDefault();
     }
 
+    async function renewMemberInfo() {
+        await call(MemberAPI.GetInfo, null,
+            (response) => {
+                const { id, nickname, role } = response.data
+                updateMemberInfo(new MemberInfo(id, nickname, role))
+                console.log('Successfully renew member profile.')
+                return;
+            },
+            (sepc, error) => {
+                const res = error.response;
+                //인증 실패
+                dispatchIf(res.status === 401, '/sign-in', () => {
+                    removeAccessToken()
+                    console.error('[Failed to authenticate user.]')
+                })
+            })
+    }
+
     return {
         memberInfo,
         needMemberInfo,
         updateMemberInfo,
-        removeMemberInfo
+        removeMemberInfo,
+        renewMemberInfo
     }
 })
 
 export class MemberInfo {
 
-    private readonly id: number
-    private readonly nickname: string
-    private readonly role: number
+    private readonly _id: number
+    private readonly _nickname: string
+    private readonly _role: number
 
     constructor(id: number, nickname: string, role: number) {
-        this.id = id
-        this.nickname = nickname
-        this.role = role
+        this._id = id
+        this._nickname = nickname
+        this._role = role
+    }
+
+    get role(): number {
+        return this._role;
+    }
+
+    get id(): number {
+        return this._id;
+    }
+
+    get nickname(): string {
+        return this._nickname;
     }
 
     static ofDefault(): MemberInfo {
@@ -41,6 +75,6 @@ export class MemberInfo {
     }
 
     notExist(): boolean {
-        return this.id === 0
+        return this._id === 0
     }
 }

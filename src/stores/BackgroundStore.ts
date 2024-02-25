@@ -15,8 +15,14 @@ export const useBackgroundStore = defineStore('background', () => {
         needBackground.value = needNicknameInitializer.value
     }
 
+    function returnNicknameInitializer() {
+        needNicknameInitializer.value = false
+        updateBackgroundNeeds()
+    }
+
     return {
         needBackground,
-        useNicknameInitializer
+        useNicknameInitializer,
+        returnNicknameInitializer
     }
 })

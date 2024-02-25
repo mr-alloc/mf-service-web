@@ -35,7 +35,6 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faExclamationTriangle, faCircleCheck, faEye } from "@fortawesome/free-solid-svg-icons";
 import {onMounted, reactive} from "vue";
-import {InputFieldInvalidError} from "@/error/InputFieldInvalidError";
 
 const state = reactive({
   isCorrect: false,
@@ -68,7 +67,7 @@ const methods =  {
     const noWarningMessage = props.warningMessage === undefined;
 
     if (noValidator && noWarningMessage) return;
-    const succeed = await props.validate();
+    const succeed = props.validate && await props.validate();
 
     state.isWarning = !succeed;
     state.isCorrect = succeed;

@@ -3,11 +3,10 @@ import Main from '../views/Main.vue'
 import SignIn from '../views/SignIn.vue'
 import SignUp from '../views/SignUp.vue'
 import {MemberInfo, useMemberInfoStore} from "@/stores/MemberInfo";
-import {useSessionStore} from "@/stores/SessionStore";
-import {get} from "@/utils/NetworkUtil";
+import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import { noAccessToken } from "@/utils/LocalCache";
+import {noAccessToken, removeAccessToken} from "@/utils/LocalCache";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,10 +35,9 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     const memberInfoStore = useMemberInfoStore();
-    const sessionStore = useSessionStore();
-    let backgroundStore = useBackgroundStore();
+    const backgroundStore = useBackgroundStore();
 
-    let onlyForGuest = ['/sign-in', '/sign-up'];
+    const onlyForGuest = ['/sign-in', '/sign-up'];
 
     console.log(`[${to.path}] [No Session: ${noAccessToken()} / No Member: ${memberInfoStore.needMemberInfo()}]`)
 
@@ -64,31 +62,35 @@ router.beforeEach(async (to, from, next) => {
     //로그이인은 했지만, 멤버 정보가 없는경우.
     if (!noAccessToken() && memberInfoStore.needMemberInfo()) {
         console.log('need member info. (renew member info)')
-        await get(MemberAPI.MEMBER_INFO_V1.name, {})
-            .then(res => {
-                const { id, nickname, role } = res.data
-                console.log(`MemberInfo: { id: ${id}, nickname: ${nickname} }`)
+
+        await call(MemberAPI.GetInfo, null,
+            (response) => {
+                const { id, nickname, role } = response.data
                 if (nickname === null) {
-                    console.log('Need to initialize nickname')
                     backgroundStore.useNicknameInitializer()
                 }
                 memberInfoStore.updateMemberInfo(new MemberInfo(id, nickname, role))
-
                 console.log('Successfully renew member profile.')
                 return;
-            })
-            .catch(err => {
-                console.error("Failed to get member info. Please sign in again.")
-                sessionStore.removeCredential()
+            },
+            (sepc, error) => {
+                const res = error.response;
+                //인증 실패
+                if (res.status === 401) {
+                    console.error('[Failed to authenticate user.]')
+                    removeAccessToken()
+                    return next({ path: '/sign-in' })
+                }
+                console.error('[Failed to Get Member Info]', error);
+                removeAccessToken()
                 return next({ path: '/sign-in' })
             })
 
-        let memberInfo = memberInfoStore.memberInfo;
-        console.log('User with ', memberInfo)
+        const memberInfo = memberInfoStore.memberInfo;
         const authorityRole: number = memberInfo.role
 
-        const { role } = to.meta
-        console.log(`${to.path}: Need: ${role} / Current: ${authorityRole}`)
+        const { role } = to.meta as { role: number }
+        console.info(`${to.path}: Need: ${role} / Current: ${authorityRole}`)
         if (role && role > authorityRole) {
             alert("접근 권한이 없습니다.")
             return next({ path: '/' })

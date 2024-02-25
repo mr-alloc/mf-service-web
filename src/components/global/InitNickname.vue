@@ -17,12 +17,14 @@
 import BlinkInput from "@/components/global/BlinkInput.vue";
 import SimpleButton from "@/components/global/SimpleButton.vue";
 import {reactive} from "vue";
-import {put} from "@/utils/NetworkUtil";
+import {call} from "@/utils/NetworkUtil";
 import Member from "@/constant/api-meta/Member";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useRouter} from "vue-router";
+import {useBackgroundStore} from "@/stores/BackgroundStore";
 
 const memberInfoStore = useMemberInfoStore();
+const backgroundStore = useBackgroundStore();
 const router = useRouter();
 const state = reactive({
   nicknameInputValidate: false,
@@ -44,16 +46,12 @@ const methods = {
   },
   async initNickname() {
     const nicknameInput: HTMLInputElement = document.getElementsByName('nickname')[0]! as HTMLInputElement;
-    await put(Member.MEMBER_CHANGE_NICKNAME_V1.name, { nickname: nicknameInput.value })
-        .then(res => {
-          console.log(res.data);
+    await call(Member.ChangeMemberNickname, { nickname: nicknameInput.value },
+        async (response) => {
           console.log('Success to change nickname. remove member cache.');
-          memberInfoStore.removeMemberInfo();
-          router.push('/')
-        })
-        .catch(err => {
-          console.error(err.response.data);
-        });
+          await memberInfoStore.renewMemberInfo();
+          backgroundStore.returnNicknameInitializer()
+    })
 
   }
 
