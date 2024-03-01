@@ -1,5 +1,4 @@
 <template>
-  <Transition name="fade">
     <div class="sign-up-container" v-show="true">
       <h1>회원가입</h1>
       <div class="form-wrapper-deployer">
@@ -22,7 +21,6 @@
         </div>
       </div>
     </div>
-  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -33,8 +31,10 @@ import {Patterns, validate} from "@/utils/Util";
 import {call} from "@/utils/NetworkUtil";
 import {useRouter} from "vue-router";
 import AccountAPI from "@/constant/api-meta/Account";
+import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
 
 const router = useRouter();
+const notificationStore = useNotificationStore();
 
 const state = reactive({
 
@@ -57,7 +57,7 @@ const methods = {
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
     const isValidate = validate(emailInput.value, Patterns.Email);
 
-    const isConfirm =  await call(AccountAPI.ConfirmAccount, { email: emailInput.value },
+    const isConfirm = isValidate && await call(AccountAPI.ConfirmAccount, {email: emailInput.value},
         (response) => {
           return true
         },
@@ -75,7 +75,6 @@ const methods = {
 
   validatePassword(forceFocus: boolean = false) {
     const passwordInput = document.getElementsByName('userPassword')[0]! as HTMLInputElement;
-    const passwordConfirmInput = document.getElementsByName('userPasswordConfirm')[0]! as HTMLInputElement;
     const succeed = validate(passwordInput.value, Patterns.Password) && (state.passwordInputValidate = true);
     succeed || ((state.passwordInputValidate = false) && forceFocus && passwordInput.focus())
     methods.checkAllInput();
@@ -95,7 +94,8 @@ const methods = {
   },
 
   visiblePassword(isVisible:boolean, elementName: string) {
-    // document.getElementsByName(elementName)[0]!['type'] = isVisible ? 'text' : 'password';
+    const passwordElement: HTMLInputElement = document.getElementsByName(elementName)[0] as HTMLInputElement;
+    passwordElement.type = isVisible ? 'text' : 'password';
   },
 
   async signUp() {
@@ -109,7 +109,7 @@ const methods = {
       password: (document.getElementsByName('userPassword')[0]! as HTMLInputElement).value
     },
     (response) => {
-      console.log('res', response)
+      notificationStore.notice(NotificationType.SUCCESS, "회원가입 완료", "미션 패밀리에 오신걸 환영합니다.")
       router.push('/sign-in')
     })
     console.log('after request')

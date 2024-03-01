@@ -9,7 +9,7 @@
         />
         <BlinkInput name="userPassword" type="password" placeHolder="Password"
                     :is-hold="state.inputHold" class="narrow" :if-visible-need="(isVisible: boolean) => methods.visiblePassword(isVisible, 'userPassword')"
-                    :validate="methods.validatePassword" :no-mark="true"
+                    :validate="methods.validatePassword" :no-mark="true" :if-enter="methods.ifEnterKeyOnPassword"
                     warning-message="비밀번호 숫자, 영문, 특수문자를 포함해 8~20자 사용이 가능합니다."
 
         />
@@ -31,9 +31,11 @@ import {useRouter} from "vue-router";
 import AccountAPI from "@/constant/api-meta/Account";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {removeAccessToken, removeRefreshToken, setAccessToken, setRefreshToken} from "@/utils/LocalCache";
+import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
 
 const router = useRouter();
 const memberInfoStore = useMemberInfoStore();
+const notificationStore = useNotificationStore();
 
 const state = reactive({
   //입력값 유효성 검증
@@ -45,6 +47,11 @@ const state = reactive({
 });
 
 const methods = {
+  ifEnterKeyOnPassword(event: KeyboardEvent) {
+    if (methods.validatePassword()) {
+      methods.signIn();
+    }
+  },
   validateEmail() {
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
     state.emailInputValidate = validate(emailInput.value, Patterns.Email);
@@ -52,7 +59,7 @@ const methods = {
     methods.checkAllInput();
     return state.emailInputValidate;
   },
-  validatePassword() {
+  validatePassword(keyboardEvent?: KeyboardEvent) {
     const passwordInput: HTMLInputElement = document.getElementsByName('userPassword')[0]! as HTMLInputElement;
     state.passwordInputValidate = validate(passwordInput.value, Patterns.Password);
     methods.checkAllInput();
@@ -74,7 +81,6 @@ const methods = {
     const signInResult = await call(AccountAPI.VerifyAccount, { email: emailInput.value, password: passwordInput.value },
         async (response) => {
           const {accessToken, refreshToken} = response.data
-          console.log(`accessToken: ${accessToken}, refreshToken: ${refreshToken}`)
           setAccessToken(accessToken)
           setRefreshToken(refreshToken)
           await router.push('/')
@@ -85,7 +91,8 @@ const methods = {
           memberInfoStore.removeMemberInfo()
           removeAccessToken()
           removeRefreshToken()
-          alert(spec.getMessage(body.code) ?? spec.defaultMessage)
+          const message = spec.getMessage(body.code) ?? spec.defaultMessage;
+          notificationStore.notice(NotificationType.INFO, "로그인 오류", message)
           return false
         }
     );

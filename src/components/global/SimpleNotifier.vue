@@ -14,8 +14,10 @@ const methods = {
         return ["fas", "circle-exclamation"];
       case NotificationType.SUCCESS:
         return ["far", "circle-check"];
+      case NotificationType.GUIDE:
+        return ["fas", "flag"];
       default:
-        return [];
+        return ["fas", "hands-clapping"];
     }
   },
   dismissAlert(index: number) {
@@ -57,7 +59,7 @@ const state = reactive({
 .notifications-wrapper {
   width: 250px;
   height: 300px;
-  z-index: 1;
+  z-index: 2;
   position: absolute;
   bottom: 0px;
 
@@ -135,7 +137,7 @@ const state = reactive({
           display: flex;
           align-items: center;
           transition: .2s;
-          color: #f6cb70;
+          color: #f6e0c0;
 
           &.warning {
             color: #e74444;
@@ -148,6 +150,11 @@ const state = reactive({
           &.success {
             color: #4daf73;
           }
+
+          &.guide {
+            color: $light-signature-purple;
+          }
+
 
           .message-title {
             padding: 0 8px;

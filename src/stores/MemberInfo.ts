@@ -37,8 +37,14 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
             })
     }
 
+    function allow(memberRole: number) {
+        return !needMemberInfo() && memberInfo.value.role >= memberRole
+    }
+
+
     return {
         memberInfo,
+        allow,
         needMemberInfo,
         updateMemberInfo,
         removeMemberInfo,
@@ -51,11 +57,13 @@ export class MemberInfo {
     private readonly _id: number
     private readonly _nickname: string
     private readonly _role: number
+    private readonly _profileImage: string
 
     constructor(id: number, nickname: string, role: number) {
-        this._id = id
-        this._nickname = nickname
-        this._role = role
+        this._id = id;
+        this._nickname = nickname;
+        this._role = role;
+        this._profileImage = "/src/assets/images/profile.png";
     }
 
     get role(): number {
@@ -67,7 +75,11 @@ export class MemberInfo {
     }
 
     get nickname(): string {
-        return this._nickname;
+        return this._nickname ?? "GUEST";
+    }
+
+    get profileImage(): string {
+        return this._profileImage;
     }
 
     static ofDefault(): MemberInfo {

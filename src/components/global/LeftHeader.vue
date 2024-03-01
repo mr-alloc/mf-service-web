@@ -1,13 +1,15 @@
 <template>
   <header>
     <div class="brand-area">
-      <div class="brand-logo">
-        <img alt="Vue logo" class="logo" src="@/assets/images/logo.gif" />
-      </div>
+      <RouterLink to="/">
+        <div class="brand-logo">
+          <img alt="Vue logo" class="logo" src="@/assets/images/logo.gif"/>
+        </div>
+      </RouterLink>
     </div>
     <div class="user-session-info pushable">
       <span class="user-img-area">
-        <img v-if="!memberInfoStore.needMemberInfo()" src="@/assets/images/profile.png"/>
+        <img v-if="!memberInfoStore.needMemberInfo()" :src="memberInfoStore.memberInfo?.profileImage"/>
         <FontAwesomeIcon v-else class="fa-xl guest-icon" :icon="faUser" />
       </span>
       <div class="current-user" v-on:click="methods.moveToUserInfo()">
@@ -17,7 +19,8 @@
     <div class="feature-list-wrapper">
       <nav>
         <ul class="feature-list">
-          <FeatureItem :icon="['far', 'lightbulb']" :click-behavior="methods.createMission"/>
+          <FeatureItem :icon="['far', 'lightbulb']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"
+                       :click-behavior="methods.createMission"/>
         </ul>
       </nav>
     </div>
@@ -32,13 +35,28 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import FeatureItem from "@/components/global/FeatureItem.vue";
 import SimpleNotifier from "@/components/global/SimpleNotifier.vue";
 import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {MemberRole} from "@/constant/MemberRole";
 
 const memberInfoStore = useMemberInfoStore();
 const notificationStore = useNotificationStore();
 let router = useRouter();
 const methods = {
   moveToUserInfo() {
-    router.push("/sign-in")
+    //GUEST
+    if (memberInfoStore.needMemberInfo()) {
+      router.push("/sign-in")
+      return;
+    }
+    switch (memberInfoStore.memberInfo?.role) {
+      case MemberRole.MEMBER:
+        router.push("/profile");
+        break;
+      case MemberRole.ADMIN:
+        router.push("/admin");
+        break;
+      default:
+        router.push("/sign-in");
+    }
   },
   getNickname() {
     return memberInfoStore.needMemberInfo()
@@ -97,6 +115,7 @@ header {
     padding: 5px 8px;
     display: flex;
     flex-direction: row;
+    border-radius: 5px;
 
     .user-img-area {
       display: flex;

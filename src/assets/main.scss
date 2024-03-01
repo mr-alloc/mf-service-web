@@ -52,7 +52,6 @@ button.btn-primary {
 
 div.pushable {
   transition: 0.4s;
-  border-radius: 5px;
   &:hover {
     cursor: pointer;
     background-color: lightgray;
@@ -60,11 +59,6 @@ div.pushable {
   }
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
 
 @mixin mobile {
   @media (max-width: 767px) {
@@ -100,13 +94,24 @@ input.blink-input {
 }
 
 // Animations
-.fade-enter-active, .fade-leave-active {
+.left-fade-enter-active, .left-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.left-fade-enter-from, .left-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50px);
+  position: absolute;
+}
+
+.fade-enter-active {
   transition: opacity 0.5s ease;
 }
 
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
+
 
 .list-move,
 .list-enter-active,
@@ -139,32 +144,23 @@ input.blink-input {
   }
 }
 
+.bounce-enter-active {
+  animation: bounce-in .3s;
+}
+
+.bounce-leave-active {
+  animation: bounce-in .3s reverse;
+}
+
 @keyframes bounce-in {
   0% {
     transform: scale(0);
   }
   50% {
-    transform: scale(1.25);
+    transform: scale(1.1);
   }
   100% {
     transform: scale(1);
   }
 }
 
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}

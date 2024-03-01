@@ -1,0 +1,245 @@
+<script setup lang="ts">
+import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {useRouter} from "vue-router";
+import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {removeTokens} from "@/utils/LocalCache";
+import {useBackgroundStore} from "@/stores/BackgroundStore";
+import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
+import {onMounted, reactive} from "vue";
+import Member from "@/constant/api-meta/Member";
+import {call} from "@/utils/NetworkUtil";
+
+const memberInfoStore = useMemberInfoStore();
+const notificationStore = useNotificationStore();
+const backgroundStore = useBackgroundStore();
+const router = useRouter();
+
+type MemberDetail = {
+  nickname: string;
+  email: string;
+  registeredAt: string;
+  lastSignedInAt: string;
+}
+
+type State = {
+  memberDetail: MemberDetail | null;
+}
+const state = reactive<State>({
+  memberDetail: null
+})
+const methods = {
+  doSignOut() {
+    notificationStore.notice(NotificationType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
+    memberInfoStore.removeMemberInfo();
+    removeTokens();
+    router.push("/sign-in");
+  },
+  confirmSignOut() {
+    if (backgroundStore.needPopup) {
+      return;
+    }
+    const currentPopup = new CurrentPopup(PopupType.NORMAL, "로그아웃", "잘못 누르신 건가요? 아직 헤어지기 아쉬워요!")
+        .addButton("확인", () => {
+          methods.doSignOut();
+          backgroundStore.returnGlobalPopup();
+        })
+        .addButton("취소", () => {
+          backgroundStore.returnGlobalPopup();
+        });
+    backgroundStore.useGlobalPopup(currentPopup)
+  },
+  changeNickname() {
+    backgroundStore.useNicknameInitializer()
+  },
+  getFormattedDate(at: number) {
+    if (!at) return ""
+    const date = new Date(at * 1000);
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}:${date.getMinutes()}`
+  }
+}
+
+onMounted(async () => {
+  await call(Member.GetMemberDetail, null,
+      response => {
+        const {nickname, email, lastSignedInAt, registeredAt} = response.data;
+        state.memberDetail = {
+          nickname: nickname,
+          email: email,
+          lastSignedInAt: methods.getFormattedDate(lastSignedInAt),
+          registeredAt: methods.getFormattedDate(registeredAt)
+        } as MemberDetail;
+      }
+  )
+})
+</script>
+
+<template>
+  <div class="member-profile" v-show="state.memberDetail">
+    <div class="simple-profiles">
+      <div class="profile-image-wrapper">
+        <div class="profile-image">
+          <img v-if="!memberInfoStore.needMemberInfo()" :src="memberInfoStore.memberInfo?.profileImage"/>
+        </div>
+        <div class="change-profile">
+          <FontAwesomeIcon class="fa-sm" :icon="['fas', 'pen']"/>
+        </div>
+      </div>
+      <div class="nickname-area" v-on:click="methods.changeNickname()">
+        <span class="member-nickname">{{ state.memberDetail?.nickname }}</span>
+      </div>
+      <div class="sign-out-area">
+        <button type="button" v-on:click="methods.confirmSignOut()">
+          <FontAwesomeIcon class="fa-2x" :icon="['fas', 'sign-out-alt']"/>
+        </button>
+      </div>
+    </div>
+    <div class="account-information">
+      <ul class="account-metadata">
+        <li class="item-pair">
+          <div class="item-key">이메일</div>
+          <div class="item-value">{{ state.memberDetail?.email }}</div>
+        </li>
+        <li class="item-pair">
+          <div class="item-key">계정 생성일시</div>
+          <div class="item-value">{{ state.memberDetail?.registeredAt }}</div>
+        </li>
+        <li class="item-pair">
+          <div class="item-key">마지막 로그인 일시</div>
+          <div class="item-value">{{ state.memberDetail?.lastSignedInAt }}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<style scoped lang="scss">
+@import '@/assets/main.scss';
+
+.member-profile {
+  padding: 30px 15px;
+
+  .simple-profiles {
+    display: flex;
+    padding: 5px 15px;
+    flex-direction: row;
+
+    .profile-image-wrapper {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      width: 50px;
+      position: relative;
+      justify-content: center;
+
+      .profile-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .change-profile {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        border: 1px $standard-gray-in-white solid;
+        color: #525252;
+        bottom: 0px;
+        right: -5px;
+        transition: .4s;
+
+        &:hover {
+          background-color: rgba(51, 51, 51, 0.78);
+          color: white;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .nickname-area {
+      padding: 5px 15px;
+      flex-shrink: 0;
+      width: 300px;
+      display: flex;
+      align-items: center;
+
+      .member-nickname {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: black;
+        border-radius: 10px;
+        padding: 5px 10px;
+        transition: .4s;
+        display: inline-block;
+
+        &:hover {
+          cursor: pointer;
+          transform: scale(1.1);
+          box-shadow: $standard-box-shadow;
+        }
+      }
+    }
+
+    .sign-out-area {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: row-reverse;
+      color: $standard-gray-in-white;
+
+      button {
+        transition: .4s;
+      }
+
+      button:hover {
+        color: $standard-clean-black;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .password-changer {
+
+  }
+
+  .account-information {
+    width: 100%;
+    margin: 20px 0px;
+
+    .account-metadata {
+      width: 100%;
+      list-style: none;
+
+      .item-pair {
+        display: flex;
+        flex-direction: row;
+
+        .item-key {
+          padding: 3px 5px;
+          flex-shrink: 0;
+          width: 200px;
+          font-size: .84rem;
+
+        }
+
+        .item-value {
+          padding: 3px 5px;
+          flex-grow: 1;
+          font-size: .94rem;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+</style>

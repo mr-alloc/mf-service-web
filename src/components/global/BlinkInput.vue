@@ -1,9 +1,10 @@
 <template>
-  <div class="input-wrapper" :class="[{ hold: props.isHold }, { warning: state.isWarning }, { correct: state.isCorrect }]">
+  <div class="input-wrapper"
+       :class="[{ hold: props.isHold }, { warning: state.isWarning }, { correct: !props.noMark && state.isCorrect }]">
     <div class="input-area">
       <label v-show="props.label" :for="props.id">{{ props.label }}</label>
       <div class="blink-input-pair">
-        <Transition name="fade">
+        <Transition name="left-fade">
           <div class="icon-area" v-show="!props.noMark && state.isCorrect">
             <FontAwesomeIcon class="fa-1x correct-mark" :icon="faCircleCheck" />
           </div>
@@ -14,10 +15,13 @@
                :name="props.name"
                :placeholder="props.placeHolder"
                :disabled="props.isHold"
+               :value="state.value ?? props.defaultValue"
                v-on:focusin="methods.focusIn()"
                v-on:focusout="methods.focusOut()"
+               v-model="state.value"
+               v-on:keyup="$event.code === 'Enter' && props.ifEnter && props.ifEnter($event)"
         />
-        <Transition name="fade">
+        <Transition name="left-fade">
           <span class="show-origin" :class="{ active: state.isVisible }" v-show="state.isPassword" v-on:click="methods.visiblePassword()">
             <FontAwesomeIcon class="fa-1x" :icon="faEye" />
           </span>
@@ -32,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faExclamationTriangle, faCircleCheck, faEye } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {faCircleCheck, faExclamationTriangle, faEye} from "@fortawesome/free-solid-svg-icons";
 import {onMounted, reactive} from "vue";
 
 const state = reactive({
@@ -41,6 +45,7 @@ const state = reactive({
   isWarning: false,
   isPassword: false,
   isVisible: false,
+  value: ''
 });
 
 const props = defineProps({
@@ -53,7 +58,9 @@ const props = defineProps({
   warningMessage: String,
   validate: Function,
   ifVisibleNeed: Function,
-  noMark: Boolean
+  noMark: Boolean,
+  defaultValue: String,
+  ifEnter: Function
 });
 const methods =  {
   focusIn() {

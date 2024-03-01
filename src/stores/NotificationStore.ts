@@ -5,7 +5,7 @@ export const useNotificationStore = defineStore('notification', () => {
 
     const notifications = ref<Array<Notification>>([]);
 
-    function notice(type: NotificationType, title: string, message: string) {
+    function notice(type: NotificationType, title: string, message: string, timeout?: number) {
         const notification = new Notification(type, title, message);
         notifications.value.push(notification);
 
@@ -16,7 +16,7 @@ export const useNotificationStore = defineStore('notification', () => {
                         notifications.value.splice(index, 1)
                     }
                 });
-        }, 3000)
+        }, timeout ?? 5000)
 
         if (notifications.value.length > 5) {
             notifications.value.shift();
@@ -68,5 +68,6 @@ export enum NotificationType {
     INFO = "info",
     WARNING = "warning",
     SUCCESS = "success",
+    GUIDE = "guide",
     NONE = "none"
 }

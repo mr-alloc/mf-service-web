@@ -30,3 +30,8 @@ export const getRefreshToken = () => {
 export const removeRefreshToken = () => {
     localStorage.removeItem(REFRESH_TOKEN)
 }
+
+export const removeTokens = () => {
+    removeAccessToken()
+    removeRefreshToken()
+}

@@ -1,5 +1,6 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
+import type {CurrentPopup} from "@/stores/status/CurrentPopup";
 
 export const useBackgroundStore = defineStore('background', () => {
 
@@ -10,6 +11,9 @@ export const useBackgroundStore = defineStore('background', () => {
         title: '',
         content: ''
     })
+
+    const popupInfo = ref<CurrentPopup>();
+    const needPopup = ref<boolean>(false)
 
     //최초 닉네임 초기화
     function useNicknameInitializer() {
@@ -42,7 +46,33 @@ export const useBackgroundStore = defineStore('background', () => {
     }
 
     function updateBackgroundNeeds() {
-        needBackground.value = needNicknameInitializer.value || needCurtainManager.value
+        needBackground.value = needNicknameInitializer.value || needCurtainManager.value || needPopup.value;
+    }
+
+
+    function useGlobalPopup(popup: CurrentPopup, autoCloseSecond?: number) {
+        if (needPopup.value) {
+            console.error('Already has popup.')
+            return;
+        }
+
+        popupInfo.value = popup;
+        needPopup.value = true;
+        updateBackgroundNeeds();
+
+        if (autoCloseSecond) {
+            setTimeout(() => {
+                returnGlobalPopup();
+            }, autoCloseSecond * 1000)
+        }
+    }
+
+    function returnGlobalPopup() {
+        needPopup.value = false;
+        setTimeout(() => {
+            popupInfo.value = undefined;
+            updateBackgroundNeeds();
+        }, 300)
     }
 
 
@@ -53,6 +83,10 @@ export const useBackgroundStore = defineStore('background', () => {
         useNicknameInitializer,
         returnNicknameInitializer,
         useCurtainManager,
-        loadingInfo
+        loadingInfo,
+        needPopup,
+        popupInfo,
+        useGlobalPopup,
+        returnGlobalPopup,
     }
 })

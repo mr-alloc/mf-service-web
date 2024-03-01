@@ -1,0 +1,62 @@
+export class CurrentPopup {
+    private readonly _type: PopupType
+    private readonly _title: string
+    private readonly _message: string
+    private readonly _buttons: Array<PopupButton>
+
+    constructor(type: PopupType, title: string, message: string) {
+        this._type = type;
+        this._title = title;
+        this._message = message;
+        this._buttons = new Array<PopupButton>();
+    }
+
+    get type(): PopupType {
+        return this._type;
+    }
+
+    get title(): string {
+        return this._title;
+    }
+
+    get message(): string {
+        return this._message;
+    }
+
+    get buttons(): Array<PopupButton> {
+        return this._buttons;
+    }
+
+    addButton(title: string, action: () => void): CurrentPopup {
+        this._buttons.push(PopupButton.create(title, action));
+        return this;
+    }
+}
+
+export class PopupButton {
+    private readonly _name: string
+    private readonly _action: () => void
+
+    constructor(name: string, action: () => void) {
+        this._name = name;
+        this._action = action;
+    }
+
+    static create(name: string, action: () => void): PopupButton {
+        return new PopupButton(name, action);
+    }
+
+    get name(): string {
+        return this._name;
+    }
+
+    get action(): () => void {
+        return this._action;
+    }
+}
+
+export enum PopupType {
+    INFO = "info",
+    WARNING = "warning",
+    NORMAL = "normal"
+}
