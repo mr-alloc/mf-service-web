@@ -3,8 +3,24 @@ import {getAccessToken, noAccessToken} from "@/utils/LocalCache";
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {useRouter} from "vue-router";
+import {useBackgroundStore} from "@/stores/BackgroundStore";
 
 axios.defaults.baseURL = "http://localhost:9090";
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.status === 401) {
+            console.error('Unauthorized')
+        }
+        if (error.response?.status === 500) {
+            console.error('Internal Server Error')
+        } else {
+            const backgroundStore = useBackgroundStore()
+            backgroundStore.useCurtainManager('네트워크 연결 오류', '서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.')
+        }
+        return Promise.reject(error);
+    }
+)
 
 
 function getHeader(): AxiosHeaders {
@@ -30,7 +46,7 @@ export async function call(
         case HttpMethod.GET:
             request = axios.get(spec.path, {
                 params: body,
-                headers: getHeader()
+                headers: getHeader(),
             });
             break;
         case HttpMethod.POST:

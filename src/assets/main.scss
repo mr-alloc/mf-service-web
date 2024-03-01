@@ -7,12 +7,17 @@ $text-signature-purple: #3d0394;
 $standard-light-gray-in-white: #f1f1f1;
 $standard-gray-in-white: #c2c1c1;
 $standard-weight-gray-in-white: #a4a4a4;
+$standard-clean-black: #151515;
+
+$standard-box-shadow: 0 0 10px 0 rgba(65, 65, 65, 0.75);
 
 $duration: 0.4s;
 $warning-red: #ce3737;
 $correct-green: #3d9c3d;
 
-
+body {
+  background-color: $standard-light-gray-in-white;
+}
 
 a {
   text-decoration: none;
@@ -102,6 +107,23 @@ input.blink-input {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
+
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all 1s ease-out;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
 
 @keyframes blink-input {
   0% {

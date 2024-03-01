@@ -17,9 +17,11 @@
     <div class="feature-list-wrapper">
       <nav>
         <ul class="feature-list">
+          <FeatureItem :icon="['far', 'lightbulb']" :click-behavior="methods.createMission"/>
         </ul>
       </nav>
     </div>
+    <SimpleNotifier/>
   </header>
 </template>
 <script setup lang="ts">
@@ -27,8 +29,12 @@ import {faUser} from "@fortawesome/free-solid-svg-icons";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useRouter} from "vue-router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import FeatureItem from "@/components/global/FeatureItem.vue";
+import SimpleNotifier from "@/components/global/SimpleNotifier.vue";
+import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
 
 const memberInfoStore = useMemberInfoStore();
+const notificationStore = useNotificationStore();
 let router = useRouter();
 const methods = {
   moveToUserInfo() {
@@ -38,6 +44,11 @@ const methods = {
     return memberInfoStore.needMemberInfo()
         ? "Guest"
         : memberInfoStore?.memberInfo.nickname ?? "No Name";
+  },
+  createMission() {
+    console.log("미션 생성");
+    const random = Math.floor(Math.random() * 10);
+    notificationStore.notice(NotificationType.SUCCESS, `${random}. 미션생성 완료`, "\"청첩장 개수확인\" 미션이 생성 되었습니다.")
   }
 }
 </script>
@@ -51,7 +62,7 @@ header {
   max-height: 100vh;
   width: 230px;
   flex-shrink: 0;
-  padding: 0 1.5rem;
+  padding: 1.2rem 1.5rem;
   border-right: 1.24px solid $standard-light-gray-in-white;
 
   .brand-area {
@@ -127,13 +138,16 @@ header {
   .feature-list-wrapper {
     display: flex;
 
-    .feature-list {
-      list-style: none;
+    nav {
+      width: 100%;
 
-      li {
-        height: 1.42rem;
+      .feature-list {
+        list-style: none;
+        padding: 5px 8px;
+
       }
     }
+
   }
 }
 </style>

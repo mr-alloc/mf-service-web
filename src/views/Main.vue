@@ -1,6 +1,6 @@
 <template>
   <div class="main-container">
-    <h1>환영 합니다. 회원님</h1>
+
   </div>
 </template>
 
@@ -13,5 +13,11 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+@import '@/assets/main.scss';
 
+.main-container {
+  height: 100%;
+  width: 648px;
+  margin: 0 auto;
+}
 </style>
