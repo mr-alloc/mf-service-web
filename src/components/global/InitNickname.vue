@@ -1,5 +1,9 @@
 <template>
   <div class="nickname-initializer">
+    <div class="back" v-show="memberInfoStore.hasNickname()">
+      <FontAwesomeIcon class="fa-4x" :icon="['fas', 'delete-left']"
+                       v-on:click="backgroundStore.returnNicknameInitializer()"/>
+    </div>
     <div class="title-area">
       <span class="nickname-initializer-title">{{ methods.getGuideNotice() }}</span>
     </div>
@@ -16,12 +20,13 @@
 <script lang="ts" setup>
 import BlinkInput from "@/components/global/BlinkInput.vue";
 import SimpleButton from "@/components/global/SimpleButton.vue";
-import {reactive} from "vue";
+import {onMounted, reactive} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import Member from "@/constant/api-meta/Member";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
@@ -58,10 +63,17 @@ const methods = {
     return state.nicknameInputValidate;
   },
   async initNickname() {
+    if (!methods.validateNickname()) {
+      return;
+    }
     const nicknameInput: HTMLInputElement = document.getElementsByName('nickname')[0]! as HTMLInputElement;
     await call(Member.ChangeMemberNickname, { nickname: nicknameInput.value },
         async (response) => {
-          notificationStore.notice(NotificationType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
+          if (memberInfoStore.hasNickname()) {
+            notificationStore.notice(NotificationType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
+          } else {
+            notificationStore.notice(NotificationType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
+          }
           await memberInfoStore.renewMemberInfo();
           backgroundStore.returnNicknameInitializer()
         },
@@ -73,11 +85,19 @@ const methods = {
 
   },
   getGuideNotice() {
-    return memberInfoStore.needMemberInfo()
-        ? "합류를 시작하기 위해 닉네임을 정해주세요!"
-        : "변경할 닉네임을 입력해주세요."
+    return memberInfoStore.hasNickname()
+        ? "변경할 닉네임을 입력해주세요."
+        : "합류를 시작하기 위해 닉네임을 정해주세요!";
   }
 }
+
+onMounted(() => {
+  window.addEventListener('keyup', (event: KeyboardEvent) => {
+    if (event.key === "Escape" && backgroundStore.needNicknameInitializer) {
+      backgroundStore.returnNicknameInitializer()
+    }
+  })
+})
 </script>
 
 <style lang="scss">
@@ -98,7 +118,7 @@ const methods = {
   backdrop-filter: blur(10px);
 
   animation-name: blur;
-  animation-duration: 3s;
+  animation-duration: 1s;
   animation-iteration-count: 1;
 
   .title-area {
@@ -119,6 +139,27 @@ const methods = {
   .nickname-form {
     width: 300px;
 
+  }
+
+  .back {
+    position: fixed;
+    color: rgb(0, 0, 0, .3);
+    top: 9px;
+    left: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .2s;
+
+
+    &:hover {
+      color: rgb(0, 0, 0, .5);
+
+      svg {
+
+        cursor: pointer;
+      }
+    }
   }
 }
 

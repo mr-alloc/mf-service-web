@@ -17,6 +17,10 @@ const methods = {
   }
 
 }
+const props = defineProps({
+  componentName: String,
+  componentProps: Object
+});
 </script>
 
 <template>
@@ -29,7 +33,10 @@ const methods = {
         <div class="popup-title">{{ backgroundStore.popupInfo?.title }}</div>
       </div>
       <div class="popup-body">
-        <span class="popup-message">{{ backgroundStore.popupInfo?.message }}</span>
+        <span class="popup-message"
+              v-show="!backgroundStore.popupInfo?.includeBodyComponent">{{ backgroundStore.popupInfo?.message }}</span>
+        <Component :is="backgroundStore.popupInfo?.componentName" v-bind="backgroundStore.popupInfo?.componentProps"
+                   v-show="backgroundStore.popupInfo?.includeBodyComponent"/>
       </div>
       <div class="popup-footer">
         <ul class="button-group">
@@ -46,7 +53,6 @@ const methods = {
 @import '@/assets/main.scss';
 
 .global-popup-wrapper {
-  width: 300px;
   border: 1px $standard-gray-in-white solid;
   border-radius: 10px;
   padding: 5px;
@@ -91,6 +97,10 @@ const methods = {
     padding: 5px 8px;
     flex-grow: 1;
     user-select: none;
+
+    .popup-message {
+      width: 300px;
+    }
   }
 
   .popup-footer {

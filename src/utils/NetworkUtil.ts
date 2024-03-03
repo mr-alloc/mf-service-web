@@ -10,8 +10,9 @@ axios.interceptors.response.use(
     response => response,
     error => {
         const notificationStore = useNotificationStore();
+        const router = useRouter();
         if (error.response?.status === 401) {
-            console.error('Unauthorized')
+            // notificationStore.notice(NotificationType.WARNING, "인증 실패", "로그인이 필요한 서비스입니다.")
         } else if (error.response?.status === 500) {
             notificationStore.notice(NotificationType.WARNING, "서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.")
         } else {

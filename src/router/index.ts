@@ -6,9 +6,9 @@ import {MemberInfo, useMemberInfoStore} from "@/stores/MemberInfo";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import {noAccessToken, removeAccessToken} from "@/utils/LocalCache";
+import {noAccessToken, removeAccessToken, removeTokens} from "@/utils/LocalCache";
 import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
-import MemberProfile from "@/views/MemberProfile.vue";
+import MemberProfile from "@/views/authorized/MemberProfile.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -68,8 +68,7 @@ router.beforeEach(async (to, from, next) => {
                 const res = error.response;
                 //인증 실패
                 if (res.status === 401) {
-                    console.error('[Failed to authenticate user.]')
-                    removeAccessToken()
+                    removeTokens()
                     return next({ path: '/sign-in' })
                 }
                 console.error('[Failed to Get Member Info]', error);
@@ -83,8 +82,7 @@ router.beforeEach(async (to, from, next) => {
         const { role } = to.meta as { role: number }
         console.info(`${to.path}: Need: ${role} / Current: ${authorityRole}`)
         if (role && role > authorityRole) {
-            alert("접근 권한이 없습니다.")
-            notificationStore.notice(NotificationType.WARNING, "부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10000)
+            notificationStore.notice(NotificationType.WARNING, "부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10)
             return next({ path: '/' })
         }
     }

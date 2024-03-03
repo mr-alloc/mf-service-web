@@ -5,7 +5,7 @@ export const useNotificationStore = defineStore('notification', () => {
 
     const notifications = ref<Array<Notification>>([]);
 
-    function notice(type: NotificationType, title: string, message: string, timeout?: number) {
+    function notice(type: NotificationType, title: string, message: string, timeoutSecond?: number) {
         const notification = new Notification(type, title, message);
         notifications.value.push(notification);
 
@@ -16,7 +16,7 @@ export const useNotificationStore = defineStore('notification', () => {
                         notifications.value.splice(index, 1)
                     }
                 });
-        }, timeout ?? 5000)
+        }, (timeoutSecond ?? 5) * 1000)
 
         if (notifications.value.length > 5) {
             notifications.value.shift();

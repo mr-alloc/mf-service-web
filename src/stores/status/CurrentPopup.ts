@@ -4,6 +4,11 @@ export class CurrentPopup {
     private readonly _message: string
     private readonly _buttons: Array<PopupButton>
 
+    private _componentName?: string
+    private _componentProps?: any
+    private _includeBodyComponent: boolean = false
+    private _cancelConfirm: boolean = false
+
     constructor(type: PopupType, title: string, message: string) {
         this._type = type;
         this._title = title;
@@ -27,8 +32,55 @@ export class CurrentPopup {
         return this._buttons;
     }
 
+    get componentName(): string {
+        return this._componentName ?? "";
+    }
+
+    get componentProps(): any {
+        return this._componentProps;
+    }
+
+    get includeBodyComponent(): boolean {
+        return this._includeBodyComponent;
+    }
+
+    get confirmCancel(): boolean {
+        return this._cancelConfirm;
+    }
+
+    tryCancel(timeoutSecond?: number): void {
+        this._cancelConfirm = true;
+        if (timeoutSecond) {
+            setTimeout(() => {
+                this._cancelConfirm = false;
+                console.log('Cancel confirm timeout')
+            }, timeoutSecond * 1000);
+        }
+    }
+
+    addBodyComponent(componentName: string, props: any): CurrentPopup {
+        this._componentName = componentName;
+        this._componentProps = props;
+        this._includeBodyComponent = true;
+        return this;
+    }
+
     addButton(title: string, action: () => void): CurrentPopup {
         this._buttons.push(PopupButton.create(title, action));
+        return this;
+    }
+
+    addCancelButton(buttonName: string, action: () => void, checkMethod: () => number): CurrentPopup {
+        const checkCancelProxy = () => {
+            if (this._cancelConfirm) {
+                action();
+            } else {
+                const timeout = checkMethod();
+                this.tryCancel(timeout);
+            }
+        }
+
+        this._buttons.push(PopupButton.create(buttonName, checkCancelProxy));
         return this;
     }
 }

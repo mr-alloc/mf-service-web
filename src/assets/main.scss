@@ -52,6 +52,7 @@ button.btn-primary {
 
 div.pushable {
   transition: 0.4s;
+
   &:hover {
     cursor: pointer;
     background-color: lightgray;
@@ -91,6 +92,14 @@ input.blink-input {
     animation-duration: 1s;
     animation-iteration-count: infinite;
   }
+}
+
+.blink {
+  border: 1px #be66f5 solid;
+  background-color: white;
+  animation-name: blink-input;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
 }
 
 // Animations

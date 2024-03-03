@@ -20,7 +20,7 @@
       <nav>
         <ul class="feature-list">
           <FeatureItem :icon="['far', 'lightbulb']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"
-                       :click-behavior="methods.createMission"/>
+                       :click-behavior="methods.popupCreateMission"/>
         </ul>
       </nav>
     </div>
@@ -36,10 +36,15 @@ import FeatureItem from "@/components/global/FeatureItem.vue";
 import SimpleNotifier from "@/components/global/SimpleNotifier.vue";
 import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
 import {MemberRole} from "@/constant/MemberRole";
+import {useBackgroundStore} from "@/stores/BackgroundStore";
+import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
+import {inject} from "vue";
 
 const memberInfoStore = useMemberInfoStore();
 const notificationStore = useNotificationStore();
+const backgroundStore = useBackgroundStore();
 let router = useRouter();
+const emitter = inject("emitter");
 const methods = {
   moveToUserInfo() {
     //GUEST
@@ -63,16 +68,25 @@ const methods = {
         ? "Guest"
         : memberInfoStore?.memberInfo.nickname ?? "No Name";
   },
-  createMission() {
-    console.log("미션 생성");
-    const random = Math.floor(Math.random() * 10);
-    notificationStore.notice(NotificationType.SUCCESS, `${random}. 미션생성 완료`, "\"청첩장 개수확인\" 미션이 생성 되었습니다.")
+  popupCreateMission() {
+    const createMissionPopup = new CurrentPopup(PopupType.NORMAL, "미션 생성", "")
+        .addBodyComponent("CreateMission", {})
+        .addButton("생성", () => {
+          console.log("emitter:", typeof emitter, emitter)
+          emitter.emit("validateCreateMissionForm")
+        })
+        .addCancelButton("취소", () => backgroundStore.returnGlobalPopup(), () => {
+          notificationStore.notice(NotificationType.WARNING, "미션생성 취소", "이 메세지가 사라지기 전까지 한번 더 취소 버튼을 누르시면 취소되요!", 5)
+          return 5;
+        });
+    backgroundStore.useGlobalPopup(createMissionPopup);
   }
 }
 </script>
 
 <style scoped lang="scss">
 @import '@/assets/main';
+
 header {
   display: flex;
   flex-direction: column;
@@ -145,13 +159,10 @@ header {
       align-items: center;
       border-radius: 5px;
       transition: $duration;
-
       .user-name {
         font-weight: bold;
       }
-
     }
-
   }
 
   .feature-list-wrapper {

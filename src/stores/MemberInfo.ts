@@ -15,6 +15,10 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         return memberInfo.value.notExist();
     }
 
+    function hasNickname(): boolean {
+        return memberInfo.value.nickname !== 'GUEST';
+    }
+
     function removeMemberInfo() {
         memberInfo.value = MemberInfo.ofDefault();
     }
@@ -45,6 +49,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
     return {
         memberInfo,
         allow,
+        hasNickname,
         needMemberInfo,
         updateMemberInfo,
         removeMemberInfo,

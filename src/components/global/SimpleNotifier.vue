@@ -198,6 +198,7 @@ const state = reactive({
           padding: 2px 8px;
           font-size: .82rem;
           text-overflow: ellipsis;
+
         }
       }
     }

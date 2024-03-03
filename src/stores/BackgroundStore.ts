@@ -7,13 +7,13 @@ export const useBackgroundStore = defineStore('background', () => {
     const needBackground = ref<boolean>(false)
     const needNicknameInitializer = ref<boolean>(false)
     const needCurtainManager = ref<boolean>(false)
+    const needPopup = ref<boolean>(false)
+
+    const popupInfo = ref<CurrentPopup>();
     const loadingInfo = ref({
         title: '',
         content: ''
     })
-
-    const popupInfo = ref<CurrentPopup>();
-    const needPopup = ref<boolean>(false)
 
     //최초 닉네임 초기화
     function useNicknameInitializer() {
@@ -69,6 +69,7 @@ export const useBackgroundStore = defineStore('background', () => {
 
     function returnGlobalPopup() {
         needPopup.value = false;
+        //팝업이 사라지기 전까지 정보를 보여줘야하므로 딜레이를 준다.
         setTimeout(() => {
             popupInfo.value = undefined;
             updateBackgroundNeeds();
