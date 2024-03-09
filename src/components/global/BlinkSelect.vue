@@ -15,7 +15,7 @@
         </ul>
       </Transition>
     </div>
-    <select id="select-element" class="select-values" ref="select" style="display: none;" :name="props.name">
+    <select :id="props.id" class="select-values" ref="select" style="display: none;" :name="props.name">
       <option v-for="option in props.options" :key="option.value" :value="option.value">{{ option.text }}</option>
     </select>
   </div>
@@ -32,7 +32,8 @@ const state = reactive({
 const props = defineProps({
   title: String,
   options: Array<SelectOption>,
-  name: String
+  name: String,
+  id: String
 })
 
 const methods = {

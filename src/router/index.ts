@@ -1,5 +1,5 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import Main from '../views/Main.vue'
+import MemberCalendar from '../views/MemberCalendar.vue'
 import SignIn from '../views/SignIn.vue'
 import SignUp from '../views/SignUp.vue'
 import {MemberInfo, useMemberInfoStore} from "@/stores/MemberInfo";
@@ -13,7 +13,7 @@ import MemberProfile from "@/views/authorized/MemberProfile.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-      {path: '/', name: 'main', component: Main, meta: {role: 1}},
+      {path: '/', name: 'main', component: MemberCalendar, meta: {role: 1}},
       {path: '/sign-in', name: 'sign-in', component: SignIn, meta: {role: 0}},
       {path: '/sign-up', name: 'sign-up', component: SignUp, meta: {role: 0}},
       {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}}

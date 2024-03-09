@@ -44,7 +44,7 @@ const memberInfoStore = useMemberInfoStore();
 const notificationStore = useNotificationStore();
 const backgroundStore = useBackgroundStore();
 let router = useRouter();
-const emitter = inject("emitter");
+const emitter = inject("emitter")!;
 const methods = {
   moveToUserInfo() {
     //GUEST
@@ -72,10 +72,12 @@ const methods = {
     const createMissionPopup = new CurrentPopup(PopupType.NORMAL, "미션 생성", "")
         .addBodyComponent("CreateMission", {})
         .addButton("생성", () => {
-          console.log("emitter:", typeof emitter, emitter)
           emitter.emit("validateCreateMissionForm")
         })
-        .addCancelButton("취소", () => backgroundStore.returnGlobalPopup(), () => {
+        .addCancelButton("취소", () => {
+          backgroundStore.returnGlobalPopup()
+          emitter.off("validateCreateMissionForm")
+        }, () => {
           notificationStore.notice(NotificationType.WARNING, "미션생성 취소", "이 메세지가 사라지기 전까지 한번 더 취소 버튼을 누르시면 취소되요!", 5)
           return 5;
         });

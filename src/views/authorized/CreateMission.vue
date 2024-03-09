@@ -2,16 +2,17 @@
   <div class="create-mission-container">
     <div class="container-body">
       <div class="mission-form" id="create-mission-form">
-        <BlinkSelect title="미션종류" :options="state.missionOptions" name="missionType"/>
+        <BlinkSelect id="mission-type" title="미션종류" :options="state.missionOptions" name="missionType"/>
         <BlinkInput id="mission-title" name="missionTitle" type="text" label="제목" placeHolder="미션 제목"
                     :is-hold="state.inputHold" :validate="methods.validateMissionTitle"
                     warning-message="미션 제목을 입력해 주세요." :no-mark="true"
         />
-        <BlinkInput name="missionContent" type="text" label="내용" placeHolder="미션 내용"
+        <BlinkInput id="mission-content" name="missionContent" type="text" label="내용" placeHolder="미션 내용"
                     :is-hold="state.inputHold" :no-mark="true"
         />
-        <SimpleRadio :options="state.deadlineOptions" label="기한" :etc-option="new SelectOption('0', '기타(일)')"
-                     etc-placeholder="초로 입력"/>
+        <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한"
+                     :etc-option="new SelectOption('0', '기타(일)')"
+                     etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
       </div>
     </div>
   </div>
@@ -22,10 +23,14 @@ import SelectOption from "@/classes/SelectOption";
 import SimpleRadio from "@/components/global/SimpleRadio.vue";
 import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
+import DocumentUtil from "@/utils/DocumentUtil";
+import Mission from "@/constant/api-meta/Mission";
+import {call} from "@/utils/NetworkUtil";
 
 const notificationStore = useNotificationStore();
 const backgroundStore = useBackgroundStore();
 const emitter = inject("emitter");
+
 const state = reactive({
   inputHold: false,
   isSubmittable: false,
@@ -73,8 +78,12 @@ const methods = {
     if (state.isSubmittable) {
       //미션 생성 로직
     }
+  },
+  dayToSecond(day: string) {
+    return (parseInt(day) * 24 * 60 * 60).toString();
   }
 }
+
 
 onMounted(() => {
   emitter.on("validateCreateMissionForm", () => {
@@ -84,9 +93,28 @@ onMounted(() => {
       return;
     }
 
-    const missionName = "식전영상 사진 고르기"
-    notificationStore.notice(NotificationType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`)
-    backgroundStore.returnGlobalPopup()
+    const missionTitleInput = DocumentUtil.getHtmlElementById<HTMLInputElement>("mission-title");
+    const missionContentInput = DocumentUtil.getHtmlElementById<HTMLInputElement>("mission-content");
+    const missionTypeSelect = DocumentUtil.getHtmlElementById<HTMLSelectElement>("mission-type");
+    const missionDeadlineInput = DocumentUtil.getHtmlElementById<HTMLInputElement>("mission-deadline");
+
+    const requestBody = {
+      missionName: missionTitleInput.value,
+      missionType: missionTypeSelect.value,
+      content: missionContentInput.value,
+      deadline: missionDeadlineInput.value
+    }
+    call(Mission.CreateMission, requestBody, (response) => {
+
+          const missionName = missionTitleInput.value;
+          notificationStore.notice(NotificationType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
+          backgroundStore.returnGlobalPopup();
+        },
+        (spec, error) => {
+          const body = error.response.data;
+          const message = spec.getMessage(body.code);
+          notificationStore.notice(NotificationType.WARNING, "미션 생성 오류", message);
+        })
   })
 })
 </script>

@@ -53,6 +53,7 @@ const props = defineProps({
 @import '@/assets/main.scss';
 
 .global-popup-wrapper {
+  background-color: white;
   border: 1px $standard-gray-in-white solid;
   border-radius: 10px;
   padding: 5px;

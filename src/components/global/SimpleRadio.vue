@@ -2,7 +2,7 @@
   <div class="simple-radio-container">
     <label v-show="props.label">{{ props.label }}</label>
     <div class="radio-selector">
-      <input type="hidden" :name="props.name" value="1" v-model="state.value"/>
+      <input type="hidden" :id="props.id" :name="props.name" v-model="state.value"/>
       <ul class="button-group">
         <li class="radio-button" :key="index" v-for="(option, index) in props.options"
             :class="{ selected: option.value === state.value }" v-on:click="methods.selectValue(option.value)">
@@ -32,6 +32,7 @@ const state = reactive({
 })
 
 const props = defineProps({
+  id: String,
   name: String,
   options: Array<SelectOption>,
   label: String,
