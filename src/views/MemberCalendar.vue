@@ -23,19 +23,24 @@
       </ul>
       <Transition name="fade">
         <ul class="calendar-row member-calendar" v-show="state.calendar">
-          <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index">
+          <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
+              :class="{ 'this-month': date.get('month') === state.thisMonth.getMonth()}">
             <div class="item-header">
-              {{ date.get('date') == 1 ? date.format('M월 D일') : date.format('D일') }}
+              <span>{{ date.get('date') == 1 ? date.format('M월 D일') : date.format('D일') }}</span>
+              <span class="mission-count"
+                    v-show="state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length ?? 0 > 0">
+                {{ state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length }}
+              </span>
             </div>
             <div class="item-body">
               <ul class="daily-schedules">
-                <li class="each-schedule">
-                  <span>심심한 일정</span>
+                <li class="each-schedule"
+                    v-for="(mission, index) in state.memberCalendarMap.get(date.format('YYYY-MM-DD')) ?? []"
+                    :key="index"
+                >
+                  {{ mission.missionName }}
                 </li>
               </ul>
-              <div class="more-button">
-                <span>+9</span>
-              </div>
             </div>
           </li>
         </ul>
@@ -46,15 +51,24 @@
 
 <script setup lang="ts">
 import {onMounted, reactive} from "vue";
-import moment, {type Moment} from "moment";
+import moment, {type Moment} from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {call} from "@/utils/NetworkUtil";
+import Mission from "@/constant/api-meta/Mission";
+
+type CalendarItem = {
+  deadLine: number,
+  missionId: number,
+  missionName: string,
+}
 
 const state = reactive({
   calendarTitle: '',
   thisMonth: new Date(),
   calendar: [] as Array<Moment>,
   startDate: moment(),
-  endDate: moment()
+  endDate: moment(),
+  memberCalendarMap: new Map<string, Array<CalendarItem>>()
 })
 const methods = {
   setMonth(month: number) {
@@ -79,10 +93,32 @@ const methods = {
       state.calendar.push(date);
       interval++;
     }
+
+    call(Mission.GetMemberCalendar, {
+          startDate: state.startDate.format('YYYY-MM-DD'),
+          endDate: state.endDate.format('YYYY-MM-DD')
+        },
+        (res) => {
+          const {memberCalendar} = res.data;
+          state.memberCalendarMap = new Map<string, Array<CalendarItem>>();
+
+          memberCalendar.forEach((mission: CalendarItem) => {
+            const date = moment(new Date(mission.deadLine * 1000)).tz('Asia/Seoul').format('YYYY-MM-DD')
+            if (state.memberCalendarMap.has(date)) {
+              state.memberCalendarMap.get(date)?.push(mission);
+            } else {
+              state.memberCalendarMap.set(date, [mission]);
+            }
+          })
+        },
+        (spec, error) => {
+          console.log(error);
+        });
+
   }
 }
 onMounted(() => {
-  methods.drawCalendar()
+  methods.drawCalendar();
 })
 </script>
 
@@ -177,8 +213,9 @@ onMounted(() => {
     }
 
     .member-calendar {
-      display: flex;
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-auto-rows: 1fr;
       flex-wrap: wrap;
       flex-grow: 1;
 
@@ -186,9 +223,13 @@ onMounted(() => {
         border-right: 1px solid $standard-light-gray-in-white;
         border-bottom: 1px solid $standard-light-gray-in-white;
         transition: $duration;
-        cursor: pointer;
         display: flex;
         flex-direction: column;
+        background-color: rgb(0, 0, 0, .2);
+
+        &.this-month {
+          background-color: white;
+        }
 
 
         .item-header {
@@ -198,6 +239,15 @@ onMounted(() => {
           user-select: none;
           height: 15px;
           flex-shrink: 0;
+
+          .mission-count {
+            border-radius: 15px;
+            color: white;
+            background-color: crimson;
+            font-weight: bold;
+            padding: 0 3px;
+            margin: 0 5px;
+          }
         }
 
         .item-body {
@@ -212,7 +262,6 @@ onMounted(() => {
             flex-grow: 1;
 
             .each-schedule {
-              width: 100%;
               border-radius: 5px;
               margin: 3px 0;
               text-align: left;
@@ -220,34 +269,16 @@ onMounted(() => {
               flex-grow: 1;
               font-size: .74rem;
               transition: $duration;
+              cursor: pointer;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
 
               &:hover {
                 background-color: rgb(0, 0, 0, .2);
               }
             }
 
-          }
-
-
-          .more-button {
-            font-size: .64rem;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;
-            height: 15px;
-            flex-shrink: 0;
-            padding: 0 3px;
-            transition: $duration;
-            border-radius: 5px;
-
-            span {
-              font-weight: bold;
-            }
-
-
-            &:hover {
-              background-color: rgb(0, 0, 0, .2);
-            }
           }
         }
 
