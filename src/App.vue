@@ -36,7 +36,7 @@ const methods = {
 
 .container-wrapper {
   background: white;
-  width: 968px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: row;

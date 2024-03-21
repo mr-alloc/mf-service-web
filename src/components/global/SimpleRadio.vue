@@ -9,7 +9,9 @@
           {{ option.text }}
         </li>
         <li class="radio-button" v-show="props.etcOption" :class="{ selected: state.etcSelected }"
-            v-on:click="methods.selectValue(props.etcOption?.value ?? '0')">{{ props.etcOption?.text }}
+            v-on:click="methods.clickEtc(props.etcOption?.value ?? props.defaultEtcValue ?? '')"
+            v-on:focusout="state.etcSelected && methods.selectValue(state.value)"
+        >{{ props.etcOption?.text }}
         </li>
       </ul>
       <Transition name="bounce">
@@ -36,21 +38,23 @@ const props = defineProps({
   name: String,
   options: Array<SelectOption>,
   label: String,
+  defaultEtcValue: String,
   etcOption: SelectOption,
   etcValueFunction: Function,
   etcPlaceholder: String,
 })
 
 const methods = {
-  selectValue(value: string) {
-    if (props.etcOption?.value === value) {
-      state.etcSelected = !state.etcSelected;
-      if (state.etcSelected) {
-        state.value = props.etcValueFunction && props.etcValueFunction(state.etcValue);
-      }
-      return;
+  clickEtc(etcValue: string) {
+    state.etcSelected = !state.etcSelected;
+    //재선택을 위한 값 할당
+    if (state.etcSelected) {
+      state.value = props.etcValueFunction && props.etcValueFunction(state.etcValue);
+    } else {
+      state.value = '';
     }
-
+  },
+  selectValue(value: string) {
     if (state.value == value) {
       state.value = '';
       state.etcSelected = false;
@@ -60,7 +64,8 @@ const methods = {
     state.etcSelected = false;
   },
   selectEtcValue() {
-    state.value = props.etcValueFunction && props.etcValueFunction(state.value);
+    state.value = props.etcValueFunction && props.etcValueFunction(state.etcValue);
+    console.log('state.value2', state.value);
   }
 }
 </script>

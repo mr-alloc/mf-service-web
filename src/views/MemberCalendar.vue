@@ -26,7 +26,7 @@
           <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
               :class="{ 'this-month': date.get('month') === state.thisMonth.getMonth()}">
             <div class="item-header">
-              <span>{{ date.get('date') == 1 ? date.format('M월 D일') : date.format('D일') }}</span>
+              <span class="date">{{ date.get('date') == 1 ? date.format('M/D') : date.format('D') }}</span>
               <span class="mission-count"
                     v-show="state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length ?? 0 > 0">
                 {{ state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length }}
@@ -38,7 +38,9 @@
                     v-for="(mission, index) in state.memberCalendarMap.get(date.format('YYYY-MM-DD')) ?? []"
                     :key="index"
                 >
-                  {{ mission.missionName }}
+                  <span class="schedule-title">
+                  {{ `${methods.toTimeString(mission.deadLine)} ${mission.missionName}` }}
+                  </span>
                 </li>
               </ul>
             </div>
@@ -50,11 +52,13 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, reactive} from "vue";
+import {inject, onMounted, reactive} from "vue";
 import moment, {type Moment} from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {call} from "@/utils/NetworkUtil";
 import Mission from "@/constant/api-meta/Mission";
+
+const emitter = inject("emitter");
 
 type CalendarItem = {
   deadLine: number,
@@ -115,10 +119,17 @@ const methods = {
           console.log(error);
         });
 
+  },
+  toTimeString(time: number) {
+    return moment(new Date(time * 1000)).tz('Asia/Seoul').format('HH:mm');
   }
 }
 onMounted(() => {
   methods.drawCalendar();
+
+  emitter.on("drawMemberCalendar", () => {
+    methods.drawCalendar();
+  });
 })
 </script>
 
@@ -214,7 +225,7 @@ onMounted(() => {
 
     .member-calendar {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       grid-auto-rows: 1fr;
       flex-wrap: wrap;
       flex-grow: 1;
@@ -226,6 +237,7 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         background-color: rgb(0, 0, 0, .2);
+        overflow: hidden;
 
         &.this-month {
           background-color: white;
@@ -239,6 +251,10 @@ onMounted(() => {
           user-select: none;
           height: 15px;
           flex-shrink: 0;
+
+          .date {
+            font-weight: bold;
+          }
 
           .mission-count {
             border-radius: 15px;
@@ -263,17 +279,18 @@ onMounted(() => {
 
             .each-schedule {
               border-radius: 5px;
-              margin: 3px 0;
               text-align: left;
               padding: 0 3px;
               flex-grow: 1;
-              font-size: .74rem;
               transition: $duration;
               cursor: pointer;
-              text-overflow: ellipsis;
-              white-space: nowrap;
               overflow: hidden;
+              line-height: 1;
 
+              .schedule-title {
+                font-size: .74rem;
+                white-space: nowrap;
+              }
               &:hover {
                 background-color: rgb(0, 0, 0, .2);
               }
