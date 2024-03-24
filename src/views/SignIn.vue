@@ -31,11 +31,11 @@ import {useRouter} from "vue-router";
 import AccountAPI from "@/constant/api-meta/Account";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {removeAccessToken, removeRefreshToken, setAccessToken, setRefreshToken} from "@/utils/LocalCache";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 
 const router = useRouter();
 const memberInfoStore = useMemberInfoStore();
-const notificationStore = useNotificationStore();
+const notificationStore = useAlertStore();
 
 const state = reactive({
   //입력값 유효성 검증
@@ -92,7 +92,7 @@ const methods = {
           removeAccessToken()
           removeRefreshToken()
           const message = spec.getMessage(body.code) ?? spec.defaultMessage;
-          notificationStore.notice(NotificationType.INFO, "로그인 오류", message)
+          notificationStore.notice(AlertType.INFO, "로그인 오류", message)
           return false
         }
     );

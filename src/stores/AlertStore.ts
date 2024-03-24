@@ -1,11 +1,11 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
 
-export const useNotificationStore = defineStore('notification', () => {
+export const useAlertStore = defineStore('alert', () => {
 
     const notifications = ref<Array<Notification>>([]);
 
-    function notice(type: NotificationType, title: string, message: string, timeoutSecond?: number) {
+    function notice(type: AlertType, title: string, message: string, timeoutSecond?: number) {
         const notification = new Notification(type, title, message);
         notifications.value.push(notification);
 
@@ -36,11 +36,11 @@ export const useNotificationStore = defineStore('notification', () => {
 
 export class Notification {
     private readonly _timestamp: number;
-    private readonly _type: NotificationType;
+    private readonly _type: AlertType;
     private readonly _title: string;
     private readonly _message: string;
 
-    constructor(type: NotificationType, title: string, message: string) {
+    constructor(type: AlertType, title: string, message: string) {
         this._timestamp = Date.now();
         this._type = type;
         this._title = title;
@@ -51,7 +51,7 @@ export class Notification {
         return this._timestamp;
     }
 
-    get type(): NotificationType {
+    get type(): AlertType {
         return this._type;
     }
 
@@ -64,7 +64,7 @@ export class Notification {
     }
 }
 
-export enum NotificationType {
+export enum AlertType {
     INFO = "info",
     WARNING = "warning",
     SUCCESS = "success",

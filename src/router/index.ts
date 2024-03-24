@@ -7,7 +7,7 @@ import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {noAccessToken, removeAccessToken, removeTokens} from "@/utils/LocalCache";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import MemberProfile from "@/views/authorized/MemberProfile.vue";
 
 const router = createRouter({
@@ -23,7 +23,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const memberInfoStore = useMemberInfoStore();
     const backgroundStore = useBackgroundStore();
-    const notificationStore = useNotificationStore();
+    const notificationStore = useAlertStore();
 
     const onlyForGuest = ['/sign-in', '/sign-up'];
 
@@ -53,10 +53,10 @@ router.beforeEach(async (to, from, next) => {
             (response) => {
                 const { id, nickname, role } = response.data
                 if (nickname === null) {
-                    notificationStore.notice(NotificationType.GUIDE, "반가워요!", "사용할 닉네임을 정해주세요. 닉네임은 다음에도 변경할 수 있어요.")
+                    notificationStore.notice(AlertType.GUIDE, "반가워요!", "사용할 닉네임을 정해주세요. 닉네임은 다음에도 변경할 수 있어요.")
                     backgroundStore.useNicknameInitializer()
                 } else {
-                    notificationStore.notice(NotificationType.NONE, "반가워요!", `${nickname}님, 오늘도 좋은 하루 되세요!`)
+                    notificationStore.notice(AlertType.NONE, "반가워요!", `${nickname}님, 오늘도 좋은 하루 되세요!`)
                 }
                 memberInfoStore.updateMemberInfo(new MemberInfo(id, nickname, role))
                 return;
@@ -78,7 +78,7 @@ router.beforeEach(async (to, from, next) => {
 
         const { role } = to.meta as { role: number }
         if (role && role > authorityRole) {
-            notificationStore.notice(NotificationType.WARNING, "부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10)
+            notificationStore.notice(AlertType.WARNING, "부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10)
             return next({ path: '/' })
         }
     }

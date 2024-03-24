@@ -2,7 +2,7 @@
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {useRouter} from "vue-router";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {removeTokens} from "@/utils/LocalCache";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
@@ -11,7 +11,7 @@ import Member from "@/constant/api-meta/Member";
 import {call} from "@/utils/NetworkUtil";
 
 const memberInfoStore = useMemberInfoStore();
-const notificationStore = useNotificationStore();
+const notificationStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const router = useRouter();
 
@@ -30,7 +30,7 @@ const state = reactive<State>({
 })
 const methods = {
   doSignOut() {
-    notificationStore.notice(NotificationType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
+    notificationStore.notice(AlertType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
     memberInfoStore.removeMemberInfo();
     removeTokens();
     router.push("/sign-in");

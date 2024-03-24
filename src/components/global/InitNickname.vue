@@ -25,12 +25,12 @@ import {call} from "@/utils/NetworkUtil";
 import Member from "@/constant/api-meta/Member";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
-const notificationStore = useNotificationStore();
+const notificationStore = useAlertStore();
 const state = reactive({
   nicknameInputValidate: false,
   nicknameSubmittable: false,
@@ -70,9 +70,9 @@ const methods = {
     await call(Member.ChangeMemberNickname, { nickname: nicknameInput.value },
         async (response) => {
           if (memberInfoStore.hasNickname()) {
-            notificationStore.notice(NotificationType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
+            notificationStore.notice(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
           } else {
-            notificationStore.notice(NotificationType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
+            notificationStore.notice(AlertType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
           }
           await memberInfoStore.renewMemberInfo();
           backgroundStore.returnNicknameInitializer()

@@ -9,10 +9,10 @@ export class CurrentPopup {
     private _includeBodyComponent: boolean = false
     private _cancelConfirm: boolean = false
 
-    constructor(type: PopupType, title: string, message: string) {
+    constructor(type: PopupType, title: string, message?: string) {
         this._type = type;
         this._title = title;
-        this._message = message;
+        this._message = message ?? "";
         this._buttons = new Array<PopupButton>();
     }
 

@@ -4,7 +4,7 @@
       <FontAwesomeIcon :icon="props.icon" class="fa-2x"/>
     </div>
     <div class="menu-name">
-      <span>미션 생성</span>
+      <span>{{ props.buttonName }}</span>
     </div>
   </li>
 </template>
@@ -14,6 +14,7 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 const props = defineProps({
   icon: Array<string>,
   clickBehavior: Function,
+  buttonName: String
 })
 const methods = {
   executeClickProxy() {

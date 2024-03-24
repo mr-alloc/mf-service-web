@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
 import type {CurrentPopup} from "@/stores/status/CurrentPopup";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 
 export const useBackgroundStore = defineStore('background', () => {
 
@@ -52,7 +53,9 @@ export const useBackgroundStore = defineStore('background', () => {
 
     function useGlobalPopup(popup: CurrentPopup, autoCloseSecond?: number) {
         if (needPopup.value) {
-            console.error('Already has popup.')
+
+            const notiStore = useAlertStore();
+            notiStore.notice(AlertType.WARNING, "문제가 있어요.", "진행중인 작업을 완료해주세요.")
             return;
         }
 

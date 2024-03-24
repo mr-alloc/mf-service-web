@@ -14,6 +14,7 @@ import BlinkInput from "@/components/global/BlinkInput.vue";
 import SimpleButton from "@/components/global/SimpleButton.vue";
 import BlinkSelect from "@/components/global/BlinkSelect.vue";
 import mitt from "mitt";
+import CreatedFamily from "@/views/authorized/CreateFamily.vue";
 
 const emitter = mitt();
 const app = createApp(App)
@@ -25,6 +26,7 @@ library.add(far)
 library.add(fas)
 
 app.component("CreateMission", CreateMission)
+app.component("CreateFamily", CreatedFamily)
 
 app.component("BlinkInput", BlinkInput)
 app.component("SimpleButton", SimpleButton)

@@ -3,21 +3,21 @@ import {getAccessToken, noAccessToken} from "@/utils/LocalCache";
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {useRouter} from "vue-router";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
     response => response,
     error => {
-        const notificationStore = useNotificationStore();
+        const notificationStore = useAlertStore();
         const router = useRouter();
         if (error.response?.status === 401) {
             // notificationStore.notice(NotificationType.WARNING, "인증 실패", "로그인이 필요한 서비스입니다.")
         } else if (error.response?.status === 500) {
-            notificationStore.notice(NotificationType.WARNING, "서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.")
+            notificationStore.notice(AlertType.WARNING, "서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.")
         } else {
-            const notificationStore = useNotificationStore();
-            notificationStore.notice(NotificationType.INFO, "네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.")
+            const notificationStore = useAlertStore();
+            notificationStore.notice(AlertType.INFO, "네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.")
         }
         return Promise.reject(error);
     }
@@ -32,8 +32,10 @@ function getHeader(): AxiosHeaders {
 }
 
 const defaultError = (spec: Spec, error: any) => {
+    const alertStore = useAlertStore();
     const res = error.response;
-    console.error(`[${error.response?.status}] ${spec.method} ${spec.path}:\n${res.data}`);
+
+    alertStore.notice(AlertType.WARNING, "서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
 }
 
 export async function call(
@@ -69,7 +71,6 @@ export async function call(
         default:
             throw new Error("Unsupported method: " + spec.method);
     }
-
     return await request
         ?.then(success)
         .catch((axiosError) => {

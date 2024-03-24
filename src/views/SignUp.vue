@@ -31,10 +31,10 @@ import {Patterns, validate} from "@/utils/Util";
 import {call} from "@/utils/NetworkUtil";
 import {useRouter} from "vue-router";
 import AccountAPI from "@/constant/api-meta/Account";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 
 const router = useRouter();
-const notificationStore = useNotificationStore();
+const notificationStore = useAlertStore();
 
 const state = reactive({
 
@@ -109,7 +109,7 @@ const methods = {
       password: (document.getElementsByName('userPassword')[0]! as HTMLInputElement).value
     },
     (response) => {
-      notificationStore.notice(NotificationType.SUCCESS, "회원가입 완료", "미션 패밀리에 오신걸 환영합니다.")
+      notificationStore.notice(AlertType.SUCCESS, "회원가입 완료", "미션 패밀리에 오신걸 환영합니다.")
       router.push('/sign-in')
     })
     console.log('after request')

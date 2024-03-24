@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {NotificationType, useNotificationStore} from "@/stores/NotificationStore";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {reactive} from "vue";
 
-const notificationStore = useNotificationStore();
+const notificationStore = useAlertStore();
 
 const methods = {
-  getNoticeIcon(type: NotificationType) {
+  getNoticeIcon(type: AlertType) {
     switch (type) {
-      case NotificationType.INFO:
+      case AlertType.INFO:
         return ["fas", "triangle-exclamation"];
-      case NotificationType.WARNING:
+      case AlertType.WARNING:
         return ["fas", "circle-exclamation"];
-      case NotificationType.SUCCESS:
+      case AlertType.SUCCESS:
         return ["far", "circle-check"];
-      case NotificationType.GUIDE:
+      case AlertType.GUIDE:
         return ["fas", "flag"];
       default:
         return ["fas", "hands-clapping"];
