@@ -1,5 +1,5 @@
 import axios, {AxiosHeaders, type AxiosResponse} from "axios";
-import {getAccessToken, noAccessToken} from "@/utils/LocalCache";
+import {getAccessToken, getSelectedFamilyId, noAccessToken} from "@/utils/LocalCache";
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {useRouter} from "vue-router";
@@ -27,6 +27,7 @@ axios.interceptors.response.use(
 function getHeader(): AxiosHeaders {
     const headers = new AxiosHeaders();
     noAccessToken() || headers.set("Authorization", `Bearer ${getAccessToken()}`)
+    headers.set("Selected-Family-Id", getSelectedFamilyId())
 
     return headers;
 }
@@ -74,6 +75,7 @@ export async function call(
     return await request
         ?.then(success)
         .catch((axiosError) => {
+            console.error(`${spec.path}: ${axiosError}`);
             return error
                 ? error(spec, axiosError)
                 : defaultError(spec, axiosError)

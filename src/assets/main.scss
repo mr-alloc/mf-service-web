@@ -175,3 +175,23 @@ input.blink-input {
   }
 }
 
+.down-fade-enter-active {
+  animation: down-fade-in .2s;
+}
+
+.down-fade-leave-active {
+  animation: down-fade-in .2s reverse;
+}
+
+@keyframes down-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

@@ -19,7 +19,7 @@ import Family from "@/constant/api-meta/Family";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 
 const emitter = inject("emitter");
-const familyNameRE = /^[가-힣a-zA-Z0-9]{2,20}$/;
+const familyNameRE = /^[가-힣a-zA-Z0-9 ]{2,20}$/;
 const state = reactive({
   inputHold: false,
   isSubmittable: false,

@@ -7,6 +7,10 @@
         </div>
       </RouterLink>
     </div>
+    <SimpleItemSelect v-if="!memberInfoStore.needMemberInfo() && ownFamiliesStore.families.length > 0"
+                      :items="ownFamiliesStore.toSelectItemValue()"
+                      default-selected-title="패밀리 이동"
+                      :select-function="(item: SelectItemValue) => methods.changeFamily(item)"/>
     <div class="user-session-info pushable">
       <span class="user-img-area">
         <img v-if="!memberInfoStore.needMemberInfo()" :src="memberInfoStore.memberInfo?.profileImage"/>
@@ -40,11 +44,17 @@ import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {MemberRole} from "@/constant/MemberRole";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
-import {inject} from "vue";
+import {inject, onMounted} from "vue";
+import SimpleItemSelect from "@/components/global/SimpleItemSelect.vue";
+import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
+import type SelectItemValue from "@/classes/SelectItemValue";
+import {setSelectedFamilyId} from "@/utils/LocalCache";
 
 const memberInfoStore = useMemberInfoStore();
 const notificationStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
+const ownFamiliesStore = useOwnFamiliesStore();
+
 let router = useRouter();
 const emitter = inject("emitter")!;
 const methods = {
@@ -100,8 +110,14 @@ const methods = {
           return 5;
         });
     backgroundStore.useGlobalPopup(createFamilyPopup);
+  },
+  changeFamily(item: SelectItemValue) {
+    setSelectedFamilyId(item.id);
   }
 }
+onMounted(() => {
+  ownFamiliesStore.fetchOwnFamilies();
+})
 </script>
 
 <style scoped lang="scss">

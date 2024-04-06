@@ -1,5 +1,6 @@
 const ACCESS_TOKEN = "mf_ac_tk";
 const REFRESH_TOKEN = "mf_rf_tk";
+const SELECTED_FAMILY_ID = "mf_sf_id";
 
 export const noAccessToken = () => {
     return localStorage.getItem(ACCESS_TOKEN) == null
@@ -34,4 +35,12 @@ export const removeRefreshToken = () => {
 export const removeTokens = () => {
     removeAccessToken()
     removeRefreshToken()
+}
+
+export const setSelectedFamilyId = (id: number) => {
+    localStorage.setItem(SELECTED_FAMILY_ID, id.toString())
+}
+
+export const getSelectedFamilyId = () => {
+    return localStorage.getItem(SELECTED_FAMILY_ID)
 }
