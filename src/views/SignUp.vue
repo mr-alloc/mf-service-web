@@ -109,7 +109,7 @@ const methods = {
       password: (document.getElementsByName('userPassword')[0]! as HTMLInputElement).value
     },
     (response) => {
-      notificationStore.notice(AlertType.SUCCESS, "회원가입 완료", "미션 패밀리에 오신걸 환영합니다.")
+      notificationStore.alert(AlertType.SUCCESS, "회원가입 완료", "미션 패밀리에 오신걸 환영합니다.")
       router.push('/sign-in')
     })
     console.log('after request')

@@ -1,3 +1,5 @@
+import {useMemberInfoStore} from "@/stores/MemberInfo";
+
 const ACCESS_TOKEN = "mf_ac_tk";
 const REFRESH_TOKEN = "mf_rf_tk";
 const SELECTED_FAMILY_ID = "mf_sf_id";
@@ -42,5 +44,9 @@ export const setSelectedFamilyId = (id: number) => {
 }
 
 export const getSelectedFamilyId = () => {
+    const memberInfoStore = useMemberInfoStore();
+    if (memberInfoStore.needMemberInfo()) {
+        setSelectedFamilyId(0)
+    }
     return localStorage.getItem(SELECTED_FAMILY_ID)
 }

@@ -5,26 +5,33 @@ import {AlertType, useAlertStore} from "@/stores/AlertStore";
 
 export const useBackgroundStore = defineStore('background', () => {
 
-    const needBackground = ref<boolean>(false)
-    const needNicknameInitializer = ref<boolean>(false)
-    const needCurtainManager = ref<boolean>(false)
-    const needPopup = ref<boolean>(false)
+    const needBackground = ref<boolean>(false);
+    const needNicknameInitializer = ref<boolean>(false);
+    const needCurtainManager = ref<boolean>(false);
+    const needPopup = ref<boolean>(false);
 
     const popupInfo = ref<CurrentPopup>();
     const loadingInfo = ref({
         title: '',
         content: ''
-    })
+    });
+
+    const nicknameInitializerInfo = ref({
+        title: '',
+    });
+
 
     //최초 닉네임 초기화
-    function useNicknameInitializer() {
-        needNicknameInitializer.value = true
-        updateBackgroundNeeds()
+    function useNicknameInitializer(title: string) {
+        needNicknameInitializer.value = true;
+        nicknameInitializerInfo.value.title = title;
+        updateBackgroundNeeds();
     }
 
     function returnNicknameInitializer() {
-        needNicknameInitializer.value = false
-        updateBackgroundNeeds()
+        needNicknameInitializer.value = false;
+        nicknameInitializerInfo.value.title = '';
+        updateBackgroundNeeds();
     }
 
     //로딩 커튼 관리
@@ -55,7 +62,7 @@ export const useBackgroundStore = defineStore('background', () => {
         if (needPopup.value) {
 
             const notiStore = useAlertStore();
-            notiStore.notice(AlertType.WARNING, "문제가 있어요.", "진행중인 작업을 완료해주세요.")
+            notiStore.alert(AlertType.WARNING, "문제가 있어요.", "진행중인 작업을 완료해주세요.")
             return;
         }
 
@@ -85,6 +92,7 @@ export const useBackgroundStore = defineStore('background', () => {
         needNicknameInitializer,
         needCurtainManager,
         useNicknameInitializer,
+        nicknameInitializerInfo,
         returnNicknameInitializer,
         useCurtainManager,
         loadingInfo,

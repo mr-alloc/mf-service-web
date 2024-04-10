@@ -4,6 +4,7 @@ import {call} from "@/utils/NetworkUtil";
 import Family from "@/constant/api-meta/Family";
 import {convertList} from "@/utils/CollectionUtil";
 import SelectItemValue from "@/classes/SelectItemValue";
+import {useMemberInfoStore} from "@/stores/MemberInfo";
 
 export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     const families = ref<Array<FamilySummary>>([])
@@ -18,8 +19,10 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     }
 
 
-    async function fetchOwnFamilies() {
-        if (families.value.length > 0) return;
+    async function fetchOwnFamilies(forceFetch: boolean) {
+        const memberInfoStore = useMemberInfoStore();
+        if (memberInfoStore.needMemberInfo()) return;
+        if (!forceFetch && families.value.length > 0) return;
 
         await call(Family.GetOwnFamilies, {}, (res) => {
             const {ownFamilies} = res.data

@@ -5,7 +5,7 @@ export const useAlertStore = defineStore('alert', () => {
 
     const notifications = ref<Array<Notification>>([]);
 
-    function notice(type: AlertType, title: string, message: string, timeoutSecond?: number) {
+    function alert(type: AlertType, title: string, message: string, timeoutSecond?: number) {
         const notification = new Notification(type, title, message);
         notifications.value.push(notification);
 
@@ -29,7 +29,7 @@ export const useAlertStore = defineStore('alert', () => {
 
     return {
         notifications,
-        notice,
+        alert,
         clear
     }
 })

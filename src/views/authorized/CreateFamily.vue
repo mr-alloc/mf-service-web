@@ -17,6 +17,7 @@ import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {call} from "@/utils/NetworkUtil";
 import Family from "@/constant/api-meta/Family";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
+import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 const emitter = inject("emitter");
 const familyNameRE = /^[가-힣a-zA-Z0-9 ]{2,20}$/;
@@ -43,11 +44,12 @@ const methods = {
 }
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
+const ownFamiliesStore = useOwnFamiliesStore();
 onMounted(() => {
   emitter.on("validateCreateFamilyForm", () => {
     methods.checkAllInput();
     if (!state.isSubmittable) {
-      alertStore.notice(AlertType.INFO, "생성 실패", "입력값을 확인해주세요.");
+      alertStore.alert(AlertType.INFO, "생성 실패", "입력값을 확인해주세요.");
       return;
     }
 
@@ -60,7 +62,8 @@ onMounted(() => {
     }
     call(Family.CreateFamily, requestBody, (response) => {
       //패밀리 정보 갱신
-      alertStore.notice(AlertType.SUCCESS, "생성 성공", `${requestBody.familyName} 패밀리가 생성되었습니다.`);
+      alertStore.alert(AlertType.SUCCESS, "생성 성공", `${requestBody.familyName} 패밀리가 생성되었습니다.`);
+      ownFamiliesStore.fetchOwnFamilies(true);
       backgroundStore.returnGlobalPopup();
     })
   });

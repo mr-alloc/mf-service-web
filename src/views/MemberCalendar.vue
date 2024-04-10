@@ -290,9 +290,11 @@ onMounted(() => {
               .schedule-title {
                 font-size: .74rem;
                 white-space: nowrap;
+
               }
               &:hover {
                 background-color: rgb(0, 0, 0, .2);
+                position: absolute;
               }
             }
 

@@ -14,10 +14,10 @@ axios.interceptors.response.use(
         if (error.response?.status === 401) {
             // notificationStore.notice(NotificationType.WARNING, "인증 실패", "로그인이 필요한 서비스입니다.")
         } else if (error.response?.status === 500) {
-            notificationStore.notice(AlertType.WARNING, "서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.")
+            notificationStore.alert(AlertType.WARNING, "서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.")
         } else {
             const notificationStore = useAlertStore();
-            notificationStore.notice(AlertType.INFO, "네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.")
+            notificationStore.alert(AlertType.INFO, "네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.")
         }
         return Promise.reject(error);
     }
@@ -27,7 +27,7 @@ axios.interceptors.response.use(
 function getHeader(): AxiosHeaders {
     const headers = new AxiosHeaders();
     noAccessToken() || headers.set("Authorization", `Bearer ${getAccessToken()}`)
-    headers.set("Selected-Family-Id", getSelectedFamilyId())
+    headers.set("Selected-Family-Id", getSelectedFamilyId() ?? '0')
 
     return headers;
 }
@@ -36,7 +36,7 @@ const defaultError = (spec: Spec, error: any) => {
     const alertStore = useAlertStore();
     const res = error.response;
 
-    alertStore.notice(AlertType.WARNING, "서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
+    alertStore.alert(AlertType.WARNING, "서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
 }
 
 export async function call(

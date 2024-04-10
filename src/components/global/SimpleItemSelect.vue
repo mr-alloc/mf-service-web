@@ -9,6 +9,10 @@
     <Transition name="down-fade">
       <ul class="select-items" v-show="state.selectMode">
         <li class="select-each-item">
+          <SelectItem v-on:click="methods.selectDefaultOption()"
+                      :content="new SelectItemValue(0, '', 'NO_IMAGE', '본캐 선택')"/>
+        </li>
+        <li class="select-each-item">
           <SelectItem v-for="(item, index) in props.items" :key="index"
                       :content="item" v-on:click="methods.selectOption(item)"/>
         </li>
@@ -30,21 +34,25 @@ const props = defineProps({
 })
 
 
+const notSelectedOption = new SelectItemValue(0, "", "NO_IMAGE", props.defaultSelectedTitle ?? "");
 const state = reactive({
   selectMode: false,
-  selectedItem: new SelectItemValue(0, "", "NO_IMAGE", props.defaultSelectedTitle ?? ""),
+  selectedItem: notSelectedOption
 })
 
 const methods = {
   showOptions() {
     state.selectMode = !state.selectMode;
-    console.log('select mode', state.selectMode)
-    console.log('selected item', state.selectedItem)
   },
   selectOption(item: SelectItemValue) {
     state.selectedItem = item;
     state.selectMode = false;
     props.selectFunction && props.selectFunction(item);
+  },
+  selectDefaultOption() {
+    state.selectedItem = notSelectedOption;
+    state.selectMode = false;
+    props.selectFunction && props.selectFunction(notSelectedOption);
   }
 }
 </script>
@@ -94,6 +102,7 @@ const methods = {
     background-color: white;
     top: 35px;
     z-index: 4;
+    width: 100%;
 
     .select-each-item {
       display: flex;

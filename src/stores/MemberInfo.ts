@@ -2,7 +2,9 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import {call, dispatchIf} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
-import {removeAccessToken} from "@/utils/LocalCache";
+import {getSelectedFamilyId, removeAccessToken} from "@/utils/LocalCache";
+import {AlertType, useAlertStore} from "@/stores/AlertStore";
+import {useBackgroundStore} from "@/stores/BackgroundStore";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<MemberInfo>(MemberInfo.ofDefault());
@@ -23,12 +25,18 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         memberInfo.value = MemberInfo.ofDefault();
     }
 
-    async function renewMemberInfo() {
+    async function fetchMemberInfo(familyName: string) {
+        const backgroundStore = useBackgroundStore();
+        const alertStore = useAlertStore();
         await call(MemberAPI.GetInfo, null,
             (response) => {
                 const { id, nickname, role } = response.data
+                const selectedFamilyId = getSelectedFamilyId();
+                if (nickname === '' && selectedFamilyId !== '0') {
+                    alertStore.alert(AlertType.GUIDE, "패밀리 닉네임 선택", `${familyName}에서 사용할 닉네임을 설정 해야해요.`);
+                    backgroundStore.useNicknameInitializer(`${familyName}에서 사용할 닉네임을 입력해주세요.`);
+                }
                 updateMemberInfo(new MemberInfo(id, nickname, role))
-                console.log('Successfully renew member profile.')
                 return;
             },
             (sepc, error) => {
@@ -53,7 +61,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         needMemberInfo,
         updateMemberInfo,
         removeMemberInfo,
-        renewMemberInfo
+        fetchMemberInfo
     }
 })
 
@@ -64,11 +72,11 @@ export class MemberInfo {
     private readonly _role: number
     private readonly _profileImage: string
 
-    constructor(id: number, nickname: string, role: number) {
+    constructor(id: number, nickname: string, role: number, profileImage: string | null = null) {
         this._id = id;
         this._nickname = nickname;
         this._role = role;
-        this._profileImage = "/src/assets/images/profile.png";
+        this._profileImage = profileImage ?? "/src/assets/images/default_user.png";
     }
 
     get role(): number {

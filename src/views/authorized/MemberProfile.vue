@@ -30,7 +30,7 @@ const state = reactive<State>({
 })
 const methods = {
   doSignOut() {
-    notificationStore.notice(AlertType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
+    notificationStore.alert(AlertType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
     memberInfoStore.removeMemberInfo();
     removeTokens();
     router.push("/sign-in");
@@ -50,7 +50,7 @@ const methods = {
     backgroundStore.useGlobalPopup(currentPopup)
   },
   changeNickname() {
-    backgroundStore.useNicknameInitializer()
+    backgroundStore.useNicknameInitializer("변경할 닉네임을 입력해주세요.");
   },
   getFormattedDate(at: number) {
     if (!at) return ""

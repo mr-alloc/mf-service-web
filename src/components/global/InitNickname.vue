@@ -70,11 +70,12 @@ const methods = {
     await call(Member.ChangeMemberNickname, { nickname: nicknameInput.value },
         async (response) => {
           if (memberInfoStore.hasNickname()) {
-            notificationStore.notice(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
+            notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
           } else {
-            notificationStore.notice(AlertType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
+            notificationStore.alert(AlertType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
           }
-          await memberInfoStore.renewMemberInfo();
+          await memberInfoStore.fetchMemberInfo("");
+          nicknameInput.value = "";
           backgroundStore.returnNicknameInitializer()
         },
         (spec, error) => {
@@ -85,9 +86,7 @@ const methods = {
 
   },
   getGuideNotice() {
-    return memberInfoStore.hasNickname()
-        ? "변경할 닉네임을 입력해주세요."
-        : "합류를 시작하기 위해 닉네임을 정해주세요!";
+    return backgroundStore.nicknameInitializerInfo.title ?? '닉네임을 입력해주세요.';
   }
 }
 

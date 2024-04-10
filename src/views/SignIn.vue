@@ -92,7 +92,7 @@ const methods = {
           removeAccessToken()
           removeRefreshToken()
           const message = spec.getMessage(body.code) ?? spec.defaultMessage;
-          notificationStore.notice(AlertType.INFO, "로그인 오류", message)
+          notificationStore.alert(AlertType.INFO, "로그인 오류", message)
           return false
         }
     );

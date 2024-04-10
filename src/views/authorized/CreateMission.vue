@@ -85,7 +85,7 @@ onMounted(() => {
   emitter.on("validateCreateMissionForm", useThrottleFn(() => {
     methods.checkAllInput();
     if (!state.isSubmittable) {
-      notificationStore.notice(AlertType.INFO, "생성 가이드", "입력되지 않은 값이 있는것 같아요! 한번 더 확인후 생성해주세요!")
+      notificationStore.alert(AlertType.INFO, "생성 가이드", "입력되지 않은 값이 있는것 같아요! 한번 더 확인후 생성해주세요!")
       return;
     }
 
@@ -102,13 +102,13 @@ onMounted(() => {
     }
 
     if (missionDeadlineInput.value === '') {
-      notificationStore.notice(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
+      notificationStore.alert(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
       return;
     }
 
     call(Mission.CreateMission, requestBody, (response) => {
           const missionName = missionTitleInput.value;
-          notificationStore.notice(AlertType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
+          notificationStore.alert(AlertType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
           emitter.emit("drawMemberCalendar")
           //이벤트 발행 취소
           emitter.off("validateCreateMissionForm")
@@ -117,7 +117,7 @@ onMounted(() => {
         (spec, error) => {
           const body = error.response.data;
           const message = spec.getMessage(body.code);
-          notificationStore.notice(AlertType.WARNING, "미션 생성 오류", message);
+          notificationStore.alert(AlertType.WARNING, "미션 생성 오류", message);
         }
     )
 
