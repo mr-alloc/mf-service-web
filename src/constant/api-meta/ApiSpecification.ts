@@ -5,6 +5,7 @@ export default class ApiSpecification {
     private readonly _path: string;
     private _defaultMessage: string = "알수 없는 오류로 실패하였습니다.";
     private _statusMap: Map<number, string> = new Map<number, string>();
+    private _familyApiSpec: ApiSpecification | null = null;
 
     constructor(method: HttpMethod, path: string) {
         this._method = method;
@@ -39,6 +40,20 @@ export default class ApiSpecification {
 
     static of(method: HttpMethod, path: string): ApiSpecification {
         return new ApiSpecification(method, path);
+    }
+
+
+    whenFamily(familyApiSpec: ApiSpecification): ApiSpecification {
+        this._familyApiSpec = familyApiSpec;
+        return this;
+    }
+
+    get familyApiSpec(): ApiSpecification {
+        return this._familyApiSpec!;
+    }
+
+    hasFamilyApiSpec(): boolean {
+        return this._familyApiSpec !== null;
     }
 }
 

@@ -18,13 +18,15 @@ export const useBackgroundStore = defineStore('background', () => {
 
     const nicknameInitializerInfo = ref({
         title: '',
+        noQuitButton: false
     });
 
 
     //최초 닉네임 초기화
-    function useNicknameInitializer(title: string) {
+    function useNicknameInitializer(title: string, noQuitButton?: boolean) {
         needNicknameInitializer.value = true;
         nicknameInitializerInfo.value.title = title;
+        nicknameInitializerInfo.value.noQuitButton = noQuitButton || false;
         updateBackgroundNeeds();
     }
 

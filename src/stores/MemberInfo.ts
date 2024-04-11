@@ -34,7 +34,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
                 const selectedFamilyId = getSelectedFamilyId();
                 if (nickname === '' && selectedFamilyId !== '0') {
                     alertStore.alert(AlertType.GUIDE, "패밀리 닉네임 선택", `${familyName}에서 사용할 닉네임을 설정 해야해요.`);
-                    backgroundStore.useNicknameInitializer(`${familyName}에서 사용할 닉네임을 입력해주세요.`);
+                    backgroundStore.useNicknameInitializer(`${familyName}에서 사용할 닉네임을 입력해주세요.`, true);
                 }
                 updateMemberInfo(new MemberInfo(id, nickname, role))
                 return;

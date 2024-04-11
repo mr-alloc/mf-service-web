@@ -1,6 +1,6 @@
 <template>
   <div class="nickname-initializer">
-    <div class="back" v-show="memberInfoStore.hasNickname()">
+    <div class="back" v-show="!backgroundStore.nicknameInitializerInfo.noQuitButton && memberInfoStore.hasNickname()">
       <FontAwesomeIcon class="fa-4x" :icon="['fas', 'delete-left']"
                        v-on:click="backgroundStore.returnNicknameInitializer()"/>
     </div>

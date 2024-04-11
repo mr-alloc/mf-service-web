@@ -45,40 +45,42 @@ export async function call(
     success: ((value: AxiosResponse<any, any>) => any) | null | undefined,
     error?: ((consumeSpec: Spec, axiosError: any) => any) | null | undefined
 ) {
+    const targetSpec = getSelectedFamilyId() !== '0' && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
+
     let request;
-    switch (spec.method) {
+    switch (targetSpec.method) {
         case HttpMethod.GET:
-            request = axios.get(spec.path, {
+            request = axios.get(targetSpec.path, {
                 params: body,
                 headers: getHeader(),
             });
             break;
         case HttpMethod.POST:
-            request = axios.post(spec.path, body, {
+            request = axios.post(targetSpec.path, body, {
                 headers: getHeader()
             });
             break;
         case HttpMethod.PUT:
-            request = axios.put(spec.path, body, {
+            request = axios.put(targetSpec.path, body, {
                 headers: getHeader()
             });
             break;
         case HttpMethod.DELETE:
-            request = axios.delete(spec.path, {
+            request = axios.delete(targetSpec.path, {
                 data: body,
                 headers: getHeader()
             })
             break;
         default:
-            throw new Error("Unsupported method: " + spec.method);
+            throw new Error(`Unsupported method: ${targetSpec.method}`);
     }
     return await request
         ?.then(success)
         .catch((axiosError) => {
-            console.error(`${spec.path}: ${axiosError}`);
+            console.error(`${targetSpec.path}: ${axiosError}`);
             return error
-                ? error(spec, axiosError)
-                : defaultError(spec, axiosError)
+                ? error(targetSpec, axiosError)
+                : defaultError(targetSpec, axiosError)
         });
 }
 

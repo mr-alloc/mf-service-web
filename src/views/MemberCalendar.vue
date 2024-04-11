@@ -97,16 +97,16 @@ const methods = {
       state.calendar.push(date);
       interval++;
     }
-
-    call(Mission.GetMemberCalendar, {
-          startDate: state.startDate.format('YYYY-MM-DD'),
-          endDate: state.endDate.format('YYYY-MM-DD')
-        },
+    const requestBody = {
+      startDate: state.startDate.format('YYYY-MM-DD'),
+      endDate: state.endDate.format('YYYY-MM-DD')
+    }
+    call(Mission.GetMemberCalendar, requestBody,
         (res) => {
-          const {memberCalendar} = res.data;
+          const {calendar} = res.data;
           state.memberCalendarMap = new Map<string, Array<CalendarItem>>();
 
-          memberCalendar.forEach((mission: CalendarItem) => {
+          calendar.forEach((mission: CalendarItem) => {
             const date = moment(new Date(mission.deadLine * 1000)).tz('Asia/Seoul').format('YYYY-MM-DD')
             if (state.memberCalendarMap.has(date)) {
               state.memberCalendarMap.get(date)?.push(mission);

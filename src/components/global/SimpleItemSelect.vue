@@ -12,9 +12,8 @@
           <SelectItem v-on:click="methods.selectDefaultOption()"
                       :content="new SelectItemValue(0, '', 'NO_IMAGE', '본캐 선택')"/>
         </li>
-        <li class="select-each-item">
-          <SelectItem v-for="(item, index) in props.items" :key="index"
-                      :content="item" v-on:click="methods.selectOption(item)"/>
+        <li class="select-each-item" v-for="(item, index) in props.items" :key="index">
+          <SelectItem :content="item" v-on:click="methods.selectOption(item)"/>
         </li>
       </ul>
     </Transition>
@@ -103,6 +102,8 @@ const methods = {
     top: 35px;
     z-index: 4;
     width: 100%;
+    max-height: 180px;
+    overflow-y: scroll;
 
     .select-each-item {
       display: flex;
