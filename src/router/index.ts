@@ -10,11 +10,13 @@ import {noAccessToken, removeAccessToken, removeTokens} from "@/utils/LocalCache
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import MemberProfile from "@/views/authorized/MemberProfile.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
+import Main from "@/views/Main.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-      {path: '/', name: 'main', component: MemberCalendar, meta: {role: 1}},
+      {path: '/', name: 'home', component: Main, meta: {role: 0}},
+      {path: '/calendar', name: 'calendar', component: MemberCalendar, meta: {role: 1}},
       {path: '/sign-in', name: 'sign-in', component: SignIn, meta: {role: 0}},
       {path: '/sign-up', name: 'sign-up', component: SignUp, meta: {role: 0}},
       {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}}
@@ -67,7 +69,7 @@ router.beforeEach(async (to, from, next) => {
             (sepc, error) => {
                 const res = error.response;
                 //인증 실패
-                if (res.status === 401) {
+                if (res?.status === 401) {
                     removeTokens()
                     return next({ path: '/sign-in' })
                 }

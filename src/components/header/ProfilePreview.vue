@@ -2,9 +2,11 @@
 import {MemberRole} from "@/constant/MemberRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useRouter} from "vue-router";
+import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 
 let router = useRouter();
 const memberInfoStore = useMemberInfoStore();
+const leftMenuStore = useLeftMenuStore();
 const methods = {
   moveToUserInfo() {
     //GUEST
@@ -32,13 +34,16 @@ const methods = {
 </script>
 
 <template>
-  <div class="user-session-info pushable">
-      <span class="user-img-area">
-        <img :src="memberInfoStore.memberInfo?.profileImage ?? '@/assets/images/default_user.png'"/>
-      </span>
-    <div class="current-user" v-on:click="methods.moveToUserInfo()">
-      <span class="user-name">{{ methods.getNickname() }}</span>
-    </div>
+  <div class="user-session-info" :class="{ pushable: !memberInfoStore.needMemberInfo()}"
+       v-on:click="!memberInfoStore.needMemberInfo() && methods.moveToUserInfo()">
+    <span class="user-img-area">
+      <img :src="memberInfoStore.memberInfo?.profileImage ?? '@/assets/images/default_user.png'"/>
+    </span>
+    <Transition name="fade">
+      <div class="current-user" v-show="!leftMenuStore.state.isCollapsed">
+        <span class="user-name">{{ methods.getNickname() }}</span>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -46,10 +51,13 @@ const methods = {
 @import "@/assets/main";
 
 .user-session-info {
-  padding: 5px 8px;
+  padding: 3px;
   display: flex;
   flex-direction: row;
   border-radius: 5px;
+  position: relative;
+  height: 35px;
+  margin: 5px 0;
 
   .user-img-area {
     display: flex;
@@ -79,6 +87,10 @@ const methods = {
     align-items: center;
     border-radius: 5px;
     transition: $duration;
+    position: absolute;
+    left: calc(35px - 3px);
+    width: calc(205px - 6px - 30px);
+    height: 30px;
 
     .user-name {
       font-weight: bold;

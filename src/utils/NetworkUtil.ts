@@ -10,7 +10,6 @@ axios.interceptors.response.use(
     response => response,
     error => {
         const notificationStore = useAlertStore();
-        const router = useRouter();
         if (error.response?.status === 401) {
             // notificationStore.notice(NotificationType.WARNING, "인증 실패", "로그인이 필요한 서비스입니다.")
         } else if (error.response?.status === 500) {

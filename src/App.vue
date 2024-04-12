@@ -31,7 +31,7 @@ const methods = {
 }
 
 </script>
-<style lang="scss">
+<style scoped lang="scss">
 @import '@/assets/main.scss';
 
 .container-wrapper {

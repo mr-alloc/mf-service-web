@@ -5,7 +5,7 @@ import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {inject} from "vue";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import FeatureItem from "@/components/global/FeatureItem.vue";
+import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
@@ -32,8 +32,8 @@ const methods = {
 </script>
 
 <template>
-  <FeatureItem :icon="['fas', 'people-group']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"
-               :click-behavior="methods.popupCreateFamily" button-name="패밀리 생성"/>
+  <CollapsibleMenu title="새로운 패밀리" :click-behavior="methods.popupCreateFamily"
+                   :icon="['fas', 'people-group']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
 </template>
 
 <style scoped lang="scss">

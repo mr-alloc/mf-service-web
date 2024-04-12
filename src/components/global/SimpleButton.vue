@@ -12,8 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import {  faSpinner } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {faSpinner} from "@fortawesome/free-solid-svg-icons";
 import {reactive} from "vue";
 
 const props = defineProps({
@@ -41,7 +41,7 @@ const methods = {
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import '@/assets/main.scss';
 .simple-button {
   display: flex;
