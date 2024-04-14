@@ -3,19 +3,22 @@
     <div class="item-image-area" :class="{ 'no-image': props.content?.image === 'NO_IMAGE' }">
       <span class="image-frame" :style="{ backgroundColor: `#${props.content?.frameColor}` }">
         <img v-if="props.content?.image && props.content?.image !== 'NO_IMAGE'" class="select-item-image"
-             :src="props.content?.image"/>
+             :src="props.content?.image" alt="선택 옵션의 이미지"/>
       </span>
     </div>
-    <div class="item-title-wrapper">
-      <span class="item-title">{{ props.content?.title }}</span>
-    </div>
+    <Transition name="fade">
+      <div class="item-title-wrapper" :class="{ collapse: props.isTitleCollapse }" v-show="!props.isTitleCollapse">
+        <span class="item-title">{{ props.content?.title }}</span>
+      </div>
+    </Transition>
   </div>
 </template>
 <script setup lang="ts">
-import SelectItemValue from "@/classes/SelectItemValue";
+import SelectFamilyOption from "@/classes/SelectFamilyOption";
 
 const props = defineProps({
-  content: SelectItemValue,
+  content: SelectFamilyOption,
+  isTitleCollapse: Boolean
 })
 </script>
 <style scoped lang="scss">
@@ -66,6 +69,9 @@ const props = defineProps({
       font-weight: bold;
       text-overflow: ellipsis;
       user-select: none;
+    }
+
+    &.collapse {
     }
   }
 

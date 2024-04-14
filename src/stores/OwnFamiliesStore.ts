@@ -3,7 +3,7 @@ import {ref} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import Family from "@/constant/api-meta/Family";
 import {convertList} from "@/utils/CollectionUtil";
-import SelectItemValue from "@/classes/SelectItemValue";
+import SelectFamilyOption from "@/classes/SelectFamilyOption";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 
 export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
@@ -40,8 +40,8 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         });
     }
 
-    function toSelectItemValue(): SelectItemValue [] {
-        return convertList<SelectItemValue>(families.value, (item: FamilySummary) => new SelectItemValue(item.id, item.color, item.image ?? "", item.name))
+    function toSelectItemValue(): SelectFamilyOption [] {
+        return convertList<SelectFamilyOption>(families.value, (item: FamilySummary) => new SelectFamilyOption(item.id, item.color, item.image ?? "", item.name))
     }
 
 

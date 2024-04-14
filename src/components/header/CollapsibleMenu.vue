@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {onMounted, reactive} from "vue";
-import {useRoute} from "vue-router";
+import {useRouter} from "vue-router";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 
 const leftMenuStore = useLeftMenuStore();
@@ -10,28 +9,29 @@ const props = defineProps({
   icon: Array<String>,
   allocatedPath: String,
   clickBehavior: Function,
+  isCurrentMenu: Boolean,
   rotate: Number
 });
 
-const state = reactive({
-  isCurrentMenu: false
-})
-
-const route = useRoute();
+const router = useRouter();
 const methods = {
   clickBehavior() {
-    props.clickBehavior && props.clickBehavior();
+    if (props.allocatedPath) {
+      router.push(props.allocatedPath);
+      return;
+    }
+
+    if (props.clickBehavior) {
+      props.clickBehavior();
+      return;
+    }
+
   }
 }
-onMounted(() => {
-  if (route.path === props.allocatedPath) {
-    state.isCurrentMenu = true;
-  }
-})
 </script>
 
 <template>
-  <div class="collapsible-menu" :class="{ collapse: leftMenuStore.state.isCollapsed, active: state.isCurrentMenu }"
+  <div class="collapsible-menu" :class="{ collapse: leftMenuStore.state.isCollapsed, active: props.isCurrentMenu }"
        v-on:click="methods.clickBehavior()">
     <div class="icon-wrapper">
       <FontAwesomeIcon class="fa-xl" :rotation="props.rotate" :icon="props.icon"/>
@@ -93,6 +93,7 @@ onMounted(() => {
     .menu-title {
       display: block;
       text-align: center;
+      user-select: none;
     }
   }
 
@@ -100,6 +101,19 @@ onMounted(() => {
   &.collapse {
 
     .title-wrapper {
+    }
+  }
+
+  &.active {
+
+    .icon-wrapper {
+      border-color: $signature-purple;
+      background-color: $signature-purple;
+      color: white;
+    }
+
+    .title-wrapper {
+      color: $signature-purple;
     }
   }
 }

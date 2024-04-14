@@ -152,8 +152,8 @@ onMounted(async () => {
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: white;
-        border: 1px $standard-gray-in-white solid;
+        background-color: $standard-gray-in-white;
+        border: 3px white solid;
         color: #525252;
         bottom: 0px;
         right: -5px;

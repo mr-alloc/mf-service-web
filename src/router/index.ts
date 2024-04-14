@@ -11,6 +11,7 @@ import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import MemberProfile from "@/views/authorized/MemberProfile.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import Main from "@/views/Main.vue";
+import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +24,18 @@ const router = createRouter({
   ]
 })
 
+router.afterEach((to, from) => {
+    const leftMenuStore = useLeftMenuStore();
+    leftMenuStore.refreshAllActivated();
+    switch (to.path) {
+        case '/':
+            leftMenuStore.state.activeHomeMenu = true;
+            break;
+        case '/calendar':
+            leftMenuStore.state.activeCalendarMenu = true;
+            break;
+    }
+});
 router.beforeEach(async (to, from, next) => {
     const memberInfoStore = useMemberInfoStore();
     const ownFamiliesStore = useOwnFamiliesStore();

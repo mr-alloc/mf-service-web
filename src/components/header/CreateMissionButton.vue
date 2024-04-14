@@ -6,7 +6,7 @@ import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {inject} from "vue";
-import FeatureItem from "@/components/global/FeatureItem.vue";
+import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
@@ -32,8 +32,8 @@ const methods = {
 </script>
 
 <template>
-  <FeatureItem :icon="['far', 'lightbulb']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"
-               :click-behavior="methods.popupCreateMission" button-name="미션 생성"/>
+  <CollapsibleMenu title="새로운 미션" :click-behavior="methods.popupCreateMission"
+                   :icon="['fas', 'lightbulb']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
 </template>
 
 <style scoped lang="scss">

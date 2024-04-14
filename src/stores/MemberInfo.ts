@@ -76,7 +76,7 @@ export class MemberInfo {
         this._id = id;
         this._nickname = nickname;
         this._role = role;
-        this._profileImage = profileImage ?? "/src/assets/images/default_user.png";
+        this._profileImage = profileImage ?? "/src/assets/images/default_user_profile.png";
     }
 
     get role(): number {

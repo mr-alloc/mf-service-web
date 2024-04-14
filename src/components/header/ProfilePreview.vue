@@ -34,10 +34,10 @@ const methods = {
 </script>
 
 <template>
-  <div class="user-session-info" :class="{ pushable: !memberInfoStore.needMemberInfo()}"
-       v-on:click="!memberInfoStore.needMemberInfo() && methods.moveToUserInfo()">
+  <div class="user-session-info pushable"
+       v-on:click="methods.moveToUserInfo()">
     <span class="user-img-area">
-      <img :src="memberInfoStore.memberInfo?.profileImage ?? '@/assets/images/default_user.png'"/>
+      <img :src="memberInfoStore.memberInfo?.profileImage"/>
     </span>
     <Transition name="fade">
       <div class="current-user" v-show="!leftMenuStore.state.isCollapsed">

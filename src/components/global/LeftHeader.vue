@@ -1,18 +1,16 @@
 <template>
   <header :class="{ collapsed: leftMenuStore.state.isCollapsed}">
+    <FamilySelector/>
     <ProfilePreview/>
-    <!--    <div class="brand-area">-->
-    <!--      <RouterLink to="/">-->
-    <!--        <div class="brand-logo">-->
-    <!--          <img alt="Vue logo" class="logo" src="@/assets/images/logo.gif"/>-->
-    <!--        </div>-->
-    <!--      </RouterLink>-->
-    <!--    </div>-->
-    <CreateFamilyButton/>
-    <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']" :rotate="90"
+    <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']"
+                     :rotate="leftMenuStore.state.isCollapsed ? 90 : 270"
                      :click-behavior="leftMenuStore.collapseMenu"/>
-    <CollapsibleMenu title="메인" :icon="['fas', 'house']" allocated-path="/"/>
-    <!--    <FamilySelector/>-->
+    <CollapsibleMenu title="메인" :icon="['fas', 'house']" allocated-path="/"
+                     :is-current-menu="leftMenuStore.state.activeHomeMenu"/>
+    <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
+                     :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
+    <CreateFamilyButton/>
+    <CreateMissionButton/>
     <!--    <div class="feature-list-wrapper">-->
     <!--      <nav>-->
     <!--        <ul class="feature-list">-->
@@ -30,6 +28,8 @@ import ProfilePreview from "@/components/header/ProfilePreview.vue";
 import CreateFamilyButton from "@/components/header/CreateFamilyButton.vue";
 import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
+import CreateMissionButton from "@/components/header/CreateMissionButton.vue";
+import FamilySelector from "@/components/header/FamilySelector.vue";
 
 const leftMenuStore = useLeftMenuStore();
 </script>
@@ -48,34 +48,6 @@ header {
   border-right: 1.24px solid $standard-light-gray-in-white;
   transition: all $duration;
   animation: collapse-in $duration ease-in-out reverse;
-
-  .brand-area {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    cursor: pointer;
-
-    .brand-logo {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 5px 8px;
-      width: 100%;
-      flex-shrink: 0;
-
-      .logo {
-        width: 100%;
-      }
-    }
-
-    .brand-name {
-      flex-grow: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-    }
-  }
 
   .feature-list-wrapper {
     display: flex;

@@ -1,4 +1,4 @@
-export default class SelectItemValue {
+export default class SelectFamilyOption {
 
     private readonly _id: number;
     private readonly _frameColor: string;
