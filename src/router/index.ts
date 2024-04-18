@@ -12,6 +12,7 @@ import MemberProfile from "@/views/authorized/MemberProfile.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import Main from "@/views/Main.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
+import Missions from "@/views/authorized/Missions.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,9 +21,10 @@ const router = createRouter({
       {path: '/calendar', name: 'calendar', component: MemberCalendar, meta: {role: 1}},
       {path: '/sign-in', name: 'sign-in', component: SignIn, meta: {role: 0}},
       {path: '/sign-up', name: 'sign-up', component: SignUp, meta: {role: 0}},
-      {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}}
+      {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}},
+      {path: '/missions', name: 'missions', component: Missions, meta: {role: 1}}
   ]
-})
+});
 
 router.afterEach((to, from) => {
     const leftMenuStore = useLeftMenuStore();

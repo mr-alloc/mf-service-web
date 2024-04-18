@@ -1,6 +1,7 @@
 <template>
   <header :class="{ collapsed: leftMenuStore.state.isCollapsed}">
     <FamilySelector/>
+    <CreateFamilyButton/>
     <ProfilePreview/>
     <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']"
                      :rotate="leftMenuStore.state.isCollapsed ? 90 : 270"
@@ -9,8 +10,8 @@
                      :is-current-menu="leftMenuStore.state.activeHomeMenu"/>
     <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
                      :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
-    <CreateFamilyButton/>
-    <CreateMissionButton/>
+    <CollapsibleMenu title="미션" :icon="['fas', 'lightbulb']" allocated-path="/missions"
+                     v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
     <!--    <div class="feature-list-wrapper">-->
     <!--      <nav>-->
     <!--        <ul class="feature-list">-->
@@ -28,10 +29,12 @@ import ProfilePreview from "@/components/header/ProfilePreview.vue";
 import CreateFamilyButton from "@/components/header/CreateFamilyButton.vue";
 import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
-import CreateMissionButton from "@/components/header/CreateMissionButton.vue";
 import FamilySelector from "@/components/header/FamilySelector.vue";
+import {MemberRole} from "@/constant/MemberRole";
+import {useMemberInfoStore} from "@/stores/MemberInfo";
 
 const leftMenuStore = useLeftMenuStore();
+const memberInfoStore = useMemberInfoStore();
 </script>
 
 <style scoped lang="scss">

@@ -1,6 +1,6 @@
 <template>
   <div class="blink-select-container">
-    <label for="select-element" class="select-title">{{ props.title }}</label>
+    <label :for="props.id" class="select-title">{{ props.title }}</label>
     <div class="option-selector" id="select-values" :class="{ blink: state.selectMode}">
       <div class="selected-value" v-on:click="methods.clickSelector()">
         <span class="value-text">{{ select?.options[select?.selectedIndex].innerText }}</span>
