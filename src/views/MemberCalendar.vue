@@ -24,13 +24,19 @@
       <Transition name="fade">
         <ul class="calendar-row member-calendar" v-show="state.calendar">
           <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
-              :class="{ 'this-month': date.get('month') === state.thisMonth.getMonth()}">
+              :class="{
+              'this-month': date.get('month') === state.thisMonth.getMonth(),
+              holiday: state.holidaysMap.has(date.format('YYYY-MM-DD'))
+              }">
             <div class="item-header">
               <span class="date">{{ date.get('date') == 1 ? date.format('M/D') : date.format('D') }}</span>
               <span class="mission-count"
                     v-show="state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length ?? 0 > 0">
                 {{ state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length }}
               </span>
+              <span class="holiday-name" v-show="state.holidaysMap.has(date.format('YYYY-MM-DD'))">{{
+                  state.holidaysMap.get(date.format('YYYY-MM-DD'))
+                }}</span>
             </div>
             <div class="item-body">
               <ul class="daily-schedules">
@@ -72,7 +78,8 @@ const state = reactive({
   calendar: [] as Array<Moment>,
   startDate: moment(),
   endDate: moment(),
-  memberCalendarMap: new Map<string, Array<CalendarItem>>()
+  memberCalendarMap: new Map<string, Array<CalendarItem>>(),
+  holidaysMap: new Map<string, string>()
 })
 const methods = {
   setMonth(month: number) {
@@ -103,8 +110,9 @@ const methods = {
     }
     call(Mission.GetMemberCalendar, requestBody,
         (res) => {
-          const {calendar} = res.data;
+          const {calendar, holidays} = res.data;
           state.memberCalendarMap = new Map<string, Array<CalendarItem>>();
+          state.holidaysMap = new Map<string, string>();
 
           calendar.forEach((mission: CalendarItem) => {
             const date = moment(new Date(mission.deadLine * 1000)).tz('Asia/Seoul').format('YYYY-MM-DD')
@@ -113,6 +121,10 @@ const methods = {
             } else {
               state.memberCalendarMap.set(date, [mission]);
             }
+          })
+
+          holidays.forEach((holiday: any) => {
+            state.holidaysMap.set('2024-' + holiday.date, holiday.name);
           })
         },
         (spec, error) => {
@@ -241,6 +253,19 @@ onMounted(() => {
 
         &.this-month {
           background-color: white;
+        }
+
+        &.holiday {
+          background-color: #f8dddd;
+          color: crimson;
+
+          .item-header {
+
+            .holiday-name {
+              font-weight: bold;
+              margin-left: 5px;
+            }
+          }
         }
 
 
