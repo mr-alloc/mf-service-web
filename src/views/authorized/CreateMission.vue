@@ -106,7 +106,7 @@ onMounted(() => {
       return;
     }
 
-    call(Mission.CreateMission, requestBody, (response) => {
+    call<any, any>(Mission.CreateMission, requestBody, (response) => {
           const missionName = missionTitleInput.value;
           notificationStore.alert(AlertType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
           emitter.emit("drawMemberCalendar")

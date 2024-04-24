@@ -78,7 +78,10 @@ const methods = {
 
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
     const passwordInput: HTMLInputElement = document.getElementsByName('userPassword')[0]! as HTMLInputElement;
-    const signInResult = await call(AccountAPI.VerifyAccount, { email: emailInput.value, password: passwordInput.value },
+    const signInResult = await call<any, any>(AccountAPI.VerifyAccount, {
+          email: emailInput.value,
+          password: passwordInput.value
+        },
         async (response) => {
           const {accessToken, refreshToken} = response.data
           setAccessToken(accessToken)

@@ -28,7 +28,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
     async function fetchMemberInfo(familyName: string) {
         const backgroundStore = useBackgroundStore();
         const alertStore = useAlertStore();
-        await call(MemberAPI.GetInfo, null,
+        await call<any, any>(MemberAPI.GetInfo, null,
             (response) => {
                 const { id, nickname, role } = response.data
                 const selectedFamilyId = getSelectedFamilyId();

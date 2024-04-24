@@ -57,7 +57,7 @@ const methods = {
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
     const isValidate = validate(emailInput.value, Patterns.Email);
 
-    const isConfirm = isValidate && await call(AccountAPI.ConfirmAccount, {email: emailInput.value},
+    const isConfirm = isValidate && await call<any, any>(AccountAPI.ConfirmAccount, {email: emailInput.value},
         (response) => {
           return true
         },
@@ -104,7 +104,7 @@ const methods = {
     if ( ! state.signUpSubmittable) {
       return false
     }
-    await call(AccountAPI.CreateAccount, {
+    await call<any, any>(AccountAPI.CreateAccount, {
       email: (document.getElementsByName('userName')[0]! as HTMLInputElement).value,
       password: (document.getElementsByName('userPassword')[0]! as HTMLInputElement).value
     },

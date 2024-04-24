@@ -68,7 +68,7 @@ router.beforeEach(async (to, from, next) => {
 
     //로그인은 했지만, 멤버 정보가 없는경우.
     if (!noAccessToken() && memberInfoStore.needMemberInfo()) {
-        await call(MemberAPI.GetInfo, null,
+        await call<any, any>(MemberAPI.GetInfo, null,
             (response) => {
                 const {id, nickname, role, profileImageUrl} = response.data
                 if (nickname === null) {

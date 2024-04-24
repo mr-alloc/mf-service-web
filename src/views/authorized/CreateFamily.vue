@@ -60,7 +60,7 @@ onMounted(() => {
       familyName: familyName.value,
       familyDescription: familyDescription.value
     }
-    call(Family.CreateFamily, requestBody, (response) => {
+    call<any, any>(Family.CreateFamily, requestBody, (response) => {
       //패밀리 정보 갱신
       alertStore.alert(AlertType.SUCCESS, "생성 성공", `${requestBody.familyName} 패밀리가 생성되었습니다.`);
       ownFamiliesStore.fetchOwnFamilies(true);

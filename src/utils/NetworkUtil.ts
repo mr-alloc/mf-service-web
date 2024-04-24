@@ -38,10 +38,10 @@ const defaultError = (spec: Spec, error: any) => {
     alertStore.alert(AlertType.WARNING, "서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
 }
 
-export async function call(
+export async function call<REQ, RES>(
     spec: Spec,
-    body: any | null = {},
-    success: ((value: AxiosResponse<any, any>) => any) | null | undefined,
+    body: REQ,
+    success: ((value: AxiosResponse<RES, any>) => any) | null | undefined,
     error?: ((consumeSpec: Spec, axiosError: any) => any) | null | undefined
 ) {
     const targetSpec = getSelectedFamilyId() !== '0' && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
@@ -50,23 +50,23 @@ export async function call(
     switch (targetSpec.method) {
         case HttpMethod.GET:
             request = axios.get(targetSpec.path, {
-                params: body,
+                params: body ?? {},
                 headers: getHeader(),
             });
             break;
         case HttpMethod.POST:
-            request = axios.post(targetSpec.path, body, {
+            request = axios.post(targetSpec.path, body ?? {}, {
                 headers: getHeader()
             });
             break;
         case HttpMethod.PUT:
-            request = axios.put(targetSpec.path, body, {
+            request = axios.put(targetSpec.path, body ?? {}, {
                 headers: getHeader()
             });
             break;
         case HttpMethod.DELETE:
             request = axios.delete(targetSpec.path, {
-                data: body,
+                data: body ?? {},
                 headers: getHeader()
             })
             break;

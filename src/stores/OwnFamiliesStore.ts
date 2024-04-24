@@ -2,7 +2,7 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import Family from "@/constant/api-meta/Family";
-import {convertList} from "@/utils/CollectionUtil";
+import CollectionUtil from "@/utils/CollectionUtil";
 import SelectFamilyOption from "@/classes/SelectFamilyOption";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 
@@ -24,7 +24,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         if (memberInfoStore.needMemberInfo()) return;
         if (!forceFetch && families.value.length > 0) return;
 
-        await call(Family.GetOwnFamilies, {}, (res) => {
+        await call<any, any>(Family.GetOwnFamilies, {}, (res) => {
             const {ownFamilies} = res.data
             const list = ownFamilies.map((family: any) => {
                 return {
@@ -41,7 +41,10 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     }
 
     function toSelectItemValue(): SelectFamilyOption [] {
-        return convertList<SelectFamilyOption>(families.value, (item: FamilySummary) => new SelectFamilyOption(item.id, item.color, item.image ?? "", item.name))
+        return CollectionUtil.convertList<SelectFamilyOption>(
+            families.value,
+            (item: FamilySummary) => new SelectFamilyOption(item.id, item.color, item.image ?? "", item.name)
+        )
     }
 
 

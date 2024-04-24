@@ -25,27 +25,27 @@
         <ul class="calendar-row member-calendar" v-show="state.calendar">
           <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
               :class="{
-              'this-month': date.get('month') === state.thisMonth.getMonth(),
-              holiday: state.holidaysMap.has(date.format('YYYY-MM-DD'))
+              'this-month': DateUtil.isSameMonth(date, state.thisMonth),
+              holiday: state.holidaysMap.has(DateUtil.toString(date))
               }">
             <div class="item-header">
               <span class="date">{{ date.get('date') == 1 ? date.format('M/D') : date.format('D') }}</span>
               <span class="mission-count"
-                    v-show="state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length ?? 0 > 0">
-                {{ state.memberCalendarMap.get(date.format('YYYY-MM-DD'))?.length }}
+                    v-show="state.memberCalendarMap.get(DateUtil.toString(date))?.length ?? 0 > 0">
+                {{ state.memberCalendarMap.get(DateUtil.toString(date))?.length }}
               </span>
-              <span class="holiday-name" v-show="state.holidaysMap.has(date.format('YYYY-MM-DD'))">{{
-                  state.holidaysMap.get(date.format('YYYY-MM-DD'))
-                }}</span>
+              <span class="holiday-name" v-show="state.holidaysMap.has(DateUtil.toString(date))">
+                {{ state.holidaysMap.get(DateUtil.toString(date))?.name }}
+              </span>
             </div>
             <div class="item-body">
               <ul class="daily-schedules">
                 <li class="each-schedule"
-                    v-for="(mission, index) in state.memberCalendarMap.get(date.format('YYYY-MM-DD')) ?? []"
+                    v-for="(mission, index) in state.memberCalendarMap.get(DateUtil.toString(date)) ?? []"
                     :key="index"
                 >
                   <span class="schedule-title">
-                  {{ `${methods.toTimeString(mission.deadLine)} ${mission.missionName}` }}
+                  {{ `${methods.toTimeString(mission.deadline)} ${mission.title}` }}
                   </span>
                 </li>
               </ul>
@@ -63,31 +63,28 @@ import moment, {type Moment} from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {call} from "@/utils/NetworkUtil";
 import Mission from "@/constant/api-meta/Mission";
+import {CalendarHoliday, CalendarMission, RequestBody, ResponseBody} from "@/classes/api-spec/mission/GetMemberCalendar"
+import DateUtil from "@/utils/DateUtil";
+import CollectionUtil from "@/utils/CollectionUtil";
 
 const emitter = inject("emitter");
 
-type CalendarItem = {
-  deadLine: number,
-  missionId: number,
-  missionName: string,
-}
-
 const state = reactive({
   calendarTitle: '',
-  thisMonth: new Date(),
+  thisMonth: moment(),
   calendar: [] as Array<Moment>,
   startDate: moment(),
   endDate: moment(),
-  memberCalendarMap: new Map<string, Array<CalendarItem>>(),
-  holidaysMap: new Map<string, string>()
+  memberCalendarMap: new Map<string, Array<CalendarMission>>(),
+  holidaysMap: new Map<string, CalendarHoliday>()
 })
 const methods = {
   setMonth(month: number) {
-    state.thisMonth.setMonth(state.thisMonth.getMonth() + month);
+    state.thisMonth.add(month, 'month');
     methods.drawCalendar();
   },
   drawCalendar() {
-    state.calendarTitle = state.thisMonth.getFullYear() + "년 " + (state.thisMonth.getMonth() + 1) + "월"
+    state.calendarTitle = state.thisMonth.get('year') + "년 " + (state.thisMonth.get('month') + 1) + "월"
     const startOfThisMonth = moment(state.thisMonth).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     state.startDate = startOfCalendar.clone();
@@ -104,28 +101,23 @@ const methods = {
       state.calendar.push(date);
       interval++;
     }
-    const requestBody = {
-      startDate: state.startDate.format('YYYY-MM-DD'),
-      endDate: state.endDate.format('YYYY-MM-DD')
-    }
-    call(Mission.GetMemberCalendar, requestBody,
+
+
+    call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(state.startDate, state.endDate),
         (res) => {
-          const {calendar, holidays} = res.data;
-          state.memberCalendarMap = new Map<string, Array<CalendarItem>>();
-          state.holidaysMap = new Map<string, string>();
+          const responseBody = ResponseBody.fromJson(res.data);
+          state.memberCalendarMap = new Map<string, Array<CalendarMission>>();
+          state.holidaysMap = new Map<string, CalendarHoliday>();
 
-          calendar.forEach((mission: CalendarItem) => {
-            const date = moment(new Date(mission.deadLine * 1000)).tz('Asia/Seoul').format('YYYY-MM-DD')
-            if (state.memberCalendarMap.has(date)) {
-              state.memberCalendarMap.get(date)?.push(mission);
-            } else {
-              state.memberCalendarMap.set(date, [mission]);
-            }
-          })
+          state.memberCalendarMap = CollectionUtil.groupBy<string, CalendarMission>(
+              responseBody.calendar,
+              (mission) => DateUtil.secondToDateString(mission.deadline)
+          );
 
-          holidays.forEach((holiday: any) => {
-            state.holidaysMap.set('2024-' + holiday.date, holiday.name);
-          })
+          state.holidaysMap = CollectionUtil.toMap<string, CalendarHoliday>(
+              responseBody.holidays.filter(h => !h.isLunar),
+              (holiday) => '2024-' + holiday.date,
+          )
         },
         (spec, error) => {
           console.log(error);

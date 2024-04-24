@@ -60,7 +60,7 @@ const methods = {
 }
 
 onMounted(async () => {
-  await call(Member.GetMemberDetail, null,
+  await call<any, any>(Member.GetMemberDetail, null,
       response => {
         const {nickname, email, lastSignedInAt, registeredAt} = response.data;
         state.memberDetail = {
@@ -160,8 +160,7 @@ onMounted(async () => {
         transition: .4s;
 
         &:hover {
-          background-color: rgba(51, 51, 51, 0.78);
-          color: white;
+          transform: scale(1.1);
           cursor: pointer;
         }
       }

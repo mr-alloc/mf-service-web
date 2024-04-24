@@ -1,6 +1,6 @@
 <template>
   <header :class="{ collapsed: leftMenuStore.state.isCollapsed}">
-    <FamilySelector/>
+    <FamilySelector v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
     <CreateFamilyButton/>
     <ProfilePreview/>
     <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']"
@@ -9,6 +9,7 @@
     <CollapsibleMenu title="메인" :icon="['fas', 'house']" allocated-path="/"
                      :is-current-menu="leftMenuStore.state.activeHomeMenu"/>
     <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
+                     v-show="memberInfoStore.allow(MemberRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
     <CollapsibleMenu title="미션" :icon="['fas', 'lightbulb']" allocated-path="/missions"
                      v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>

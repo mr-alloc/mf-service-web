@@ -67,7 +67,7 @@ const methods = {
       return;
     }
     const nicknameInput: HTMLInputElement = document.getElementsByName('nickname')[0]! as HTMLInputElement;
-    await call(Member.ChangeMemberNickname, { nickname: nicknameInput.value },
+    await call<any, any>(Member.ChangeMemberNickname, {nickname: nicknameInput.value},
         async (response) => {
           if (memberInfoStore.hasNickname()) {
             notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
