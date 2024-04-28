@@ -24,18 +24,21 @@
       <Transition name="fade">
         <ul class="calendar-row member-calendar" v-show="state.calendar">
           <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
+              v-on:click="methods.createMission()"
               :class="{
               'this-month': DateUtil.isSameMonth(date, state.thisMonth),
-              holiday: state.holidaysMap.has(DateUtil.toString(date))
+              holiday: state.holidaysMap.has(DateUtil.to(date, 'MM-DD'))
               }">
             <div class="item-header">
-              <span class="date">{{ date.get('date') == 1 ? date.format('M/D') : date.format('D') }}</span>
+              <span class="date" :class="{ today: DateUtil.toString(moment()) === DateUtil.toString(date)}">
+                {{ date.get('date') == 1 ? date.format('M/D') : date.format('D') }}
+              </span>
               <span class="mission-count"
                     v-show="state.memberCalendarMap.get(DateUtil.toString(date))?.length ?? 0 > 0">
                 {{ state.memberCalendarMap.get(DateUtil.toString(date))?.length }}
               </span>
-              <span class="holiday-name" v-show="state.holidaysMap.has(DateUtil.toString(date))">
-                {{ state.holidaysMap.get(DateUtil.toString(date))?.name }}
+              <span class="holiday-name" v-show="state.holidaysMap.has(DateUtil.to(date, 'MM-DD'))">
+                {{ state.holidaysMap.get(DateUtil.to(date, 'MM-DD'))?.name }}
               </span>
             </div>
             <div class="item-body">
@@ -45,7 +48,7 @@
                     :key="index"
                 >
                   <span class="schedule-title">
-                  {{ `${methods.toTimeString(mission.deadline)} ${mission.title}` }}
+                  {{ `${methods.toTimeString(mission.registerDate)} ${mission.title}` }}
                   </span>
                 </li>
               </ul>
@@ -63,9 +66,19 @@ import moment, {type Moment} from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {call} from "@/utils/NetworkUtil";
 import Mission from "@/constant/api-meta/Mission";
-import {CalendarHoliday, CalendarMission, RequestBody, ResponseBody} from "@/classes/api-spec/mission/GetMemberCalendar"
+import {
+  CalendarHoliday,
+  CalendarMission,
+  FamilyMission,
+  type IMission,
+  RequestBody,
+  ResponseBody
+} from "@/classes/api-spec/mission/GetMemberCalendar"
 import DateUtil from "@/utils/DateUtil";
 import CollectionUtil from "@/utils/CollectionUtil";
+import PopupUtil from "@/utils/PopupUtil";
+import {hasSelectedFamilyId} from "@/utils/LocalCache";
+
 
 const emitter = inject("emitter");
 
@@ -75,10 +88,13 @@ const state = reactive({
   calendar: [] as Array<Moment>,
   startDate: moment(),
   endDate: moment(),
-  memberCalendarMap: new Map<string, Array<CalendarMission>>(),
+  memberCalendarMap: new Map<string, Array<IMission>>(),
   holidaysMap: new Map<string, CalendarHoliday>()
 })
 const methods = {
+  createMission() {
+    PopupUtil.popupCreateMission(emitter)
+  },
   setMonth(month: number) {
     state.thisMonth.add(month, 'month');
     methods.drawCalendar();
@@ -105,18 +121,22 @@ const methods = {
 
     call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(state.startDate, state.endDate),
         (res) => {
-          const responseBody = ResponseBody.fromJson(res.data);
-          state.memberCalendarMap = new Map<string, Array<CalendarMission>>();
-          state.holidaysMap = new Map<string, CalendarHoliday>();
+          const responseBody = ResponseBody.fromJson(res.data, (mission) => {
+            return hasSelectedFamilyId()
+                ? CalendarMission.fromJson(mission)
+                : FamilyMission.fromJson(mission)
+          });
 
-          state.memberCalendarMap = CollectionUtil.groupBy<string, CalendarMission>(
+          state.memberCalendarMap = CollectionUtil.groupBy<string, IMission>(
               responseBody.calendar,
-              (mission) => DateUtil.secondToDateString(mission.deadline)
+              (mission) => mission.groupingDate
           );
+
+          console.log(state.memberCalendarMap)
 
           state.holidaysMap = CollectionUtil.toMap<string, CalendarHoliday>(
               responseBody.holidays.filter(h => !h.isLunar),
-              (holiday) => '2024-' + holiday.date,
+              (holiday) => holiday.date,
           )
         },
         (spec, error) => {
@@ -271,6 +291,14 @@ onMounted(() => {
 
           .date {
             font-weight: bold;
+
+            &.today {
+              position: absolute;
+              background-color: $signature-purple;
+              border-radius: 50%;
+              color: white;
+              padding: 0 1px;
+            }
           }
 
           .mission-count {
@@ -318,8 +346,9 @@ onMounted(() => {
           }
         }
 
-        &:hover {
-          //background-color: rgb(0, 0, 0, .2)
+        &.this-month:hover {
+          background-color: rgb(0, 0, 0, .2);
+          cursor: pointer;
         }
       }
     }

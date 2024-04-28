@@ -1,16 +1,17 @@
 <template>
   <header :class="{ collapsed: leftMenuStore.state.isCollapsed}">
-    <FamilySelector v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
-    <CreateFamilyButton/>
+    <FamilySelector v-show="memberInfoStore.allow(MemberRole.MEMBER)" allow-collapse/>
     <ProfilePreview/>
     <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']"
-                     :rotate="leftMenuStore.state.isCollapsed ? 90 : 270"
+                     :rotate="leftMenuStore.state.isCollapsed ? 270 : 90"
                      :click-behavior="leftMenuStore.collapseMenu"/>
     <CollapsibleMenu title="메인" :icon="['fas', 'house']" allocated-path="/"
                      :is-current-menu="leftMenuStore.state.activeHomeMenu"/>
     <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
                      v-show="memberInfoStore.allow(MemberRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
+    <CollapsibleMenu title="패밀리" :icon="['fas', 'users']" allocated-path="/families"
+                     v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
     <CollapsibleMenu title="미션" :icon="['fas', 'lightbulb']" allocated-path="/missions"
                      v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
     <!--    <div class="feature-list-wrapper">-->
@@ -27,7 +28,6 @@
 <script setup lang="ts">
 import SimpleNotifier from "@/components/global/SimpleNotifier.vue";
 import ProfilePreview from "@/components/header/ProfilePreview.vue";
-import CreateFamilyButton from "@/components/header/CreateFamilyButton.vue";
 import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import FamilySelector from "@/components/header/FamilySelector.vue";

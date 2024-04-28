@@ -8,4 +8,7 @@ export default {
     GetOwnFamilies: Spec.of(HttpMethod.GET, "/v1/family/own")
         .andDefaultMessage("패밀리 목록을 불러오는 도중 오류가 발생 하였습니다.")
         .andPairs([]),
+    GetFamilyMembers: Spec.of(HttpMethod.GET, "/v1/family/members")
+        .andDefaultMessage("패밀리 멤버 목록을 불러오는 도중 오류가 발생 하였습니다.")
+        .andPairs([])
 }

@@ -18,5 +18,8 @@ export default {
     },
     toString(m: Moment): string {
         return m.format(DEFAULT_DATE_FORMAT);
+    },
+    to(moment: Moment, format: string): string {
+        return moment.format(format);
     }
 }

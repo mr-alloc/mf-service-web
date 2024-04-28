@@ -11,7 +11,7 @@ import Member from "@/constant/api-meta/Member";
 import {call} from "@/utils/NetworkUtil";
 
 const memberInfoStore = useMemberInfoStore();
-const notificationStore = useAlertStore();
+const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const router = useRouter();
 
@@ -30,7 +30,7 @@ const state = reactive<State>({
 })
 const methods = {
   doSignOut() {
-    notificationStore.alert(AlertType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
+    alertStore.alert(AlertType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
     memberInfoStore.removeMemberInfo();
     removeTokens();
     router.push("/sign-in");
@@ -56,6 +56,9 @@ const methods = {
     if (!at) return ""
     const date = new Date(at * 1000);
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}:${date.getMinutes()}`
+  },
+  changeProfile() {
+    alertStore.info('프로필 이미지 변경', '아직 준비중이에요! 조금만 기다려주세요!')
   }
 }
 
@@ -81,7 +84,7 @@ onMounted(async () => {
         <div class="profile-image">
           <img v-if="!memberInfoStore.needMemberInfo()" :src="memberInfoStore.memberInfo?.profileImage"/>
         </div>
-        <div class="change-profile">
+        <div class="change-profile" v-on:click="methods.changeProfile()">
           <FontAwesomeIcon class="fa-sm" :icon="['fas', 'pen']"/>
         </div>
       </div>

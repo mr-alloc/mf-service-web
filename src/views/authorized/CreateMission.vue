@@ -10,6 +10,8 @@
         <BlinkInput id="mission-content" name="missionContent" type="text" label="부제 (옵션)" placeHolder="미션 부제"
                     :is-hold="state.inputHold" :no-mark="true"
         />
+        <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
+                        :options="state.members" v-show="hasSelectedFamilyId()"/>
         <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한"
                      :etc-option="new SelectOption('0', '기타(일)')"
                      etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
@@ -27,6 +29,11 @@ import DocumentUtil from "@/utils/DocumentUtil";
 import Mission from "@/constant/api-meta/Mission";
 import {call} from "@/utils/NetworkUtil";
 import {useThrottleFn} from "@vueuse/core";
+import SimpleSelector from "@/components/global/SimpleSelector.vue";
+import Family from "@/constant/api-meta/Family";
+import {ResponseBody} from "@/classes/api-spec/family/GetFamilyMember";
+import type SelectImageOption from "@/classes/api-spec/SelectImageOption";
+import {hasSelectedFamilyId} from "@/utils/LocalCache";
 
 const notificationStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
@@ -58,7 +65,8 @@ const state = reactive({
     new SelectOption("86400", "하루"),
     new SelectOption("604800", "일주일"),
     new SelectOption("2592000", "30일"),
-  ]
+  ],
+  members: [] as Array<SelectImageOption>
 });
 
 const methods = {
@@ -77,11 +85,19 @@ const methods = {
   },
   dayToSecond(day: string) {
     return day ? (parseInt(day) * 24 * 60 * 60).toString() : '';
+  },
+  setMembers() {
+    call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
+      const responseBody = ResponseBody.fromJson(response.data);
+      state.members = responseBody.members.map((member) => member.toSelectImageOption());
+    })
   }
 }
 
 
 onMounted(() => {
+  methods.setMembers()
+
   emitter.on("validateCreateMissionForm", useThrottleFn(() => {
     methods.checkAllInput();
     if (!state.isSubmittable) {

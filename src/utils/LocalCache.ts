@@ -50,3 +50,7 @@ export const getSelectedFamilyId = () => {
     }
     return localStorage.getItem(SELECTED_FAMILY_ID)
 }
+
+export const hasSelectedFamilyId = () => {
+    return getSelectedFamilyId() !== '0'
+}

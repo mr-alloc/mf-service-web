@@ -32,7 +32,7 @@ const state = reactive({
 <template>
   <div class="notifications-wrapper">
     <TransitionGroup name="list" tag="ul" class="notice-message-list">
-      <li class="message-item" v-for="(notification, index) in notificationStore.notifications"
+      <li class="message-item" v-for="(notification, index) in state.notifications"
           :key="notification.timestamp">
         <div class="message-header">
           <div class="message-icon" :class="[notification.type]">
@@ -58,7 +58,7 @@ const state = reactive({
 
 .notifications-wrapper {
   width: 250px;
-  height: 300px;
+  max-height: 300px;
   z-index: 2;
   position: absolute;
   bottom: 0px;
@@ -98,6 +98,7 @@ const state = reactive({
     padding: 0px;
 
     .message-item {
+      z-index: 2;
       background-color: rgba(0, 0, 0, 0.62);
       color: $standard-light-gray-in-white;
       width: 250px;

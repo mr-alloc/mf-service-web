@@ -13,6 +13,7 @@ import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import Main from "@/views/Main.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import Missions from "@/views/authorized/Missions.vue";
+import Families from "@/views/authorized/Families.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +23,8 @@ const router = createRouter({
       {path: '/sign-in', name: 'sign-in', component: SignIn, meta: {role: 0}},
       {path: '/sign-up', name: 'sign-up', component: SignUp, meta: {role: 0}},
       {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}},
-      {path: '/missions', name: 'missions', component: Missions, meta: {role: 1}}
+      {path: '/missions', name: 'missions', component: Missions, meta: {role: 1}},
+      {path: '/families', name: 'families', component: Families, meta: {role: 1}}
   ]
 });
 

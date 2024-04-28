@@ -27,10 +27,30 @@ export const useAlertStore = defineStore('alert', () => {
         notifications.value = [];
     }
 
+    function warning(title: string, message: string) {
+        alert(AlertType.WARNING, title, message);
+    }
+
+    function info(title: string, message: string) {
+        alert(AlertType.INFO, title, message);
+    }
+
+    function success(title: string, message: string) {
+        alert(AlertType.SUCCESS, title, message);
+    }
+
+    function guide(title: string, message: string) {
+        alert(AlertType.GUIDE, title, message);
+    }
+
     return {
         notifications,
         alert,
-        clear
+        clear,
+        warning,
+        info,
+        success,
+        guide
     }
 })
 

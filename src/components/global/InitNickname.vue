@@ -115,6 +115,7 @@ onMounted(() => {
   align-items: center;
   flex-direction: column;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
   animation-name: blur;
   animation-duration: 1s;
@@ -165,9 +166,11 @@ onMounted(() => {
 @keyframes blur {
   0% {
     backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
   }
   100% {
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
 </style>

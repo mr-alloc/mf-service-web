@@ -1,5 +1,5 @@
 import axios, {AxiosHeaders, type AxiosResponse} from "axios";
-import {getAccessToken, getSelectedFamilyId, noAccessToken} from "@/utils/LocalCache";
+import {getAccessToken, getSelectedFamilyId, hasSelectedFamilyId, noAccessToken} from "@/utils/LocalCache";
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {useRouter} from "vue-router";
@@ -44,7 +44,7 @@ export async function call<REQ, RES>(
     success: ((value: AxiosResponse<RES, any>) => any) | null | undefined,
     error?: ((consumeSpec: Spec, axiosError: any) => any) | null | undefined
 ) {
-    const targetSpec = getSelectedFamilyId() !== '0' && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
+    const targetSpec = hasSelectedFamilyId() && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
 
     let request;
     switch (targetSpec.method) {

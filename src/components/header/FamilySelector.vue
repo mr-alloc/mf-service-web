@@ -6,7 +6,7 @@ import {setSelectedFamilyId} from "@/utils/LocalCache";
 import {inject, reactive} from "vue";
 import {faCaretDown} from "@fortawesome/free-solid-svg-icons";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
-import SelectItem from "@/components/global/SelectItem.vue";
+import SelectItem from "@/components/global/SelectFamilyItem.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const memberInfoStore = useMemberInfoStore();
@@ -36,14 +36,18 @@ const methods = {
 
 const leftMenuStore = useLeftMenuStore();
 const notSelectedOption = new SelectFamilyOption(0, "", "NO_IMAGE", "본캐 선택");
+const props = defineProps({
+  allowCollapse: Boolean
+});
 const state = reactive({
   selectMode: false,
   defaultOption: notSelectedOption,
-  selectedItem: notSelectedOption
+  selectedItem: notSelectedOption,
+  isCollapse: props.allowCollapse && leftMenuStore.state.isCollapsed
 });
 </script>
 <template>
-  <div class="select-container" :class="{ collapse: leftMenuStore.state.isCollapsed }">
+  <div class="select-container" :class="{ collapse: state.isCollapse }">
     <div class="current-selected-item" :class="{ 'no-image': state.selectedItem.image === 'NO_IMAGE' }"
          v-on:click="methods.showOptions()">
       <div class="item-image-area">
@@ -52,15 +56,15 @@ const state = reactive({
                :src="state.selectedItem.image" alt="선택 옵션의 이미지"/>
         </span>
         <Transition name="fade">
-          <span class="toggle-icon" v-show="leftMenuStore.state.isCollapsed">
+          <span class="toggle-icon" v-show="state.isCollapse">
               <FontAwesomeIcon :icon="faCaretDown"/>
           </span>
         </Transition>
       </div>
       <Transition name="fade">
-        <div class="item-title-wrapper" :class="{ collapse: leftMenuStore.state.isCollapsed }"
-             v-show="!leftMenuStore.state.isCollapsed">
-          <span class="item-title">{{ state.selectedItem.title }}</span>
+        <div class="item-title-wrapper" :class="{ collapse: state.isCollapse }"
+             v-show="!state.isCollapse">
+          <span class="item-title">{{ state.selectedItem.id === 0 ? '패밀리 선택' : state.selectedItem.title }}</span>
         </div>
       </Transition>
     </div>
