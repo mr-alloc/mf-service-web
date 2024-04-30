@@ -11,7 +11,7 @@
                     :is-hold="state.inputHold" :no-mark="true"
         />
         <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
-                        :options="state.members" v-show="hasSelectedFamilyId()"/>
+                        :options="state.members" v-show="ownFamiliesStore.hasSelectFamily"/>
         <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한"
                      :etc-option="new SelectOption('0', '기타(일)')"
                      etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
@@ -33,10 +33,11 @@ import SimpleSelector from "@/components/global/SimpleSelector.vue";
 import Family from "@/constant/api-meta/Family";
 import {ResponseBody} from "@/classes/api-spec/family/GetFamilyMember";
 import type SelectImageOption from "@/classes/api-spec/SelectImageOption";
-import {hasSelectedFamilyId} from "@/utils/LocalCache";
+import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 const notificationStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
+const ownFamiliesStore = useOwnFamiliesStore();
 const emitter = inject("emitter");
 
 const state = reactive({

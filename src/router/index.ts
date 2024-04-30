@@ -7,7 +7,7 @@ import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {noAccessToken, removeAccessToken, removeTokens} from "@/utils/LocalCache";
-import {AlertType, useAlertStore} from "@/stores/AlertStore";
+import {useAlertStore} from "@/stores/AlertStore";
 import MemberProfile from "@/views/authorized/MemberProfile.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import Main from "@/views/Main.vue";
@@ -74,10 +74,10 @@ router.beforeEach(async (to, from, next) => {
             (response) => {
                 const {id, nickname, role, profileImageUrl} = response.data
                 if (nickname === null) {
-                    alertStore.alert(AlertType.GUIDE, "반가워요!", "사용할 닉네임을 정해주세요. 닉네임은 다음에도 변경할 수 있어요.");
+                    alertStore.guide("반가워요!", "사용할 닉네임을 정해주세요. 닉네임은 다음에도 변경할 수 있어요.");
                     backgroundStore.useNicknameInitializer("합류를 시작하기 위해 닉네임을 정해주세요!");
                 } else {
-                    alertStore.alert(AlertType.NONE, "반가워요!", `${nickname}님, 오늘도 좋은 하루 되세요!`)
+                    alertStore.none("반가워요!", `${nickname}님, 오늘도 좋은 하루 되세요!`)
                 }
                 memberInfoStore.updateMemberInfo(new MemberInfo(id, nickname, role, profileImageUrl))
                 ownFamiliesStore.fetchOwnFamilies(true);
@@ -100,7 +100,7 @@ router.beforeEach(async (to, from, next) => {
 
         const { role } = to.meta as { role: number }
         if (role && role > authorityRole) {
-            alertStore.alert(AlertType.WARNING, "부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10)
+            alertStore.warning("부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10)
             return next({ path: '/' })
         }
     }

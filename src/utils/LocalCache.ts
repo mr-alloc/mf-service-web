@@ -1,4 +1,5 @@
 import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 const ACCESS_TOKEN = "mf_ac_tk";
 const REFRESH_TOKEN = "mf_rf_tk";
@@ -40,6 +41,8 @@ export const removeTokens = () => {
 }
 
 export const setSelectedFamilyId = (id: number) => {
+    const ownFamiliesStore = useOwnFamiliesStore();
+    ownFamiliesStore.hasSelectFamily = id !== 0;
     localStorage.setItem(SELECTED_FAMILY_ID, id.toString())
 }
 

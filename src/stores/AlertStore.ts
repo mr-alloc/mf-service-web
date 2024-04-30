@@ -27,20 +27,24 @@ export const useAlertStore = defineStore('alert', () => {
         notifications.value = [];
     }
 
-    function warning(title: string, message: string) {
-        alert(AlertType.WARNING, title, message);
+    function warning(title: string, message: string, timeoutSecond?: number) {
+        alert(AlertType.WARNING, title, message, timeoutSecond);
     }
 
-    function info(title: string, message: string) {
-        alert(AlertType.INFO, title, message);
+    function info(title: string, message: string, timeoutSecond?: number) {
+        alert(AlertType.INFO, title, message, timeoutSecond);
     }
 
-    function success(title: string, message: string) {
-        alert(AlertType.SUCCESS, title, message);
+    function success(title: string, message: string, timeoutSecond?: number) {
+        alert(AlertType.SUCCESS, title, message, timeoutSecond);
     }
 
-    function guide(title: string, message: string) {
-        alert(AlertType.GUIDE, title, message);
+    function guide(title: string, message: string, timeoutSecond?: number) {
+        alert(AlertType.GUIDE, title, message, timeoutSecond);
+    }
+
+    function none(title: string, message: string, timeoutSecond?: number) {
+        alert(AlertType.NONE, title, message, timeoutSecond);
     }
 
     return {
@@ -50,7 +54,8 @@ export const useAlertStore = defineStore('alert', () => {
         warning,
         info,
         success,
-        guide
+        guide,
+        none
     }
 })
 
