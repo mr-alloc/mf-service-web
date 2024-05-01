@@ -132,8 +132,6 @@ const methods = {
               (mission) => mission.groupingDate
           );
 
-          console.log(state.memberCalendarMap)
-
           state.holidaysMap = CollectionUtil.toMap<string, CalendarHoliday>(
               responseBody.holidays.filter(h => !h.isLunar),
               (holiday) => holiday.date,
@@ -293,11 +291,10 @@ onMounted(() => {
             font-weight: bold;
 
             &.today {
-              position: absolute;
               background-color: $signature-purple;
-              border-radius: 50%;
+              border-radius: 5px;
               color: white;
-              padding: 0 1px;
+              padding: 2px 8px;
             }
           }
 

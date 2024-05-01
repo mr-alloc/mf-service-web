@@ -51,9 +51,10 @@ export const getSelectedFamilyId = () => {
     if (memberInfoStore.needMemberInfo()) {
         setSelectedFamilyId(0)
     }
-    return localStorage.getItem(SELECTED_FAMILY_ID)
+    const familyId = localStorage.getItem(SELECTED_FAMILY_ID);
+    return parseInt(familyId ?? '0')
 }
 
 export const hasSelectedFamilyId = () => {
-    return getSelectedFamilyId() !== '0'
+    return getSelectedFamilyId() !== 0
 }

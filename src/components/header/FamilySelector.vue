@@ -6,6 +6,7 @@ import SelectItem from "@/components/global/SelectFamilyItem.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import SelectFamilyOption from "@/classes/SelectFamilyOption";
+import {getSelectedFamilyId} from "@/utils/LocalCache";
 
 const emitter = inject("emitter")!;
 const ownFamiliesStore = useOwnFamiliesStore();
@@ -23,8 +24,11 @@ const methods = {
   showSelector() {
     state.isSelectMode = !state.isSelectMode;
   },
-  selectFamily(emitter: any, item?: SelectFamilyOption) {
-    ownFamiliesStore.selectorState.selectedOption = item ?? ownFamiliesStore.selectorState.defaultOption;
+  selectFamily(emitter: any, item: SelectFamilyOption = ownFamiliesStore.selectorState.defaultOption as SelectFamilyOption) {
+    if (getSelectedFamilyId() === item?.id) {
+      return;
+    }
+    ownFamiliesStore.selectorState.selectedOption = item;
     state.isSelectMode = false;
 
     ownFamiliesStore.changeFamily(emitter);

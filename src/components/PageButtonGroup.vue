@@ -1,35 +1,40 @@
 <script setup lang="ts">
 
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {faCalendarPlus} from "@fortawesome/free-solid-svg-icons";
-import PopupUtil from "@/utils/PopupUtil";
 import {inject} from "vue";
+import type {DefaultButtonValue} from "@/classes/DefaultButtonValue";
 
 const emitter = inject("emitter");
+const props = defineProps({
+  buttons: Array<DefaultButtonValue>
+});
 </script>
 
 <template>
-  <div class="mission-options">
-    <div class="option-item-wrapper" v-on:click="PopupUtil.popupCreateMission(emitter)">
+  <ul class="option-button-group">
+    <li class="option-item-wrapper"
+        v-for="(button, index) in props.buttons" :key="index" v-on:click="button.clickBehavior">
       <div class="option-item">
         <div class="option-icon">
-          <FontAwesomeIcon :icon="faCalendarPlus" size="xl"/>
+          <FontAwesomeIcon :icon="button.icon" size="xl"/>
         </div>
         <div class="option-title">
-          <span>미션 생성</span>
+          <span>{{ button.title }}</span>
         </div>
       </div>
-    </div>
-  </div>
+    </li>
+  </ul>
 </template>
 
 <style scoped lang="scss">
 @import "@/assets/main";
 
-.mission-options {
+.option-button-group {
   width: max-content;
   display: flex;
-  margin: 0 auto;
+  margin: 15px 0;
+  list-style: none;
+  padding: 0 20px;
 
   .option-item-wrapper {
     width: 60px;
@@ -40,6 +45,7 @@ const emitter = inject("emitter");
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin: 10px;
     transition: $duration;
 
     &:hover {

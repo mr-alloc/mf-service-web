@@ -1,6 +1,17 @@
 <script setup lang="ts">
 
-import MissionOptions from "@/components/MissionOptions.vue";
+import PageButtonGroup from "@/components/PageButtonGroup.vue";
+import {DefaultButtonValue} from "@/classes/DefaultButtonValue";
+import {inject, reactive} from "vue";
+import PopupUtil from "@/utils/PopupUtil";
+
+
+const emitter = inject("emitter");
+const state = reactive({
+  buttons: [
+    new DefaultButtonValue("미션 생성", ["fas", "calendar-plus"], () => PopupUtil.popupCreateMission(emitter))
+  ]
+});
 </script>
 
 <template>
@@ -17,7 +28,7 @@ import MissionOptions from "@/components/MissionOptions.vue";
         </li>
       </ul>
     </div>
-    <MissionOptions/>
+    <PageButtonGroup :buttons="state.buttons"/>
   </div>
 </template>
 

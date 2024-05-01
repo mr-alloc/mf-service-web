@@ -26,7 +26,7 @@ axios.interceptors.response.use(
 function getHeader(): AxiosHeaders {
     const headers = new AxiosHeaders();
     noAccessToken() || headers.set("Authorization", `Bearer ${getAccessToken()}`)
-    headers.set("Selected-Family-Id", getSelectedFamilyId() ?? '0')
+    headers.set("Selected-Family-Id", getSelectedFamilyId())
 
     return headers;
 }

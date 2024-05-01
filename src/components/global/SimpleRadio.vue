@@ -3,7 +3,7 @@
     <label v-show="props.label">{{ props.label }}</label>
     <div class="radio-selector">
       <input type="hidden" :id="props.id" :name="props.name" v-model="state.value"/>
-      <ul class="button-group">
+      <ul class="option-button-group">
         <li class="radio-button" :key="index" v-for="(option, index) in props.options"
             :class="{ selected: option.value === state.value }" v-on:click="methods.selectValue(option.value)">
           {{ option.text }}
@@ -78,7 +78,7 @@ const methods = {
 
   .radio-selector {
 
-    .button-group {
+    .option-button-group {
       list-style: none;
       padding: 0;
       display: flex;

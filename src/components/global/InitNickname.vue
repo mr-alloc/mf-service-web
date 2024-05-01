@@ -20,13 +20,14 @@
 <script lang="ts" setup>
 import BlinkInput from "@/components/global/BlinkInput.vue";
 import SimpleButton from "@/components/global/SimpleButton.vue";
-import {onMounted, reactive} from "vue";
+import {inject, onMounted, reactive} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import Member from "@/constant/api-meta/Member";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {hasSelectedFamilyId} from "@/utils/LocalCache";
 
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
@@ -39,7 +40,7 @@ const state = reactive({
 });
 
 const nickNameRE = /^[가-힣a-zA-Z0-9 ]{2,10}$/;
-
+const emitter = inject("emitter")!;
 const methods = {
   ifEnterOnNickname() {
     if (methods.validateNickname()) {
@@ -71,6 +72,9 @@ const methods = {
         async (response) => {
           if (memberInfoStore.hasNickname()) {
             notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
+            if (hasSelectedFamilyId()) {
+              emitter.emit("fetchFamilyMember");
+            }
           } else {
             notificationStore.alert(AlertType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
           }

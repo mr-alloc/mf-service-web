@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {MemberRole} from "@/constant/MemberRole";
+import {AccountRole} from "@/constant/AccountRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useRouter} from "vue-router";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
@@ -15,10 +15,10 @@ const methods = {
       return;
     }
     switch (memberInfoStore.memberInfo?.role) {
-      case MemberRole.MEMBER:
+      case AccountRole.MEMBER:
         router.push("/profile");
         break;
-      case MemberRole.ADMIN:
+      case AccountRole.ADMIN:
         router.push("/admin");
         break;
       default:

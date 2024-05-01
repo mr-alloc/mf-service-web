@@ -24,7 +24,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <Transition name="bounce">
+  <Transition name="fall-fade">
     <div class="global-popup-wrapper" v-show="backgroundStore.needPopup" :class="[backgroundStore.popupInfo?.type]">
       <div class="popup-header">
         <div class="popup-icon">
@@ -39,7 +39,7 @@ const props = defineProps({
                    v-show="backgroundStore.popupInfo?.includeBodyComponent"/>
       </div>
       <div class="popup-footer">
-        <ul class="button-group">
+        <ul class="option-button-group">
           <li class="popup-process-button" v-for="(button, index) in backgroundStore.popupInfo?.buttons"
               v-bind:key="index">
             <button type="button" v-on:click="button.action()">{{ button.name }}</button>
@@ -105,7 +105,7 @@ const props = defineProps({
   }
 
   .popup-footer {
-    .button-group {
+    .option-button-group {
       list-style: none;
       display: flex;
       justify-content: space-evenly;

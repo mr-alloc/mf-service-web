@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {MemberRole} from "@/constant/MemberRole";
+import {AccountRole} from "@/constant/AccountRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
@@ -33,7 +33,7 @@ const methods = {
 
 <template>
   <CollapsibleMenu title="새로운 패밀리" :click-behavior="methods.popupCreateFamily"
-                   :icon="['fas', 'people-group']" v-show="memberInfoStore.allow(MemberRole.MEMBER)"/>
+                   :icon="['fas', 'people-group']" v-show="memberInfoStore.allow(AccountRole.MEMBER)"/>
 </template>
 
 <style scoped lang="scss">

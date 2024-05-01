@@ -9,25 +9,17 @@ import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {onMounted, reactive} from "vue";
 import Member from "@/constant/api-meta/Member";
 import {call} from "@/utils/NetworkUtil";
+import {ResponseBody} from "@/classes/api-spec/member/GetMemberDetail";
 
 const memberInfoStore = useMemberInfoStore();
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const router = useRouter();
 
-type MemberDetail = {
-  nickname: string;
-  email: string;
-  registeredAt: string;
-  lastSignedInAt: string;
-}
+const state = reactive({
+  memberDetail: null as ResponseBody | null
+});
 
-type State = {
-  memberDetail: MemberDetail | null;
-}
-const state = reactive<State>({
-  memberDetail: null
-})
 const methods = {
   doSignOut() {
     alertStore.alert(AlertType.NONE, "반가웠어요!", `${memberInfoStore.memberInfo?.nickname}님 다음에 또 봐요!`);
@@ -63,15 +55,9 @@ const methods = {
 }
 
 onMounted(async () => {
-  await call<any, any>(Member.GetMemberDetail, null,
+  await call<any, ResponseBody>(Member.GetMemberDetail, null,
       response => {
-        const {nickname, email, lastSignedInAt, registeredAt} = response.data;
-        state.memberDetail = {
-          nickname: nickname,
-          email: email,
-          lastSignedInAt: methods.getFormattedDate(lastSignedInAt),
-          registeredAt: methods.getFormattedDate(registeredAt)
-        } as MemberDetail;
+        state.memberDetail = ResponseBody.fromJson(response.data);
       }
   )
 })
@@ -82,7 +68,7 @@ onMounted(async () => {
     <div class="simple-profiles">
       <div class="profile-image-wrapper">
         <div class="profile-image">
-          <img v-if="!memberInfoStore.needMemberInfo()" :src="memberInfoStore.memberInfo?.profileImage"/>
+          <img v-if="!memberInfoStore.needMemberInfo()" :src="state.memberDetail?.profile"/>
         </div>
         <div class="change-profile" v-on:click="methods.changeProfile()">
           <FontAwesomeIcon class="fa-sm" :icon="['fas', 'pen']"/>

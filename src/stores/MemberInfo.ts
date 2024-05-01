@@ -2,7 +2,7 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import {call, dispatchIf} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
-import {getSelectedFamilyId, removeAccessToken} from "@/utils/LocalCache";
+import {hasSelectedFamilyId, removeAccessToken} from "@/utils/LocalCache";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 
@@ -31,8 +31,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         await call<any, any>(MemberAPI.GetInfo, null,
             (response) => {
                 const { id, nickname, role } = response.data
-                const selectedFamilyId = getSelectedFamilyId();
-                if (nickname === '' && selectedFamilyId !== '0') {
+                if (nickname === '' && hasSelectedFamilyId()) {
                     alertStore.alert(AlertType.GUIDE, "패밀리 닉네임 선택", `${familyName}에서 사용할 닉네임을 설정 해야해요.`);
                     backgroundStore.useNicknameInitializer(`${familyName}에서 사용할 닉네임을 입력해주세요.`, true);
                 }

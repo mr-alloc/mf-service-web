@@ -3,17 +3,36 @@
 import FamilySelector from "@/components/header/FamilySelector.vue";
 import FamilyMembers from "@/components/main/FamilyMembers.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
+import {inject, reactive} from "vue";
+import {DefaultButtonValue} from "@/classes/DefaultButtonValue";
+import PopupUtil from "@/utils/PopupUtil";
+import PageButtonGroup from "@/components/PageButtonGroup.vue";
+import {hasSelectedFamilyId} from "@/utils/LocalCache";
+import {MemberRole} from "@/classes/constant/MemberRole";
+import {useMemberInfoStore} from "@/stores/MemberInfo";
 
 const ownFamiliesStore = useOwnFamiliesStore();
+const memberInfoStore = useMemberInfoStore();
+const emitter = inject("emitter");
+const state = reactive({
+  buttons: [
+    DefaultButtonValue.of("생성", ["fas", "users"], () => PopupUtil.popupCreateFamily(emitter)),
+    DefaultButtonValue.of("초대", ["fas", "user-plus"], () => PopupUtil.popupInviteFamily(emitter),
+        () => hasSelectedFamilyId() && MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.memberInfo.role)),
+  ]
+});
 </script>
 
 <template>
   <div class="families-container">
-    <h1>패밀리 정보</h1>
+    <span class="page-title">패밀리</span>
     <div class="family-selector-wrapper">
       <FamilySelector/>
     </div>
-    <FamilyMembers v-show="ownFamiliesStore.hasSelectFamily"/>
+    <PageButtonGroup :buttons="state.buttons.filter(button => button.visibleCondition())"/>
+    <Transition name="fade">
+      <FamilyMembers v-show="ownFamiliesStore.hasSelectFamily"/>
+    </Transition>
   </div>
 </template>
 

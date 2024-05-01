@@ -48,8 +48,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         memberInfoStore.fetchMemberInfo(item.title);
         //캘린더 갱신
         emitter.emit("drawMemberCalendar")
-        emitter.emit("changeFamily")
-
+        emitter.emit("fetchFamilyMember")
     }
 
 
