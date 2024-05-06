@@ -5,6 +5,7 @@ import MemberAPI from "@/constant/api-meta/Member";
 import {hasSelectedFamilyId, removeAccessToken} from "@/utils/LocalCache";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
+import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<MemberInfo>(MemberInfo.ofDefault());
@@ -75,7 +76,7 @@ export class MemberInfo {
         this._id = id;
         this._nickname = nickname;
         this._role = role;
-        this._profileImage = profileImage ?? "/src/assets/images/default_user_profile.png";
+        this._profileImage = profileImage ?? DEFAULT_USER_PROFILE;
     }
 
     get role(): number {

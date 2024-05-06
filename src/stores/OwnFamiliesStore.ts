@@ -6,7 +6,7 @@ import CollectionUtil from "@/utils/CollectionUtil";
 import SelectFamilyOption from "@/classes/SelectFamilyOption";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {FamilySummary, ResponseBody} from "@/classes/api-spec/family/GetOwnFamilies";
-import {setSelectedFamilyId} from "@/utils/LocalCache";
+import {hasSelectedFamilyId, setSelectedFamilyId} from "@/utils/LocalCache";
 
 export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     const notSelectedOption = new SelectFamilyOption(0, "", "NO_IMAGE", "본캐 선택");
@@ -48,7 +48,9 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         memberInfoStore.fetchMemberInfo(item.title);
         //캘린더 갱신
         emitter.emit("drawMemberCalendar")
-        emitter.emit("fetchFamilyMember")
+        if (hasSelectedFamilyId()) {
+            emitter.emit("fetchFamilyMember")
+        }
     }
 
 

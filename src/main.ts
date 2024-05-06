@@ -16,6 +16,9 @@ import BlinkSelect from "@/components/global/BlinkSelect.vue";
 import mitt from "mitt";
 import CreatedFamily from "@/components/popup-form/CreateFamily.vue";
 import InviteFamily from "@/components/popup-form/InviteFamily.vue";
+import FamilyMembers from "@/components/main/FamilyMembers.vue";
+import JoinRequests from "@/components/main/JoinRequests.vue";
+import FamilyInviteCode from "@/components/global/FamilyInviteCode.vue";
 
 const emitter = mitt();
 const app = createApp(App)
@@ -35,6 +38,9 @@ app.component("InviteFamily", InviteFamily)
 app.component("BlinkInput", BlinkInput)
 app.component("SimpleButton", SimpleButton)
 app.component("BlinkSelect", BlinkSelect)
+app.component("FamilyMembers", FamilyMembers)
+app.component("JoinRequests", JoinRequests)
+app.component("FamilyInviteCode", FamilyInviteCode)
 app.provide("emitter", emitter)
 
 

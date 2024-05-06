@@ -1,5 +1,6 @@
 @import './base.scss';
 
+$super-light-signature-purple: #dcc6e9;
 $light-signature-purple: #be66f5;
 $signature-purple: #8a1acb;
 $text-signature-purple: #3d0394;
@@ -7,6 +8,7 @@ $text-signature-purple: #3d0394;
 $standard-light-gray-in-white: #f1f1f1;
 $standard-gray-in-white: #c2c1c1;
 $standard-weight-gray-in-white: #a4a4a4;
+$standard-dark-gray-in-white: #848383;
 $standard-clean-black: #151515;
 
 $standard-box-shadow: 0 0 10px 0 rgba(65, 65, 65, 0.75);
@@ -116,6 +118,12 @@ input.blink-input {
     animation-duration: 1s;
     animation-iteration-count: infinite;
   }
+
+  &:disabled {
+    background-color: $standard-light-gray-in-white !important;
+    cursor: not-allowed !important;
+    user-select: none;
+  }
 }
 
 .blink {
@@ -216,11 +224,11 @@ input.blink-input {
 }
 
 .fall-fade-enter-active {
-  animation: fall-fade-in .2s;
+  animation: fall-fade-in .2s !important;
 }
 
 .fall-fade-leave-active {
-  animation: fall-fade-in .2s reverse;
+  animation: fall-fade-in .2s reverse !important;
 }
 
 @keyframes fall-fade-in {

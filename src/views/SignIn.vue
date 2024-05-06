@@ -30,7 +30,13 @@ import {call} from "@/utils/NetworkUtil";
 import {useRouter} from "vue-router";
 import AccountAPI from "@/constant/api-meta/Account";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
-import {removeAccessToken, removeRefreshToken, setAccessToken, setRefreshToken} from "@/utils/LocalCache";
+import {
+  removeAccessToken,
+  removeRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+  setSelectedFamilyId
+} from "@/utils/LocalCache";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 
 const router = useRouter();
@@ -78,6 +84,8 @@ const methods = {
 
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
     const passwordInput: HTMLInputElement = document.getElementsByName('userPassword')[0]! as HTMLInputElement;
+    //최초 로그인 전 패밀리 선택 초기화
+    setSelectedFamilyId(0)
     const signInResult = await call<any, any>(AccountAPI.VerifyAccount, {
           email: emailInput.value,
           password: passwordInput.value

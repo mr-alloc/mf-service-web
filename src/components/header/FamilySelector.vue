@@ -26,6 +26,7 @@ const methods = {
   },
   selectFamily(emitter: any, item: SelectFamilyOption = ownFamiliesStore.selectorState.defaultOption as SelectFamilyOption) {
     if (getSelectedFamilyId() === item?.id) {
+      state.isSelectMode = false;
       return;
     }
     ownFamiliesStore.selectorState.selectedOption = item;

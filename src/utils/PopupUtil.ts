@@ -55,8 +55,24 @@ function popupInviteFamily(emitter: any) {
     backgroundStore.useGlobalPopup(inviteFamilyPopup);
 }
 
+function popupRequestJoinFamily(emitter: any) {
+    const backgroundStore = useBackgroundStore();
+
+    const joinRequestPopup = new CurrentPopup(PopupType.NORMAL, "초대코드 입력")
+        .addBodyComponent("FamilyInviteCode", {})
+        .addButton("가입 요청", () => emitter.emit("validateInviteCodeForm"))
+        .addButton("취소", () => {
+            backgroundStore.returnGlobalPopup()
+            emitter.off("validateInviteCodeForm")
+        });
+
+    backgroundStore.useGlobalPopup(joinRequestPopup);
+
+}
+
 export default {
     popupCreateMission,
     popupCreateFamily,
-    popupInviteFamily
+    popupInviteFamily,
+    popupRequestJoinFamily
 }

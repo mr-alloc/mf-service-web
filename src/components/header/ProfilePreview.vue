@@ -18,11 +18,9 @@ const methods = {
       case AccountRole.MEMBER:
         router.push("/profile");
         break;
-      case AccountRole.ADMIN:
-        router.push("/admin");
-        break;
       default:
         router.push("/sign-in");
+        break;
     }
   },
   getNickname() {

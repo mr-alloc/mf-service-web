@@ -1,7 +1,6 @@
 <script setup lang="ts">
 
 import FamilySelector from "@/components/header/FamilySelector.vue";
-import FamilyMembers from "@/components/main/FamilyMembers.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {inject, reactive} from "vue";
 import {DefaultButtonValue} from "@/classes/DefaultButtonValue";
@@ -10,6 +9,8 @@ import PageButtonGroup from "@/components/PageButtonGroup.vue";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import {MemberRole} from "@/classes/constant/MemberRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
+import FamilyInfo from "@/components/main/FamilyInfo.vue";
+import TappableView from "@/components/global/TappableView.vue";
 
 const ownFamiliesStore = useOwnFamiliesStore();
 const memberInfoStore = useMemberInfoStore();
@@ -19,6 +20,7 @@ const state = reactive({
     DefaultButtonValue.of("생성", ["fas", "users"], () => PopupUtil.popupCreateFamily(emitter)),
     DefaultButtonValue.of("초대", ["fas", "user-plus"], () => PopupUtil.popupInviteFamily(emitter),
         () => hasSelectedFamilyId() && MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.memberInfo.role)),
+    DefaultButtonValue.of("가입신청", ["far", "envelope"], () => PopupUtil.popupRequestJoinFamily(emitter))
   ]
 });
 </script>
@@ -29,10 +31,9 @@ const state = reactive({
     <div class="family-selector-wrapper">
       <FamilySelector/>
     </div>
+    <FamilyInfo v-if="ownFamiliesStore.hasSelectFamily"/>
     <PageButtonGroup :buttons="state.buttons.filter(button => button.visibleCondition())"/>
-    <Transition name="fade">
-      <FamilyMembers v-show="ownFamiliesStore.hasSelectFamily"/>
-    </Transition>
+    <TappableView v-if="ownFamiliesStore.hasSelectFamily"/>
   </div>
 </template>
 
