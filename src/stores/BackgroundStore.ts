@@ -63,8 +63,8 @@ export const useBackgroundStore = defineStore('background', () => {
     function useGlobalPopup(popup: CurrentPopup, autoCloseSecond?: number) {
         if (needPopup.value) {
 
-            const notiStore = useAlertStore();
-            notiStore.alert(AlertType.WARNING, "문제가 있어요.", "진행중인 작업을 완료해주세요.")
+            const alertStore = useAlertStore();
+            alertStore.alert(AlertType.WARNING, "문제가 있어요.", "진행중인 작업을 완료해주세요.")
             return;
         }
 

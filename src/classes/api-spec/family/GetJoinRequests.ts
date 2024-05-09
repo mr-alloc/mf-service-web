@@ -50,3 +50,4 @@ export class ResponseBody {
         return new ResponseBody(joinRequests);
     }
 }
+

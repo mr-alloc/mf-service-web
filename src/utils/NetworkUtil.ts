@@ -17,7 +17,10 @@ axios.interceptors.response.use(
     response => response,
     error => {
         const alertStore = useAlertStore();
-        if (error.response?.status === 401) {
+        if (error.response?.status === 400) {
+
+        } else if (error.response?.status === 401) {
+            console.log('error', error.request.request);
             alertStore.warning("인증 실패", "로그인이 필요한 서비스입니다.");
             removeAccessToken()
             removeRefreshToken()
@@ -30,6 +33,8 @@ axios.interceptors.response.use(
         return Promise.reject(error);
     }
 )
+
+const pathVariableRE = /{(\w+)}/g;
 
 
 function getHeader(): AxiosHeaders {
@@ -54,27 +59,36 @@ export async function call<REQ, RES>(
     error?: ((consumeSpec: Spec, axiosError: any) => any) | null | undefined
 ) {
     const targetSpec = hasSelectedFamilyId() && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
-
+    let bindPath = targetSpec.path;
+    const pathVariables = pathVariableRE.exec(bindPath);
+    if (pathVariables) {
+        //replace path variables
+        const bodyEntries = Object.entries(body);
+        for (const [key, value] of bodyEntries) {
+            bindPath = bindPath.replace(`{${key}}`, value);
+            delete body[key];
+        }
+    }
     let request;
     switch (targetSpec.method) {
         case HttpMethod.GET:
-            request = axios.get(targetSpec.path, {
+            request = axios.get(bindPath, {
                 params: body ?? {},
                 headers: getHeader(),
             });
             break;
         case HttpMethod.POST:
-            request = axios.post(targetSpec.path, body ?? {}, {
+            request = axios.post(bindPath, body ?? {}, {
                 headers: getHeader()
             });
             break;
         case HttpMethod.PUT:
-            request = axios.put(targetSpec.path, body ?? {}, {
+            request = axios.put(bindPath, body ?? {}, {
                 headers: getHeader()
             });
             break;
         case HttpMethod.DELETE:
-            request = axios.delete(targetSpec.path, {
+            request = axios.delete(bindPath, {
                 data: body ?? {},
                 headers: getHeader()
             })
@@ -85,7 +99,7 @@ export async function call<REQ, RES>(
     return await request
         ?.then(success)
         .catch((axiosError) => {
-            console.error(`${targetSpec.path}: ${axiosError}`);
+            console.error(`${bindPath}: ${axiosError}`);
             return error
                 ? error(targetSpec, axiosError)
                 : defaultError(targetSpec, axiosError)

@@ -10,6 +10,7 @@
           </div>
         </Transition>
         <input class="blink-input"
+               ref="input"
                :type="props.type"
                :id="props.id"
                :name="props.name"
@@ -18,6 +19,7 @@
                :value="state.value ?? props.defaultValue"
                v-on:focusin="methods.focusIn()"
                v-on:focusout="methods.focusOut()"
+               v-on:input="props.onInput && props.onInput($event)"
                v-model="state.value"
                v-on:keyup="$event.code === 'Enter' && props.ifEnter && props.ifEnter($event)"
         />
@@ -38,8 +40,9 @@
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faCircleCheck, faExclamationTriangle, faEye} from "@fortawesome/free-solid-svg-icons";
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
+const input = ref(null);
 const state = reactive({
   isCorrect: false,
   isWarning: false,
@@ -60,7 +63,8 @@ const props = defineProps({
   ifVisibleNeed: Function,
   noMark: Boolean,
   defaultValue: String,
-  ifEnter: Function
+  ifEnter: Function,
+  onInput: Function
 });
 const methods =  {
   focusIn() {

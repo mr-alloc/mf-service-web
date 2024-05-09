@@ -38,11 +38,6 @@ export default class ApiSpecification {
         return this;
     }
 
-    static of(method: HttpMethod, path: string): ApiSpecification {
-        return new ApiSpecification(method, path);
-    }
-
-
     whenFamily(familyApiSpec: ApiSpecification): ApiSpecification {
         this._familyApiSpec = familyApiSpec;
         return this;
@@ -54,6 +49,10 @@ export default class ApiSpecification {
 
     hasFamilyApiSpec(): boolean {
         return this._familyApiSpec !== null;
+    }
+
+    static of(method: HttpMethod, path: string): ApiSpecification {
+        return new ApiSpecification(method, path);
     }
 }
 

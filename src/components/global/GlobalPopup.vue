@@ -36,7 +36,7 @@ const props = defineProps({
         <span class="popup-message"
               v-show="!backgroundStore.popupInfo?.includeBodyComponent">{{ backgroundStore.popupInfo?.message }}</span>
         <Component :is="backgroundStore.popupInfo?.componentName" v-bind="backgroundStore.popupInfo?.componentProps"
-                   v-show="backgroundStore.popupInfo?.includeBodyComponent"/>
+                   v-if="backgroundStore.popupInfo?.includeBodyComponent"/>
       </div>
       <div class="popup-footer">
         <ul class="option-button-group">

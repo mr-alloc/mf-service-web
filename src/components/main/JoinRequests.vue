@@ -17,8 +17,9 @@
           </div>
         </div>
         <div class="response-buttons">
-          <IconButton :icon="['fas', 'check']" color="green"/>
-          <IconButton :icon="['fas', 'ban']" color="crimson"/>
+          <IconButton :icon="['fas', 'check']" color="green"
+                      :click-behavior="() => methods.acceptJoinRequest(request as JoinRequest)"/>
+          <IconButton :icon="['fas', 'ban']" color="crimson" :click-behavior="() => {}"/>
         </div>
       </li>
     </ul>
@@ -29,8 +30,20 @@ import IconButton from "@/components/global/IconButton.vue";
 import {onMounted} from "vue";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import DateUtil from "../../utils/DateUtil";
+import PopupUtil from "@/utils/PopupUtil";
+import {JoinRequest} from "@/classes/api-spec/family/GetJoinRequests";
 
 const familiesViewStore = useFamiliesViewStore();
+const methods = {
+  acceptJoinRequest(request: JoinRequest) {
+    PopupUtil.confirm("가입요청", `${request.nickname}님의 가입요청을 수락하시겠습니까?`, () => {
+      familiesViewStore.acceptJoinRequestAsync(request.memberId);
+    });
+  },
+  rejectJoinRequest() {
+
+  }
+}
 onMounted(() => {
   familiesViewStore.fetchJoinRequestsAsync();
 });

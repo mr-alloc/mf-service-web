@@ -56,6 +56,7 @@ onMounted(() => {
 
   .member-item-group {
     list-style: none;
+    display: flex;
     padding: 0;
 
     .member-item-card {

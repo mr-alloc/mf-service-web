@@ -3,14 +3,13 @@
       <h1>로그인</h1>
       <div class="form-wrapper">
         <BlinkInput name="userName" type="email" placeHolder="E-mail"
-                    :is-hold="state.inputHold" class="narrow"
-                    :validate="methods.validateEmail" :no-mark="true"
-                    warning-message="이메일 형식이 올바르지 않습니다."
+                    :on-input="(event: InputEvent) => methods.validateEmailAndPassword(event)"
+                    :is-hold="state.inputHold" class="narrow" :no-mark="true" :if-enter="methods.ifEnterKeyOnPassword"
         />
         <BlinkInput name="userPassword" type="password" placeHolder="Password"
-                    :is-hold="state.inputHold" class="narrow" :if-visible-need="(isVisible: boolean) => methods.visiblePassword(isVisible, 'userPassword')"
-                    :validate="methods.validatePassword" :no-mark="true" :if-enter="methods.ifEnterKeyOnPassword"
-                    warning-message="비밀번호 숫자, 영문, 특수문자를 포함해 8~20자 사용이 가능합니다."
+                    :on-input="(event: InputEvent) => methods.validateEmailAndPassword(event)"
+                    :is-hold="state.inputHold" class="narrow" :no-mark="true" :if-enter="methods.ifEnterKeyOnPassword"
+                    :if-visible-need="(isVisible: boolean) => methods.visiblePassword(isVisible, 'userPassword')"
 
         />
         <SimpleButton buttonName="로그인" :clickBehavior="methods.signIn" :submittable="state.isSubmittable"/>
@@ -54,22 +53,13 @@ const state = reactive({
 
 const methods = {
   ifEnterKeyOnPassword(event: KeyboardEvent) {
-    if (methods.validatePassword()) {
-      methods.signIn();
-    }
+    methods.signIn();
   },
-  validateEmail() {
+  validateEmailAndPassword(event: InputEvent) {
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
-    state.emailInputValidate = validate(emailInput.value, Patterns.Email);
-
-    methods.checkAllInput();
-    return state.emailInputValidate;
-  },
-  validatePassword(keyboardEvent?: KeyboardEvent) {
     const passwordInput: HTMLInputElement = document.getElementsByName('userPassword')[0]! as HTMLInputElement;
-    state.passwordInputValidate = validate(passwordInput.value, Patterns.Password);
-    methods.checkAllInput();
-    return state.passwordInputValidate;
+
+    state.isSubmittable = emailInput.value.length > 0 && passwordInput.value.length > 0;
   },
   visiblePassword(isVisible:boolean, elementName: string) {
     const element: HTMLInputElement = document.getElementsByName(elementName)[0] as HTMLInputElement;
@@ -84,6 +74,12 @@ const methods = {
 
     const emailInput: HTMLInputElement = document.getElementsByName('userName')[0]! as HTMLInputElement;
     const passwordInput: HTMLInputElement = document.getElementsByName('userPassword')[0]! as HTMLInputElement;
+
+    if (!validate(emailInput.value, Patterns.Email) || !validate(passwordInput.value, Patterns.Password)) {
+      notificationStore.alert(AlertType.INFO, "로그인 오류", "이메일과 비밀번호를 확인해주세요.")
+      return
+    }
+
     //최초 로그인 전 패밀리 선택 초기화
     setSelectedFamilyId(0)
     const signInResult = await call<any, any>(AccountAPI.VerifyAccount, {

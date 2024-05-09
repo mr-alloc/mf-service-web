@@ -18,5 +18,11 @@ export default {
             [-3, "닉네임은 2~10자로 입력해주세요."]
         ]),
     GetJoinRequests: Spec.of(HttpMethod.GET, "/v1/family/join_requests")
-        .andPairs([])
+        .andPairs([]),
+    AcceptJoinRequest: Spec.of(HttpMethod.POST, "/v1/family/accept/{memberId}")
+        .andDefaultMessage("가입 요청을 처리하는 도중 오류가 발생 하였습니다.")
+        .andPairs([
+            [-4, "이미 우리 패밀리에요."],
+            [-7, "찾을수 없는 요청이에요! 다른 관리자가 처리했거나, 요청자가 취소했을 수 있어요."]
+        ]),
 }

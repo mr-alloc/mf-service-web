@@ -19,9 +19,6 @@ function secondToDateTimeString(second: number): string {
 function toKoreanString(second: number): string {
     const now = moment().utc().unix();
     const seconds = now - second;
-    console.log('now', now);
-    console.log('second', second);
-    console.log('result', seconds);
 
     if (seconds < 60) return `방금 전`
 

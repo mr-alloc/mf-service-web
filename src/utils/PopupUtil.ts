@@ -70,9 +70,25 @@ function popupRequestJoinFamily(emitter: any) {
 
 }
 
+function confirm(title: string, message: string, ifConfirm: () => void) {
+    const backgroundStore = useBackgroundStore();
+
+    const confirmPopup = new CurrentPopup(PopupType.NORMAL, title, message)
+        .addButton("확인", () => {
+            ifConfirm();
+            backgroundStore.returnGlobalPopup()
+        })
+        .addButton("취소", () => {
+            backgroundStore.returnGlobalPopup()
+        });
+
+    backgroundStore.useGlobalPopup(confirmPopup);
+}
+
 export default {
     popupCreateMission,
     popupCreateFamily,
     popupInviteFamily,
-    popupRequestJoinFamily
+    popupRequestJoinFamily,
+    confirm
 }
