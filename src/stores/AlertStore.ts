@@ -59,6 +59,8 @@ export const useAlertStore = defineStore('alert', () => {
     }
 })
 
+export type AlertStore = ReturnType<typeof useAlertStore>;
+
 export class Notification {
     private readonly _timestamp: number;
     private readonly _type: AlertType;

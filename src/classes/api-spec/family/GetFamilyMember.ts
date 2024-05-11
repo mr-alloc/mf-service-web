@@ -8,12 +8,14 @@ export class FamilyMember implements ISelectImageOptionConvertable {
     private readonly _name: string;
     private readonly _image: string;
     private readonly _role: number;
+    private readonly _isNewMember: boolean;
 
-    constructor(id: number, name: string, image: string, role: number) {
+    constructor(id: number, name: string, image: string, role: number, isNewMember: boolean) {
         this._id = id;
         this._name = name;
         this._image = image;
         this._role = role;
+        this._isNewMember = isNewMember;
     }
 
     get id(): number {
@@ -32,6 +34,10 @@ export class FamilyMember implements ISelectImageOptionConvertable {
         return this._role;
     }
 
+    get isNewMember(): boolean {
+        return this._isNewMember;
+    }
+
     toSelectImageOption(): SelectImageOption {
         return new SelectImageOption(this._id, this._name, this._image);
     }
@@ -41,7 +47,8 @@ export class FamilyMember implements ISelectImageOptionConvertable {
             json.id,
             json.nickname,
             json.profileImageUrl ?? DEFAULT_USER_PROFILE,
-            json.role
+            json.role,
+            json.isNewMember
         );
     }
 }

@@ -19,7 +19,8 @@
         <div class="response-buttons">
           <IconButton :icon="['fas', 'check']" color="green"
                       :click-behavior="() => methods.acceptJoinRequest(request as JoinRequest)"/>
-          <IconButton :icon="['fas', 'ban']" color="crimson" :click-behavior="() => {}"/>
+          <IconButton :icon="['fas', 'ban']" color="crimson"
+                      :click-behavior="() => methods.rejectJoinRequest(request as JoinRequest)"/>
         </div>
       </li>
     </ul>
@@ -40,8 +41,10 @@ const methods = {
       familiesViewStore.acceptJoinRequestAsync(request.memberId);
     });
   },
-  rejectJoinRequest() {
-
+  rejectJoinRequest(request: JoinRequest) {
+    PopupUtil.confirm("가입요청", `${request.nickname}님의 가입요청을 거절하시겠습니까?`, () => {
+      familiesViewStore.rejectJoinRequestAsync(request.memberId);
+    });
   }
 }
 onMounted(() => {

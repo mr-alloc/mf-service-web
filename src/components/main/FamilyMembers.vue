@@ -27,7 +27,8 @@ onMounted(() => {
 <template>
   <div class="family-members-container">
     <ul class="member-item-group">
-      <li class="member-item-card" v-for="(member, index) in state.familyMembers" :key="index">
+      <li class="member-item-card" :class="{ 'new-member': member.isNewMember }"
+          v-for="(member, index) in state.familyMembers" :key="index">
         <div class="member-item">
           <div class="role-frame"
                :class="[MemberRole.from(member.role).simpleName, { floating: MemberRole.SUB_MASTER.isGrantedFrom(member.role)}]">
@@ -146,6 +147,21 @@ onMounted(() => {
       &:hover {
         background-color: $standard-light-gray-in-white;
         cursor: pointer;
+      }
+
+      &.new-member:before {
+        content: "N";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: .64rem;
+        color: white;
+        width: 15px;
+        height: 15px;
+        text-align: center;
+        background-color: crimson;
       }
     }
   }

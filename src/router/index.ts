@@ -48,7 +48,7 @@ router.beforeEach(async (to, from, next) => {
 
     const onlyForGuest = ['/sign-in', '/sign-up'];
 
-    // console.log(`[${to.path}] [No Session: ${noAccessToken()} / No Member: ${memberInfoStore.needMemberInfo()}]`)
+    console.info(`${from.path} → ${to.path} [No Session: ${noAccessToken()} / No Member: ${memberInfoStore.needMemberInfo()}]`)
 
     //로그인 정보가 없는 경우
     if (noAccessToken() && to.meta.role !== 0) {
@@ -89,11 +89,9 @@ router.beforeEach(async (to, from, next) => {
                 //인증 실패
                 if (res?.status === 401) {
                     removeTokens()
-                    return next({ path: '/sign-in' })
                 }
-                console.error('[Failed to Get Member Info]', error);
+                console.error(`${from.path}-> ${to.path} [Failed to Get Member Info] ${error}`);
                 removeAccessToken()
-                return next({ path: '/sign-in' })
             })
 
         const memberInfo = memberInfoStore.memberInfo;
@@ -105,7 +103,7 @@ router.beforeEach(async (to, from, next) => {
             return next({ path: '/' })
         }
     }
-
+    console.log('All pass router guard')
     return next()
 })
 

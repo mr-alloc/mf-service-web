@@ -1,16 +1,15 @@
-import axios, {AxiosHeaders, type AxiosResponse} from "axios";
+import axios, {AxiosError, AxiosHeaders, type AxiosResponse,} from "axios";
 import {
     getAccessToken,
     getSelectedFamilyId,
     hasSelectedFamilyId,
     noAccessToken,
-    removeAccessToken,
-    removeRefreshToken
+    removeTokens
 } from "@/utils/LocalCache";
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
-import {useRouter} from "vue-router";
-import {AlertType, useAlertStore} from "@/stores/AlertStore";
+import {type AlertStore, AlertType, useAlertStore} from "@/stores/AlertStore";
+import {useMemberInfoStore} from "@/stores/MemberInfo";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
@@ -20,20 +19,35 @@ axios.interceptors.response.use(
         if (error.response?.status === 400) {
 
         } else if (error.response?.status === 401) {
-            console.log('error', error.request.request);
-            alertStore.warning("인증 실패", "로그인이 필요한 서비스입니다.");
-            removeAccessToken()
-            removeRefreshToken()
+            handleUnAuthorized(error, alertStore);
+        } else if (error.response?.status === 403) {
+            handleForbidden(error, alertStore);
         } else if (error.response?.status === 500) {
-            alertStore.alert(AlertType.WARNING, "서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.");
+            alertStore.warning("서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.");
         } else {
-            const notificationStore = useAlertStore();
-            notificationStore.alert(AlertType.INFO, "네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.");
+            alertStore.info("네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.");
         }
         return Promise.reject(error);
     }
 )
 
+function handleUnAuthorized(error: AxiosError, alertStore: AlertStore) {
+    alertStore.warning("인증 실패", "로그인이 필요한 서비스입니다.");
+    const memberInfoStore = useMemberInfoStore();
+    memberInfoStore.removeMemberInfo();
+    removeTokens();
+
+}
+
+function handleForbidden(error: AxiosError, alertStore: AlertStore) {
+    const userStatus = error.response?.headers["user-status"];
+    const memberInfoStore = useMemberInfoStore();
+    if (userStatus === "BLOCKED") {
+        alertStore.warning("서비스 이용 정지", "이용이 정지된 계정입니다.");
+    }
+    removeTokens();
+    memberInfoStore.removeMemberInfo();
+}
 const pathVariableRE = /{(\w+)}/g;
 
 
@@ -104,12 +118,4 @@ export async function call<REQ, RES>(
                 ? error(targetSpec, axiosError)
                 : defaultError(targetSpec, axiosError)
         });
-}
-
-export const dispatchIf = (condition: boolean, path: string, callback: () => void) => {
-    const router = useRouter();
-    if (condition) {
-        callback();
-        router.push(path);
-    }
 }

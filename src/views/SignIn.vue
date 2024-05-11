@@ -87,17 +87,24 @@ const methods = {
           password: passwordInput.value
         },
         async (response) => {
-          const {accessToken, refreshToken} = response.data
-          setAccessToken(accessToken)
-          setRefreshToken(refreshToken)
-          await router.push('/')
+          if (response.status === 200) {
+            const {accessToken, refreshToken} = response.data
+            setAccessToken(accessToken)
+            setRefreshToken(refreshToken)
+            await router.push('/')
+          }
+
           return true
         },
         (spec, error) => {
-          const body = error.response.data
           memberInfoStore.removeMemberInfo()
           removeAccessToken()
           removeRefreshToken()
+          const userStatus = error.response.headers["user-status"];
+          if (userStatus === "BLOCKED") {
+            return false;
+          }
+          const body = error.response.data
           const message = spec.getMessage(body.code) ?? spec.defaultMessage;
           notificationStore.alert(AlertType.INFO, "로그인 오류", message)
           return false

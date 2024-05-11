@@ -1,11 +1,12 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
-import {call, dispatchIf} from "@/utils/NetworkUtil";
+import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {hasSelectedFamilyId, removeAccessToken} from "@/utils/LocalCache";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
+import {useRouter} from "vue-router";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<MemberInfo>(MemberInfo.ofDefault());
@@ -40,12 +41,14 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
                 return;
             },
             (sepc, error) => {
+                const router = useRouter();
                 const res = error.response;
                 //인증 실패
-                dispatchIf(res.status === 401, '/sign-in', () => {
+                if (res.status === 401) {
                     removeAccessToken()
                     console.error('[Failed to authenticate user.]')
-                })
+                    router.push('/sign-in')
+                }
             })
     }
 
