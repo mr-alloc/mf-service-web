@@ -1,12 +1,11 @@
 <script setup lang="ts">
-
-import {AccountRole} from "@/constant/AccountRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {inject} from "vue";
 import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
+import {AccountRole} from "@/classes/constant/AccountRole";
 
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
@@ -33,7 +32,8 @@ const methods = {
 
 <template>
   <CollapsibleMenu title="새로운 미션" :click-behavior="methods.popupCreateMission"
-                   :icon="['fas', 'lightbulb']" v-show="memberInfoStore.allow(AccountRole.MEMBER)"/>
+                   :icon="['fas', 'lightbulb']"
+                   v-show="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"/>
 </template>
 
 <style scoped lang="scss">

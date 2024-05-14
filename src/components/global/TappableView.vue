@@ -2,14 +2,15 @@
   <div class="tappable-view-container">
     <ul class="tap-item-group">
       <li class="item-navigator" :class="{ select: state.current === index }"
-          v-for="(view, index) in state.views" :key="index" v-on:click="state.current = index">
-        <span class="navigate-button">{{ view.name }}</span>
-        <span class="alert-count" v-if="view.alertCount > 0">{{ view.alertCount }}</span>
+          v-for="(component, index) in props.components as TabViewComponent []" :key="index"
+          v-on:click="state.current = index">
+        <span class="navigate-button">{{ component.name }}</span>
+        <span class="alert-count" v-if="component.alertCount > 0">{{ component.alertCount }}</span>
       </li>
     </ul>
     <div class="view-area">
       <Transition name="fade">
-        <Component v-bind:is="state.views[state.current]?.component"/>
+        <Component v-bind:is="props.components?.[state.current]?.component"/>
       </Transition>
     </div>
   </div>
@@ -17,21 +18,13 @@
 <script setup lang="ts">
 
 import {reactive} from "vue";
+import {TabViewComponent} from "@/classes/TabViewComponent";
 
+const props = defineProps({
+  components: Array<TabViewComponent>
+});
 const state = reactive({
-  current: 0,
-  views: [
-    {
-      name: "멤버",
-      component: "FamilyMembers",
-      alertCount: 12
-    },
-    {
-      name: "가입요청",
-      component: "JoinRequests",
-      alertCount: 0
-    }
-  ]
+  current: 0
 });
 </script>
 <style scoped lang="scss">
@@ -70,7 +63,7 @@ const state = reactive({
         font-weight: bold;
         background-color: $signature-purple;
         color: white;
-        padding: 0 5px;
+        padding: 0 7px;
         border-radius: 30px;
       }
 

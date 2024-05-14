@@ -1,34 +1,14 @@
 <script setup lang="ts">
-import {inject, onMounted, reactive} from "vue";
-import {FamilyMember, ResponseBody} from "@/classes/api-spec/family/GetFamilyMember";
-import Family from "@/constant/api-meta/Family";
-import {call} from "@/utils/NetworkUtil";
 import {MemberRole} from "@/classes/constant/MemberRole";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
-const emitter = inject("emitter")!;
-const state = reactive({
-  familyMembers: [] as Array<FamilyMember>
-});
-const methods = {
-  fetchFamilyMembers() {
-    call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
-      const responseBody = ResponseBody.fromJson(response.data);
-      state.familyMembers = responseBody.members;
-    });
-  }
-}
-onMounted(() => {
-  methods.fetchFamilyMembers();
-  emitter.on("fetchFamilyMember", () => {
-    methods.fetchFamilyMembers();
-  });
-});
+const familiesViewStore = useFamiliesViewStore();
 </script>
 <template>
   <div class="family-members-container">
     <ul class="member-item-group">
       <li class="member-item-card" :class="{ 'new-member': member.isNewMember }"
-          v-for="(member, index) in state.familyMembers" :key="index">
+          v-for="(member, index) in familiesViewStore.members" :key="index">
         <div class="member-item">
           <div class="role-frame"
                :class="[MemberRole.from(member.role).simpleName, { floating: MemberRole.SUB_MASTER.isGrantedFrom(member.role)}]">

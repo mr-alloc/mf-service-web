@@ -2,12 +2,12 @@ import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 
-function popupCreateMission(emitter: any) {
+function popupCreateMission(emitter: any, startDate: string) {
     const backgroundStore = useBackgroundStore();
     const alertStore = useAlertStore();
 
-    const createMissionPopup = new CurrentPopup(PopupType.NORMAL, "미션 생성")
-        .addBodyComponent("CreateMission", {})
+    const createMissionPopup = new CurrentPopup(PopupType.NORMAL, `미션 생성`)
+        .addBodyComponent("CreateMission", {startDate: startDate})
         .addButton("생성", () => {
             emitter.emit("validateCreateMissionForm")
         })
@@ -85,10 +85,22 @@ function confirm(title: string, message: string, ifConfirm: () => void) {
     backgroundStore.useGlobalPopup(confirmPopup);
 }
 
+function alert(title: string, message: string) {
+    const backgroundStore = useBackgroundStore();
+
+    const alertPopup = new CurrentPopup(PopupType.NORMAL, title, message)
+        .addButton("확인", () => {
+            backgroundStore.returnGlobalPopup()
+        });
+
+    backgroundStore.useGlobalPopup(alertPopup);
+}
+
 export default {
     popupCreateMission,
     popupCreateFamily,
     popupInviteFamily,
     popupRequestJoinFamily,
-    confirm
+    confirm,
+    alert
 }

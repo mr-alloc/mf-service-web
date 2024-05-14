@@ -29,6 +29,8 @@ export default {
         .andDefaultMessage("가입 요청을 거절하는 도중 오류가 발생 하였습니다.")
         .andPairs([
             [-5, "찾을수 없는 요청이에요! 다른 관리자가 처리했거나, 요청자가 취소했을 수 있어요."]
-        ])
+        ]),
+    GetFamilyMembersOwn: Spec.of(HttpMethod.GET, "/v1/family/members/own")
+        .andDefaultMessage("패밀리 멤버 정보를 불러오는 도중 오류가 발생 하였습니다.")
 
 }

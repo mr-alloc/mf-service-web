@@ -12,7 +12,7 @@
         />
         <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
                         :options="state.members" v-show="ownFamiliesStore.hasSelectFamily"/>
-        <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한"
+        <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한 (미션 시작시 적용)"
                      :etc-option="new SelectOption('0', '기타(일)')"
                      etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
       </div>
@@ -34,12 +34,16 @@ import Family from "@/constant/api-meta/Family";
 import {ResponseBody} from "@/classes/api-spec/family/GetFamilyMember";
 import type SelectImageOption from "@/classes/api-spec/SelectImageOption";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
+import {hasSelectedFamilyId} from "@/utils/LocalCache";
+import DateUtil from "@/utils/DateUtil";
 
 const notificationStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
 const emitter = inject("emitter");
-
+const props = defineProps({
+  startDate: String
+})
 const state = reactive({
   inputHold: false,
   isSubmittable: false,
@@ -53,12 +57,6 @@ const state = reactive({
     new SelectOption("1", "미션"),
     new SelectOption("2", "미션팩"),
     new SelectOption("3", "스텝미션"),
-    new SelectOption("4", "타임미션"),
-    new SelectOption("5", "프로젝트"),
-    new SelectOption("6", "비밀(랜덤 등장)"),
-    new SelectOption("7", "서프라이즈"),
-    new SelectOption("8", "고정(매일, 매주, 매월)"),
-    new SelectOption("9", "간격미션(시간간격)")
   ],
   deadlineOptions: [
     new SelectOption("3600", "한시간"),
@@ -88,10 +86,12 @@ const methods = {
     return day ? (parseInt(day) * 24 * 60 * 60).toString() : '';
   },
   setMembers() {
-    call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
-      const responseBody = ResponseBody.fromJson(response.data);
-      state.members = responseBody.members.map((member) => member.toSelectImageOption());
-    })
+    if (hasSelectedFamilyId()) {
+      call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
+        const responseBody = ResponseBody.fromJson(response.data);
+        state.members = responseBody.members.map((member) => member.toSelectImageOption());
+      })
+    }
   }
 }
 
@@ -109,12 +109,15 @@ onMounted(() => {
     const missionTitleInput = DocumentUtil.getHtmlElementById<HTMLInputElement>("mission-title");
     const missionContentInput = DocumentUtil.getHtmlElementById<HTMLInputElement>("mission-content");
     const missionTypeSelect = DocumentUtil.getHtmlElementById<HTMLSelectElement>("mission-type");
+    const assigneeInput = DocumentUtil.getHtmlElementById<HTMLSelectElement>("mission-assignee");
     const missionDeadlineInput = DocumentUtil.getHtmlElementById<HTMLInputElement>("mission-deadline");
 
     const requestBody = {
-      missionName: missionTitleInput.value,
-      missionSubName: missionContentInput.value,
-      missionType: missionTypeSelect.value,
+      name: missionTitleInput.value,
+      subName: missionContentInput.value,
+      assignee: assigneeInput.value,
+      type: missionTypeSelect.value,
+      startDate: DateUtil.toUtc(props.startDate ?? DateUtil.getTodayStr(DateUtil.DEFAULT_DATE_FORMAT), DateUtil.DEFAULT_DATE_FORMAT),
       deadline: missionDeadlineInput.value
     }
 

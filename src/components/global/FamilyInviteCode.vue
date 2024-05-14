@@ -3,6 +3,7 @@
     <BlinkInput id="invite-code" name="inviteCode" type="text" label="초대코드로 가입신청" placeHolder="초대코드 입력"
                 :is-hold="state.isInputHold" :validate="methods.validateInviteCode"
                 :warning-message="state.inviteCodeWarningMessage"/>
+    <BlinkTextArea id="introduce" name="introduce" label="신청 메세지"/>
   </div>
 </template>
 <script setup lang="ts">
@@ -16,6 +17,7 @@ import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {call} from "@/utils/NetworkUtil";
 import {RequestBody, ResponseBody} from "@/classes/api-spec/member/JoinFamily";
 import Member from "@/constant/api-meta/Member";
+import BlinkTextArea from "@/components/global/BlinkTextArea.vue";
 
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
@@ -47,9 +49,14 @@ onMounted(() => {
     }
 
     const input = DocumentUtil.getHtmlElementById<HTMLInputElement>('invite-code');
-    call<RequestBody, ResponseBody>(Member.RequestJoinFamily, RequestBody.of(input.value), (response) => {
+    const textarea = DocumentUtil.getHtmlElementById<HTMLTextAreaElement>('introduce');
+
+    console.log('input', input.value);
+    console.log('textarea', textarea.value);
+
+    call<RequestBody, ResponseBody>(Member.RequestJoinFamily, RequestBody.of(input.value, textarea.value), (response) => {
       const responseBody = ResponseBody.fromJson(response.data);
-      alertStore.success("가입신청 완료", `${responseBody.name} 패밀리로 가입신청 되었어요.`);
+      alertStore.success("가입신청 완료", `요청된 패밀리로 가입신청 완료 되었어요.`);
 
       emitter.off("validateInviteCodeForm")
       backgroundStore.returnGlobalPopup();

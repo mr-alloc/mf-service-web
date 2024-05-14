@@ -2,17 +2,20 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
-import {hasSelectedFamilyId, removeAccessToken} from "@/utils/LocalCache";
-import {AlertType, useAlertStore} from "@/stores/AlertStore";
+import {removeAccessToken} from "@/utils/LocalCache";
+import {useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
 import {useRouter} from "vue-router";
+import {type ProfileMember, useProfileMemberStore} from "@/stores/ProfileMemberStore";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<MemberInfo>(MemberInfo.ofDefault());
 
     function updateMemberInfo (memberInfoValue: MemberInfo) {
         memberInfo.value = memberInfoValue
+        const profileMemberStore = useProfileMemberStore();
+        profileMemberStore.updateProfileMember(memberInfoValue);
     }
 
     function needMemberInfo(): boolean {
@@ -33,10 +36,6 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         await call<any, any>(MemberAPI.GetInfo, null,
             (response) => {
                 const { id, nickname, role } = response.data
-                if (nickname === '' && hasSelectedFamilyId()) {
-                    alertStore.alert(AlertType.GUIDE, "패밀리 닉네임 선택", `${familyName}에서 사용할 닉네임을 설정 해야해요.`);
-                    backgroundStore.useNicknameInitializer(`${familyName}에서 사용할 닉네임을 입력해주세요.`, true);
-                }
                 updateMemberInfo(new MemberInfo(id, nickname, role))
                 return;
             },
@@ -56,6 +55,10 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         return !needMemberInfo() && memberInfo.value.role >= memberRole
     }
 
+    function getCurrentMemberRole() {
+        return memberInfo.value.role
+    }
+
 
     return {
         memberInfo,
@@ -64,22 +67,23 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         needMemberInfo,
         updateMemberInfo,
         removeMemberInfo,
-        fetchMemberInfo
+        fetchMemberInfo,
+        getCurrentMemberRole
     }
 })
 
-export class MemberInfo {
+export class MemberInfo implements ProfileMember {
 
     private readonly _id: number
     private readonly _nickname: string
     private readonly _role: number
-    private readonly _profileImage: string
+    private readonly _profile: string
 
-    constructor(id: number, nickname: string, role: number, profileImage: string | null = null) {
+    constructor(id: number, nickname: string, role: number, profile: string | null = null) {
         this._id = id;
         this._nickname = nickname;
         this._role = role;
-        this._profileImage = profileImage ?? DEFAULT_USER_PROFILE;
+        this._profile = profile ?? DEFAULT_USER_PROFILE;
     }
 
     get role(): number {
@@ -94,8 +98,12 @@ export class MemberInfo {
         return this._nickname ?? "GUEST";
     }
 
-    get profileImage(): string {
-        return this._profileImage;
+    get profile(): string {
+        return this._profile;
+    }
+
+    get familyName(): string {
+        return "";
     }
 
     static ofDefault(): MemberInfo {

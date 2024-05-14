@@ -1,12 +1,14 @@
 export class RequestBody {
     readonly inviteCode: string;
+    readonly introduce: string;
 
-    constructor(inviteCode: string) {
+    constructor(inviteCode: string, introduce: string) {
         this.inviteCode = inviteCode;
+        this.introduce = introduce;
     }
 
-    static of(inviteCode: string): RequestBody {
-        return new RequestBody(inviteCode);
+    static of(inviteCode: string, introduce: string): RequestBody {
+        return new RequestBody(inviteCode, introduce);
     }
 }
 

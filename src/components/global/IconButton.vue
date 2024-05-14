@@ -1,6 +1,6 @@
 <template>
   <div class="icon-button-container">
-    <button class="icon-button" v-on:click="props.clickBehavior" type="button">
+    <button class="icon-button" v-on:click="methods.clickButton" type="button">
       <FontAwesomeIcon :icon="props.icon" :style="{ color: props.color }"/>
     </button>
   </div>
@@ -13,7 +13,13 @@ const props = defineProps({
   clickBehavior: Function,
   icon: Array,
   color: String
-})
+});
+const methods = {
+  clickButton(event: MouseEvent) {
+    event.stopPropagation();
+    props.clickBehavior && props.clickBehavior(event);
+  }
+}
 </script>
 <style scoped lang="scss">
 @import "@/assets/main";

@@ -10,6 +10,7 @@ import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {type AlertStore, AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useRouter} from "vue-router";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
@@ -23,7 +24,7 @@ axios.interceptors.response.use(
         } else if (error.response?.status === 403) {
             handleForbidden(error, alertStore);
         } else if (error.response?.status === 500) {
-            alertStore.warning("서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.");
+            // alertStore.warning("서버오류", "처리 중 오류가 발생했습니다. 잠시후 다시 시도해 주시기 바랍니다.");
         } else {
             alertStore.info("네트워크 연결 오류", "서버에 연결할 수 없습니다. 잠시후 다시 시도해 주시기 바랍니다.");
         }
@@ -36,6 +37,7 @@ function handleUnAuthorized(error: AxiosError, alertStore: AlertStore) {
     const memberInfoStore = useMemberInfoStore();
     memberInfoStore.removeMemberInfo();
     removeTokens();
+    useRouter().push("/sign-in");
 
 }
 

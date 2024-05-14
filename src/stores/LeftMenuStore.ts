@@ -6,7 +6,9 @@ export const useLeftMenuStore = defineStore("leftMenu", () => {
         isCollapsed: true,
         activeCollapseMenu: false,
         activeHomeMenu: false,
-        activeCalendarMenu: false
+        activeCalendarMenu: false,
+        activeFamiliesMenu: false,
+        activeMissionMenu: false,
     });
 
     function collapseMenu() {
@@ -17,6 +19,8 @@ export const useLeftMenuStore = defineStore("leftMenu", () => {
     function refreshAllActivated() {
         state.activeHomeMenu = false;
         state.activeCalendarMenu = false;
+        state.activeFamiliesMenu = false;
+        state.activeMissionMenu = false;
     }
 
     return {

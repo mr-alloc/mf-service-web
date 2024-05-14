@@ -10,11 +10,13 @@ import {onMounted, reactive} from "vue";
 import Member from "@/constant/api-meta/Member";
 import {call} from "@/utils/NetworkUtil";
 import {ResponseBody} from "@/classes/api-spec/member/GetMemberDetail";
+import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
 
 const memberInfoStore = useMemberInfoStore();
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const router = useRouter();
+const profileMemberStore = useProfileMemberStore();
 
 const state = reactive({
   memberDetail: null as ResponseBody | null
@@ -68,14 +70,14 @@ onMounted(async () => {
     <div class="simple-profiles">
       <div class="profile-image-wrapper">
         <div class="profile-image">
-          <img v-if="!memberInfoStore.needMemberInfo()" :src="state.memberDetail?.profile"/>
+          <img v-if="!memberInfoStore.needMemberInfo()" :src="profileMemberStore.profileMember.profile"/>
         </div>
         <div class="change-profile" v-on:click="methods.changeProfile()">
           <FontAwesomeIcon class="fa-sm" :icon="['fas', 'pen']"/>
         </div>
       </div>
       <div class="nickname-area" v-on:click="methods.changeNickname()">
-        <span class="member-nickname">{{ state.memberDetail?.nickname }}</span>
+        <span class="member-nickname">{{ profileMemberStore.profileMember.nickname }}</span>
       </div>
       <div class="sign-out-area">
         <button type="button" v-on:click="methods.confirmSignOut()">

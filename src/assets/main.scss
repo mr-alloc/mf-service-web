@@ -126,6 +126,26 @@ input.blink-input {
   }
 }
 
+textarea.blink-input {
+  border-radius: 5px;
+  border: 1px transparent solid;
+  background-color: $standard-light-gray-in-white;
+
+  &:focus {
+    border: 1px #be66f5 solid;
+    background-color: white;
+    animation-name: blink-input;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+  }
+
+  &:disabled {
+    background-color: $standard-light-gray-in-white !important;
+    cursor: not-allowed !important;
+    user-select: none;
+  }
+}
+
 .blink {
   border: 1px #be66f5 solid;
   background-color: white;

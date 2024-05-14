@@ -1,7 +1,8 @@
 <template>
   <div class="join-requests-container">
     <ul class="request-item-group">
-      <li class="join-request-item" v-for="(request, index) in familiesViewStore.joinRequests" :key="index">
+      <li class="join-request-item" v-on:click="methods.showRequestInfo(request as JoinRequest)"
+          v-for="(request, index) in familiesViewStore.joinRequests" :key="index">
         <div class="member-info">
           <div class="image-frame">
             <img :src="request.profile" :alt="`요청자 ${request.nickname}의 프로필 이미지`"/>
@@ -18,8 +19,10 @@
         </div>
         <div class="response-buttons">
           <IconButton :icon="['fas', 'check']" color="green"
+                      v-if="MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
                       :click-behavior="() => methods.acceptJoinRequest(request as JoinRequest)"/>
           <IconButton :icon="['fas', 'ban']" color="crimson"
+                      v-if="MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
                       :click-behavior="() => methods.rejectJoinRequest(request as JoinRequest)"/>
         </div>
       </li>
@@ -28,12 +31,14 @@
 </template>
 <script setup lang="ts">
 import IconButton from "@/components/global/IconButton.vue";
-import {onMounted} from "vue";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import DateUtil from "../../utils/DateUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {JoinRequest} from "@/classes/api-spec/family/GetJoinRequests";
+import {MemberRole} from "@/classes/constant/MemberRole";
+import {useMemberInfoStore} from "@/stores/MemberInfo";
 
+const memberInfoStore = useMemberInfoStore();
 const familiesViewStore = useFamiliesViewStore();
 const methods = {
   acceptJoinRequest(request: JoinRequest) {
@@ -45,11 +50,11 @@ const methods = {
     PopupUtil.confirm("가입요청", `${request.nickname}님의 가입요청을 거절하시겠습니까?`, () => {
       familiesViewStore.rejectJoinRequestAsync(request.memberId);
     });
+  },
+  showRequestInfo(request: JoinRequest) {
+    PopupUtil.alert(`${request.nickname}님의 가입 요청 메세지`, `${request.introduce ?? ""}`);
   }
 }
-onMounted(() => {
-  familiesViewStore.fetchJoinRequestsAsync();
-});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main";

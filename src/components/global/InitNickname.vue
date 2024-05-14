@@ -28,7 +28,9 @@ import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
+const familiesViewStore = useFamiliesViewStore();
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
 const notificationStore = useAlertStore();
@@ -73,7 +75,7 @@ const methods = {
           if (memberInfoStore.hasNickname()) {
             notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
             if (hasSelectedFamilyId()) {
-              emitter.emit("fetchFamilyMember");
+              await familiesViewStore.fetchFamilyMembersAsync();
             }
           } else {
             notificationStore.alert(AlertType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);

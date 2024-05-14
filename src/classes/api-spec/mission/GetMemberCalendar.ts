@@ -4,7 +4,7 @@ import DateUtil from "@/utils/DateUtil";
 export interface IMission {
     id: number;
     title: string;
-    registerDate: number;
+    startDate: number;
 
     get groupingDate(): string;
 }
@@ -14,14 +14,14 @@ export class FamilyMission implements IMission {
     private readonly _title: string;
     private readonly _startTime: number;
     private readonly _endTime: number;
-    private readonly _registerDate: number;
+    private readonly _startDate: number;
 
-    constructor(id: number, title: string, startTime: number, endTime: number, registerDate: number) {
+    constructor(id: number, title: string, startTime: number, endTime: number, startDate: number) {
         this._id = id;
         this._title = title;
         this._startTime = startTime;
         this._endTime = endTime;
-        this._registerDate = registerDate;
+        this._startDate = startDate;
     }
 
     get id(): number {
@@ -32,8 +32,8 @@ export class FamilyMission implements IMission {
         return this._title;
     }
 
-    get registerDate(): number {
-        return this._registerDate;
+    get startDate(): number {
+        return this._startDate;
     }
 
     get startTime(): number {
@@ -45,12 +45,12 @@ export class FamilyMission implements IMission {
     }
 
     get groupingDate(): string {
-        return DateUtil.secondToDateString(this._startTime);
+        return DateUtil.secondToDateString(this._startDate);
     }
 
 
     static fromJson(json: any): FamilyMission {
-        return new FamilyMission(json.id, json.title, json.startTime ?? 0, json.endTime ?? 0, json.registerDate);
+        return new FamilyMission(json.id, json.name, json.startTime ?? 0, json.endTime ?? 0, json.startDate);
     }
 
 }
@@ -59,13 +59,13 @@ export class CalendarMission implements IMission {
     private readonly _id: number;
     private readonly _title: string;
     private readonly _deadline: number;
-    private readonly _registerDate: number;
+    private readonly _startDate: number;
 
-    constructor(id: number, title: string, deadline: number, registerDate: number) {
+    constructor(id: number, title: string, deadline: number, startDate: number) {
         this._id = id;
         this._title = title;
         this._deadline = deadline;
-        this._registerDate = registerDate;
+        this._startDate = startDate;
     }
 
     get id(): number {
@@ -80,16 +80,16 @@ export class CalendarMission implements IMission {
         return this._deadline;
     }
 
-    get registerDate(): number {
-        return this._registerDate;
+    get startDate(): number {
+        return this._startDate;
     }
 
     get groupingDate(): string {
-        return DateUtil.secondToDateString(this._deadline);
+        return DateUtil.secondToDateString(this._startDate);
     }
 
     static fromJson(json: any): CalendarMission {
-        return new CalendarMission(json.id, json.name, json.deadline ?? 0, json.createdAt ?? 0);
+        return new CalendarMission(json.id, json.name, json.deadline ?? 0, json.startDate);
     }
 }
 

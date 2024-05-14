@@ -1,18 +1,17 @@
-import moment, {type Moment} from "moment-timezone";
+import moment, {type Moment, tz} from "moment-timezone";
+import TempralUtil from "@/utils/TempralUtil";
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 const DEFAULT_DATE_TIME_FORMAT = 'YYYY년 MM월 DD일 HH:mm:ss';
 const DEFAULT_TIME_ZONE = 'Asia/Seoul';
 
 function secondToDateString(second: number): string {
-    return moment(new Date(second * 1000))
-        .tz(DEFAULT_TIME_ZONE)
+    return moment(new Date((second + TempralUtil.getOffsetSecond()) * 1000))
         .format(DEFAULT_DATE_FORMAT)
 }
 
 function secondToDateTimeString(second: number): string {
-    return moment(new Date(second * 1000))
-        .tz(DEFAULT_TIME_ZONE)
+    return moment(new Date((second + TempralUtil.getOffsetSecond()) * 1000))
         .format(DEFAULT_DATE_TIME_FORMAT)
 }
 
@@ -41,8 +40,15 @@ function toKoreanString(second: number): string {
     return `${Math.round(years)}년 전`
 }
 
+function toUtc(date: string, format: string): number {
+    const timestamp = moment(date, format).utc(false).unix();
+    const offsetSecond = TempralUtil.SECONDS_IN_MINUTE * tz(DEFAULT_TIME_ZONE).utcOffset();
+    return timestamp - offsetSecond;
+}
+
 export default {
     DEFAULT_DATE_FORMAT,
+    DEFAULT_DATE_TIME_FORMAT,
     DEFAULT_TIME_ZONE,
     secondToDateString,
     secondToDateTimeString,
@@ -55,5 +61,9 @@ export default {
     },
     to(moment: Moment, format: string): string {
         return moment.format(format);
+    },
+    toUtc,
+    getTodayStr(format: string): string {
+        return moment().format(format);
     }
 }

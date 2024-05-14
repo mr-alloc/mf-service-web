@@ -24,7 +24,7 @@
       <Transition name="fade">
         <ul class="calendar-row member-calendar" v-show="state.calendar">
           <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
-              v-on:click="methods.createMission()"
+              v-on:click="methods.createMission(DateUtil.to(date, 'YYYY-MM-DD'))"
               :class="{
               'this-month': DateUtil.isSameMonth(date, state.thisMonth),
               holiday: state.holidaysMap.has(DateUtil.to(date, 'MM-DD'))
@@ -48,7 +48,7 @@
                     :key="index"
                 >
                   <span class="schedule-title">
-                  {{ `${methods.toTimeString(mission.registerDate)} ${mission.title}` }}
+                  {{ `${methods.toTimeString(mission.startDate)} ${mission.title}` }}
                   </span>
                 </li>
               </ul>
@@ -78,6 +78,7 @@ import DateUtil from "@/utils/DateUtil";
 import CollectionUtil from "@/utils/CollectionUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
+import TempralUtil from "@/utils/TempralUtil";
 
 
 const emitter = inject("emitter");
@@ -92,8 +93,8 @@ const state = reactive({
   holidaysMap: new Map<string, CalendarHoliday>()
 })
 const methods = {
-  createMission() {
-    PopupUtil.popupCreateMission(emitter)
+  createMission(startDate?: string) {
+    PopupUtil.popupCreateMission(emitter, startDate ?? DateUtil.to(moment(), 'YYYY-MM-DD'));
   },
   setMonth(month: number) {
     state.thisMonth.add(month, 'month');
@@ -143,7 +144,8 @@ const methods = {
 
   },
   toTimeString(time: number) {
-    return moment(new Date(time * 1000)).tz('Asia/Seoul').format('HH:mm');
+    const schedule = moment(new Date((time + TempralUtil.getOffsetSecond()) * 1000));
+    return schedule.format('HH:mm');
   }
 }
 onMounted(() => {
@@ -303,7 +305,7 @@ onMounted(() => {
             color: white;
             background-color: crimson;
             font-weight: bold;
-            padding: 0 3px;
+            padding: 0 3.5px;
             margin: 0 5px;
           }
         }
@@ -336,7 +338,7 @@ onMounted(() => {
               }
               &:hover {
                 background-color: rgb(0, 0, 0, .2);
-                position: absolute;
+                //position: absolute;
               }
             }
 

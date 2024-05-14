@@ -1,21 +1,24 @@
 <script setup lang="ts">
-import {AccountRole} from "@/constant/AccountRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {useRouter} from "vue-router";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
+import {AccountRole} from "@/classes/constant/AccountRole";
+import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
 
 let router = useRouter();
 const memberInfoStore = useMemberInfoStore();
 const leftMenuStore = useLeftMenuStore();
+const profileMemberStore = useProfileMemberStore();
 const methods = {
   moveToUserInfo() {
+    console.log('role:', memberInfoStore.memberInfo);
     //GUEST
     if (memberInfoStore.needMemberInfo()) {
       router.push("/sign-in")
       return;
     }
-    switch (memberInfoStore.memberInfo?.role) {
-      case AccountRole.MEMBER:
+    switch (memberInfoStore.getCurrentMemberRole()) {
+      case AccountRole.MEMBER.level:
         router.push("/profile");
         break;
       default:
@@ -26,7 +29,7 @@ const methods = {
   getNickname() {
     return memberInfoStore.needMemberInfo()
         ? "Guest"
-        : memberInfoStore?.memberInfo.nickname ?? "No Name";
+        : profileMemberStore.profileMember.nickname ?? "No Name";
   },
 }
 </script>
@@ -35,7 +38,7 @@ const methods = {
   <div class="user-session-info pushable"
        v-on:click="methods.moveToUserInfo()">
     <span class="user-img-area">
-      <img :src="memberInfoStore.memberInfo?.profileImage"/>
+      <img :src="profileMemberStore.profileMember.profile"/>
     </span>
     <Transition name="fade">
       <div class="current-user" v-show="!leftMenuStore.state.isCollapsed">

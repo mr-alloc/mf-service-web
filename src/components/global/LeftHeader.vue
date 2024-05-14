@@ -1,6 +1,6 @@
 <template>
   <header :class="{ collapsed: leftMenuStore.state.isCollapsed}">
-    <FamilySelector v-show="memberInfoStore.allow(AccountRole.MEMBER)" allow-collapse/>
+    <FamilySelector v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())" allow-collapse/>
     <ProfilePreview/>
     <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']"
                      :rotate="leftMenuStore.state.isCollapsed ? 270 : 90"
@@ -8,12 +8,14 @@
     <CollapsibleMenu title="메인" :icon="['fas', 'house']" allocated-path="/"
                      :is-current-menu="leftMenuStore.state.activeHomeMenu"/>
     <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
-                     v-if="memberInfoStore.allow(AccountRole.MEMBER)"
+                     v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
                      :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
     <CollapsibleMenu title="패밀리" :icon="['fas', 'users']" allocated-path="/families"
-                     v-if="memberInfoStore.allow(AccountRole.MEMBER)"/>
+                     v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                     :is-current-menu="leftMenuStore.state.activeFamiliesMenu"/>
     <CollapsibleMenu title="미션" :icon="['fas', 'lightbulb']" allocated-path="/missions"
-                     v-if="memberInfoStore.allow(AccountRole.MEMBER)"/>
+                     v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                     :is-current-menu="leftMenuStore.state.activeMissionMenu"/>
     <!--    <div class="feature-list-wrapper">-->
     <!--      <nav>-->
     <!--        <ul class="feature-list">-->
@@ -31,8 +33,8 @@ import ProfilePreview from "@/components/header/ProfilePreview.vue";
 import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import FamilySelector from "@/components/header/FamilySelector.vue";
-import {AccountRole} from "@/constant/AccountRole";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {AccountRole} from "@/classes/constant/AccountRole";
 
 const leftMenuStore = useLeftMenuStore();
 const memberInfoStore = useMemberInfoStore();

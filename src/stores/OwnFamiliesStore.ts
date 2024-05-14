@@ -7,6 +7,8 @@ import SelectFamilyOption from "@/classes/SelectFamilyOption";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
 import {FamilySummary, ResponseBody} from "@/classes/api-spec/family/GetOwnFamilies";
 import {hasSelectedFamilyId, setSelectedFamilyId} from "@/utils/LocalCache";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
+import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
 
 export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     const notSelectedOption = new SelectFamilyOption(0, "", "NO_IMAGE", "본캐 선택");
@@ -19,7 +21,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
 
     const hasSelectFamily = ref<boolean>(false);
 
-    async function fetchOwnFamilies(forceFetch: boolean) {
+    async function fetchOwnFamiliesAsync(forceFetch: boolean) {
         const memberInfoStore = useMemberInfoStore();
         if (memberInfoStore.needMemberInfo()) return;
         if (!forceFetch && families.value.length > 0) return;
@@ -40,6 +42,8 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
 
     function changeFamily(emitter: any) {
         const memberInfoStore = useMemberInfoStore();
+        const familiesViewStore = useFamiliesViewStore();
+        const familyMemberInfoStore = useFamilyMemberInfoStore();
         const item = selectorState.value.selectedOption;
 
         //패밀리 선택시 갱신정보
@@ -48,8 +52,10 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         memberInfoStore.fetchMemberInfo(item.title);
         //캘린더 갱신
         emitter.emit("drawMemberCalendar")
+        emitter.emit("fetchFamiliesView")
         if (hasSelectedFamilyId()) {
-            emitter.emit("fetchFamilyMember")
+            familiesViewStore.fetchFamilyMembersAsync();
+            familyMemberInfoStore.fetchFamilyMemberAsync();
         }
     }
 
@@ -57,7 +63,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     return {
         families,
         selectorState,
-        fetchOwnFamilies,
+        fetchOwnFamiliesAsync,
         toSelectItemValue,
         changeFamily,
         hasSelectFamily

@@ -18,10 +18,11 @@ export default {
             [-1, "존재하지 않는 회원 입니다."],
             [-4, "잘못된 계정입니다."]
         ]),
-    RequestJoinFamily: Spec.of(HttpMethod.POST, "/v1/member/request/join")
+    RequestJoinFamily: Spec.of(HttpMethod.POST, "/v1/member/join_request")
         .andDefaultMessage("가입 요청중 오류가 발생 하였습니다.")
         .andPairs([
             [-5, "잘못된 초대코드 입니다."],
+            [-6, "이미 가입을 요청한 패밀리 입니다."],
             [-7, "이미 가입된 패밀리 입니다."],
         ])
 }

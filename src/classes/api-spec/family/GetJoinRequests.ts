@@ -4,12 +4,14 @@ export class JoinRequest {
     private readonly _memberId: number;
     private readonly _nickname: string;
     private readonly _profile: string;
+    private readonly _introduce: string;
     private readonly _requestedAt: number;
 
-    constructor(memberId: number, nickname: string, profile: string, requestedAt: number) {
+    constructor(memberId: number, nickname: string, profile: string, introduce: string, requestedAt: number) {
         this._memberId = memberId;
         this._nickname = nickname;
         this._profile = profile ?? DEFAULT_USER_PROFILE;
+        this._introduce = introduce;
         this._requestedAt = requestedAt;
     }
 
@@ -29,8 +31,12 @@ export class JoinRequest {
         return this._requestedAt;
     }
 
+    get introduce(): string {
+        return this._introduce;
+    }
+
     static fromJson(json: any): JoinRequest {
-        return new JoinRequest(json.memberId, json.nickname, json.profile, json.requestedAt);
+        return new JoinRequest(json.memberId, json.nickname, json.profile, json.introduce, json.requestedAt);
     }
 }
 

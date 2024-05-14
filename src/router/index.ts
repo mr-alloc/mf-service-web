@@ -38,6 +38,12 @@ router.afterEach((to, from) => {
         case '/calendar':
             leftMenuStore.state.activeCalendarMenu = true;
             break;
+        case '/families':
+            leftMenuStore.state.activeFamiliesMenu = true;
+            break;
+        case '/missions':
+            leftMenuStore.state.activeMissionMenu = true;
+            break;
     }
 });
 router.beforeEach(async (to, from, next) => {
@@ -81,7 +87,7 @@ router.beforeEach(async (to, from, next) => {
                     alertStore.none("반가워요!", `${nickname}님, 오늘도 좋은 하루 되세요!`)
                 }
                 memberInfoStore.updateMemberInfo(new MemberInfo(id, nickname, role, profileImageUrl))
-                ownFamiliesStore.fetchOwnFamilies(true);
+                ownFamiliesStore.fetchOwnFamiliesAsync(true);
                 return;
             },
             (sepc, error) => {
@@ -100,7 +106,7 @@ router.beforeEach(async (to, from, next) => {
         const { role } = to.meta as { role: number }
         if (role && role > authorityRole) {
             alertStore.warning("부적절한 접근 경고", "잘못된 방법으로 접근이 감지 되었습니다. 지속적으로 올바르지 않은 접근시 이용에 제한이 될 수 있습니다.", 10)
-            return next({ path: '/' })
+            return next({path: '/sign-in'})
         }
     }
     console.log('All pass router guard')

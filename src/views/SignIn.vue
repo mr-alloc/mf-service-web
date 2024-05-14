@@ -91,7 +91,7 @@ const methods = {
             const {accessToken, refreshToken} = response.data
             setAccessToken(accessToken)
             setRefreshToken(refreshToken)
-            await router.push('/')
+            await router.push('/calendar')
           }
 
           return true
