@@ -1,9 +1,9 @@
 <template>
   <div class="blink-select-container">
-    <label :for="props.id" class="select-title">{{ props.title }}</label>
+    <label v-if="props.title" :for="props.id" class="select-title">{{ props.title }}</label>
     <div class="option-selector" id="select-values" :class="{ blink: state.selectMode}">
       <div class="selected-value" v-on:click="methods.clickSelector()">
-        <span class="value-text">{{ select?.options[select?.selectedIndex].innerText }}</span>
+        <span class="value-text">{{ props?.options?.[select?.selectedIndex!]?.text }}</span>
       </div>
       <Transition name="bounce">
         <ul class="select-option-wrapper" v-show="state.selectMode">
@@ -22,7 +22,7 @@
 </template>
 <script setup lang="ts">
 import SelectOption from "@/classes/SelectOption";
-import {reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
 const select = ref<HTMLSelectElement | null>(null);
 const state = reactive({
@@ -33,7 +33,9 @@ const props = defineProps({
   title: String,
   options: Array<SelectOption>,
   name: String,
-  id: String
+  id: String,
+  currentSelected: String,
+  beforeChange: Function
 })
 
 const methods = {
@@ -46,6 +48,12 @@ const methods = {
     state.selectMode = false;
   }
 }
+
+onMounted(() => {
+  if (props.currentSelected) {
+    methods.selectValue(props.currentSelected ?? "0")
+  }
+});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";
@@ -53,8 +61,7 @@ const methods = {
 $option-height: 25px;
 .blink-select-container {
   width: 100%;
-  margin: 20px 0;
-  padding: 0 20px;
+  padding: 0;
 
   .option-selector {
     display: flex;
@@ -84,6 +91,7 @@ $option-height: 25px;
     }
 
     .select-option-wrapper {
+      width: max-content;
       flex-grow: 1;
       list-style: none;
       position: absolute;

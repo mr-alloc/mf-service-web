@@ -42,16 +42,19 @@
               </span>
             </div>
             <div class="item-body">
-              <ul class="daily-schedules">
+              <TransitionGroup class="daily-schedules" tag="ul" name="fade">
                 <li class="each-schedule"
                     v-for="(mission, index) in state.memberCalendarMap.get(DateUtil.toString(date)) ?? []"
-                    :key="index"
+                    :key="index" v-on:click="methods.clickSchedule($event, mission)"
                 >
                   <span class="schedule-title">
-                  {{ `${methods.toTimeString(mission.startDate)} ${mission.title}` }}
+                  {{
+                      /*`${methods.toTimeString(mission.startDate)}*/
+                      `${mission.title}`
+                    }}
                   </span>
                 </li>
-              </ul>
+              </TransitionGroup>
             </div>
           </li>
         </ul>
@@ -78,7 +81,7 @@ import DateUtil from "@/utils/DateUtil";
 import CollectionUtil from "@/utils/CollectionUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
-import TempralUtil from "@/utils/TempralUtil";
+import TemporalUtil from "@/utils/TemporalUtil";
 
 
 const emitter = inject("emitter");
@@ -144,8 +147,12 @@ const methods = {
 
   },
   toTimeString(time: number) {
-    const schedule = moment(new Date((time + TempralUtil.getOffsetSecond()) * 1000));
+    const schedule = moment(new Date((time + TemporalUtil.getOffsetSecond()) * 1000));
     return schedule.format('HH:mm');
+  },
+  clickSchedule(e: MouseEvent, mission: IMission) {
+    e.stopPropagation();
+    PopupUtil.popupMissionDetail(mission);
   }
 }
 onMounted(() => {
@@ -305,7 +312,7 @@ onMounted(() => {
             color: white;
             background-color: crimson;
             font-weight: bold;
-            padding: 0 3.5px;
+            padding: 1px 4px;
             margin: 0 5px;
           }
         }
@@ -322,23 +329,23 @@ onMounted(() => {
             flex-grow: 1;
 
             .each-schedule {
-              border-radius: 5px;
               text-align: left;
-              padding: 0 3px;
               flex-grow: 1;
-              transition: $duration;
-              cursor: pointer;
-              overflow: hidden;
               line-height: 1;
+              overflow: hidden;
+              padding: 0;
 
               .schedule-title {
                 font-size: .74rem;
                 white-space: nowrap;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: $duration;
+                padding: 0 3px;
 
-              }
-              &:hover {
-                background-color: rgb(0, 0, 0, .2);
-                //position: absolute;
+                &:hover {
+                  background-color: rgb(0, 0, 0, .2);
+                }
               }
             }
 

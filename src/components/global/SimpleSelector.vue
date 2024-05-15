@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import SelectImageOption from "@/classes/api-spec/SelectImageOption";
 
 const select = ref<HTMLSelectElement | null>(null);
@@ -9,35 +9,51 @@ const props = defineProps({
   title: String,
   options: Array<SelectImageOption>,
   defaultOptionName: String,
-  allowNoImage: Boolean
+  allowNoImage: Boolean,
+  defaultSelected: Number,
+  currentSelectedId: Number,
+  beforeChange: Function
 });
 const defaultOption = new SelectImageOption(0, props.defaultOptionName ?? "없음", props.allowNoImage ? "NO_IMAGE" : "");
 const state = reactive({
   isSelectMode: false,
-  currentSelected: defaultOption
+  currentSelected: props.options?.[props.options?.findIndex(option => option.id === props.currentSelectedId)] ?? defaultOption
 });
 const methods = {
   clickSelector() {
     state.isSelectMode = !state.isSelectMode;
   },
   selectOption(index: number) {
-    const selectElement = select.value!;
-    selectElement.value = `${state.currentSelected.id}`;
-    state.currentSelected = props.options?.[index] ?? defaultOption;
     state.isSelectMode = false;
+    props.beforeChange && props.beforeChange(props.options?.[index]);
+  },
+  selectOptionById(id: number) {
+    const index = props.options?.findIndex(option => option.id === id)!;
+    if (index === -1) {
+      state.currentSelected = defaultOption;
+      return;
+    }
+    state.currentSelected = props.options?.[index]!;
   }
 }
+
+onMounted(() => {
+  if (props.defaultSelected) {
+    methods.selectOptionById(props.defaultSelected);
+  }
+
+});
 </script>
 <template>
-  <div class="simple-selector-container">
-    <label :for="props.id">{{ props.title }}</label>
+  <div class="simple-selector-container" :class="{ 'no-label': !props.title }">
+    <label :for="props.id" v-if="props.title">{{ props.title }}</label>
     <div class="option-item current-selected-area pushable"
          :class="{ 'no-image': state.currentSelected.id === 0 || state.currentSelected.image === 'NO_IMAGE', 'blink': state.isSelectMode }"
          v-on:click="methods.clickSelector()"
     >
-      <div class="item-image-area">
+      <div class="item-image-area" :class="{ collapse: !state.currentSelected.image }">
         <div class="option-image-frame">
-          <img :src="state.currentSelected.image" :alt="state.currentSelected.name"/>
+          <img v-if="state.currentSelected.image" :src="state.currentSelected.image" :alt="state.currentSelected.name"/>
         </div>
       </div>
       <div class="option-title">
@@ -47,8 +63,18 @@ const methods = {
     <Transition name="down-fade">
       <div class="select-item-area" v-show="state.isSelectMode">
         <ul class="option-item-group">
+          <li class="option-item" v-on:click="methods.selectOption(props.options?.length!)">
+            <div class="item-image-area collapse">
+              <div class="option-image-frame">
+              </div>
+            </div>
+            <div class="option-title">
+              <span class="title-text">{{ defaultOption.name }}</span>
+            </div>
+          </li>
           <li class="option-item" v-for="(option, index) in props.options" :key="index"
               v-on:click="methods.selectOption(index)">
+            <input type="hidden" name="optionId" :value="option.id"/>
             <div class="item-image-area">
               <div class="option-image-frame">
                 <img :src="option.image" :alt="option.name"/>
@@ -60,7 +86,9 @@ const methods = {
           </li>
         </ul>
         <select ref="select" :id="props.id" :name="props.id" :style="{ display: 'none' }">
-          <option v-for="(option, index) in props.options" :key="index" :value="option.id">{{ option.name }}</option>
+          <option v-for="(option, index) in props.options" :key="index" :value="option.id"
+                  :selected="props.currentSelectedId === option.id">{{ option.name }}
+          </option>
         </select>
       </div>
     </Transition>
@@ -71,8 +99,8 @@ const methods = {
 @import "@/assets/main";
 
 .simple-selector-container {
-  padding: 0 20px;
-  margin: 20px auto;
+  padding: 0;
+  margin: 0 auto;
   position: relative;
 
   .current-selected-area {
@@ -118,6 +146,12 @@ const methods = {
       }
     }
   }
+
+  &.no-label {
+    .select-item-area {
+      top: 35px;
+    }
+  }
 }
 
 .option-item {
@@ -125,6 +159,8 @@ const methods = {
   transition: $duration;
   flex-direction: row;
   padding: 0.2rem 0.3rem;
+  justify-content: center;
+  align-items: center;
 
   .item-image-area {
     width: 30px;
@@ -145,6 +181,10 @@ const methods = {
         height: 100%;
       }
     }
+
+    &.collapse {
+      width: 0;
+    }
   }
 
   .option-title {
@@ -158,6 +198,7 @@ const methods = {
 
     }
   }
+
 }
 
 </style>

@@ -1,6 +1,7 @@
 import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
+import type {IMission} from "@/classes/api-spec/mission/GetMemberCalendar";
 
 function popupCreateMission(emitter: any, startDate: string) {
     const backgroundStore = useBackgroundStore();
@@ -70,6 +71,17 @@ function popupRequestJoinFamily(emitter: any) {
 
 }
 
+function popupMissionDetail(mission: IMission) {
+    const backgroundStore = useBackgroundStore();
+
+    const missionDetailPopup = new CurrentPopup(PopupType.NORMAL, mission.title)
+        .addBodyComponent("MissionDetail", {missionId: mission.id})
+        .addButton("닫기", () => backgroundStore.returnGlobalPopup())
+        .addProgress();
+
+    backgroundStore.useGlobalPopup(missionDetailPopup);
+}
+
 function confirm(title: string, message: string, ifConfirm: () => void) {
     const backgroundStore = useBackgroundStore();
 
@@ -96,11 +108,28 @@ function alert(title: string, message: string) {
     backgroundStore.useGlobalPopup(alertPopup);
 }
 
+function innerConfirm(title: string, description: string, ifConfirm: () => void) {
+    const backgroundStore = useBackgroundStore();
+
+    const confirmPopup = new CurrentPopup(PopupType.NORMAL, title, description)
+        .addButton("확인", () => {
+            ifConfirm();
+            backgroundStore.returnInnerPopup()
+        })
+        .addButton("취소", () => {
+            backgroundStore.returnInnerPopup()
+        });
+
+    backgroundStore.useInnerPopup(confirmPopup);
+}
+
 export default {
     popupCreateMission,
     popupCreateFamily,
     popupInviteFamily,
     popupRequestJoinFamily,
+    popupMissionDetail,
     confirm,
-    alert
+    alert,
+    innerConfirm
 }

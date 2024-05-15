@@ -9,8 +9,11 @@ export const useBackgroundStore = defineStore('background', () => {
     const needNicknameInitializer = ref<boolean>(false);
     const needCurtainManager = ref<boolean>(false);
     const needPopup = ref<boolean>(false);
+    const needInnerPopup = ref<boolean>(false);
+    const isPopupPrepare = ref<boolean>(false);
 
     const popupInfo = ref<CurrentPopup>();
+    const innerPopupInfo = ref<CurrentPopup>();
     const loadingInfo = ref({
         title: '',
         content: ''
@@ -69,6 +72,7 @@ export const useBackgroundStore = defineStore('background', () => {
 
         popupInfo.value = popup;
         needPopup.value = true;
+        isPopupPrepare.value = popup.progress;
         updateBackgroundNeeds();
 
         if (autoCloseSecond) {
@@ -78,13 +82,36 @@ export const useBackgroundStore = defineStore('background', () => {
         }
     }
 
+    function useInnerPopup(popup: CurrentPopup) {
+        innerPopupInfo.value = popup;
+        needInnerPopup.value = true;
+    }
+
+    function doIfHasPopup(callback: (popup: CurrentPopup) => void) {
+        if (popupInfo.value) {
+            callback(popupInfo.value);
+        }
+    }
+
     function returnGlobalPopup() {
         needPopup.value = false;
+        needInnerPopup.value = false;
         //팝업이 사라지기 전까지 정보를 보여줘야하므로 딜레이를 준다.
         setTimeout(() => {
             popupInfo.value = undefined;
+            innerPopupInfo.value = undefined;
             updateBackgroundNeeds();
         }, 300)
+    }
+
+    function returnInnerPopup() {
+        needInnerPopup.value = false;
+        //팝업이 사라지기 전까지 정보를 보여줘야하므로 딜레이를 준다.
+        setTimeout(() => innerPopupInfo.value = undefined, 300)
+    }
+
+    function readyPopup() {
+        isPopupPrepare.value = false;
     }
 
 
@@ -98,8 +125,15 @@ export const useBackgroundStore = defineStore('background', () => {
         useCurtainManager,
         loadingInfo,
         needPopup,
+        needInnerPopup,
+        innerPopupInfo,
         popupInfo,
         useGlobalPopup,
         returnGlobalPopup,
+        doIfHasPopup,
+        returnInnerPopup,
+        useInnerPopup,
+        isPopupPrepare,
+        readyPopup
     }
 })

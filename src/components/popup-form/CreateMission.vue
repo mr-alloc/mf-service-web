@@ -11,7 +11,7 @@
                     :is-hold="state.inputHold" :no-mark="true"
         />
         <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
-                        :options="state.members" v-show="ownFamiliesStore.hasSelectFamily"/>
+                        :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"/>
         <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한 (미션 시작시 적용)"
                      :etc-option="new SelectOption('0', '기타(일)')"
                      etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
@@ -115,7 +115,7 @@ onMounted(() => {
     const requestBody = {
       name: missionTitleInput.value,
       subName: missionContentInput.value,
-      assignee: assigneeInput.value,
+      assignee: parseInt(assigneeInput.value),
       type: missionTypeSelect.value,
       startDate: DateUtil.toUtc(props.startDate ?? DateUtil.getTodayStr(DateUtil.DEFAULT_DATE_FORMAT), DateUtil.DEFAULT_DATE_FORMAT),
       deadline: missionDeadlineInput.value
@@ -151,6 +151,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 20px;
 
   .container-body {
   }

@@ -10,7 +10,6 @@ import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {type AlertStore, AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
-import {useRouter} from "vue-router";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
@@ -37,8 +36,6 @@ function handleUnAuthorized(error: AxiosError, alertStore: AlertStore) {
     const memberInfoStore = useMemberInfoStore();
     memberInfoStore.removeMemberInfo();
     removeTokens();
-    useRouter().push("/sign-in");
-
 }
 
 function handleForbidden(error: AxiosError, alertStore: AlertStore) {
@@ -76,12 +73,13 @@ export async function call<REQ, RES>(
 ) {
     const targetSpec = hasSelectedFamilyId() && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
     let bindPath = targetSpec.path;
+    pathVariableRE.lastIndex = 0;
     const pathVariables = pathVariableRE.exec(bindPath);
     if (pathVariables) {
         //replace path variables
         const bodyEntries = Object.entries(body);
         for (const [key, value] of bodyEntries) {
-            bindPath = bindPath.replace(`{${key}}`, value);
+            bindPath = bindPath.replace(`{${key}}`, `${value}`);
             delete body[key];
         }
     }

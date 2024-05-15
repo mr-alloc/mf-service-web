@@ -1,14 +1,15 @@
 <template>
   <div class="simple-radio-container">
-    <label v-show="props.label">{{ props.label }}</label>
+    <label v-show="props.label" v-if="props.label">{{ props.label }}</label>
     <div class="radio-selector">
       <input type="hidden" :id="props.id" :name="props.name" v-model="state.value"/>
       <ul class="option-button-group">
         <li class="radio-button" :key="index" v-for="(option, index) in props.options"
+            :style="{ backgroundColor: `#${option.color}` }"
             :class="{ selected: option.value === state.value }" v-on:click="methods.selectValue(option.value)">
           {{ option.text }}
         </li>
-        <li class="radio-button" v-show="props.etcOption" :class="{ selected: state.etcSelected }"
+        <li class="radio-button" v-if="props.etcOption" :class="{ selected: state.etcSelected }"
             v-on:click="methods.clickEtc(props.etcOption?.value ?? props.defaultEtcValue ?? '')"
             v-on:focusout="state.etcSelected && methods.selectValue(state.value)"
         >{{ props.etcOption?.text }}
@@ -25,7 +26,7 @@
 </template>
 <script setup lang="ts">
 import SelectOption from "@/classes/SelectOption";
-import {reactive} from "vue";
+import {onMounted, reactive} from "vue";
 
 const state = reactive({
   value: '',
@@ -42,6 +43,7 @@ const props = defineProps({
   etcOption: SelectOption,
   etcValueFunction: Function,
   etcPlaceholder: String,
+  defaultSelected: String
 })
 
 const methods = {
@@ -68,13 +70,16 @@ const methods = {
     console.log('state.value2', state.value);
   }
 }
+
+onMounted(() => {
+  methods.selectValue(props.defaultSelected ?? props.options?.[0]!.value ?? '0')
+});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";
 
 .simple-radio-container {
-  padding: 0 20px;
-  margin: 20px auto;
+  padding: 0;
 
   .radio-selector {
 
@@ -93,11 +98,13 @@ const methods = {
         transition: .2s;
         cursor: pointer;
 
+
         &:hover {
           background-color: rgb(0, 0, 0, .3);
         }
 
         &.selected {
+          box-shadow: inset 3px 3px 8px rgb(0, 0, 0, .3);
           background-color: rgb(0, 0, 0, .3);
           transform: scale(.9);
         }

@@ -6,5 +6,15 @@ const getFamilyCalendarSpec = Spec.of(HttpMethod.GET, "/v1/family/mission/calend
     .andPairs([]);
 
 export default {
-    GetFamilyCalendar: getFamilyCalendarSpec
+    GetFamilyCalendar: getFamilyCalendarSpec,
+    CreateFamilyMission: Spec.of(HttpMethod.POST, "/v1/family/mission/create")
+        .andDefaultMessage("패밀리 미션 생성에 실패 하였습니다.")
+        .andPairs([
+            [-8, "존재하지 않는 멤버 입니다."]
+        ]),
+    GetFamilyMissionDetail: Spec.of(HttpMethod.GET, `/v1/family/mission/{missionId}`)
+        .andPairs([]),
+    ChangeMissionAttribute: Spec.of(HttpMethod.PUT, `/v1/family/mission/{missionId}`)
+        .andDefaultMessage("패밀리 미션 정보 수정에 실패 하였습니다.")
+        .andPairs([])
 }

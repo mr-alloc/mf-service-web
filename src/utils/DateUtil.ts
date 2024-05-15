@@ -1,5 +1,5 @@
 import moment, {type Moment, tz} from "moment-timezone";
-import TempralUtil from "@/utils/TempralUtil";
+import TempralUtil from "@/utils/TemporalUtil";
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 const DEFAULT_DATE_TIME_FORMAT = 'YYYY년 MM월 DD일 HH:mm:ss';

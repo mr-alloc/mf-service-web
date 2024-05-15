@@ -5,14 +5,16 @@ import Family from "@/constant/api-meta/Family";
 import CollectionUtil from "@/utils/CollectionUtil";
 import SelectFamilyOption from "@/classes/SelectFamilyOption";
 import {useMemberInfoStore} from "@/stores/MemberInfo";
-import {FamilySummary, ResponseBody} from "@/classes/api-spec/family/GetOwnFamilies";
+import * as GetOwnFamilies from "@/classes/api-spec/family/GetOwnFamilies";
+import * as GetFamilyMember from "@/classes/api-spec/family/GetFamilyMember";
 import {hasSelectedFamilyId, setSelectedFamilyId} from "@/utils/LocalCache";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
 
 export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     const notSelectedOption = new SelectFamilyOption(0, "", "NO_IMAGE", "본캐 선택");
-    const families = ref<Array<FamilySummary>>([])
+    const families = ref<Array<GetOwnFamilies.FamilySummary>>([]);
+    const members = ref<Array<GetFamilyMember.FamilyMember>>([]);
     const selectorState = ref({
         defaultOption: notSelectedOption,
         selectedOption: notSelectedOption,
@@ -26,16 +28,27 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         if (memberInfoStore.needMemberInfo()) return;
         if (!forceFetch && families.value.length > 0) return;
 
-        await call<any, ResponseBody>(Family.GetOwnFamilies, {}, (res) => {
-            const responseBody = ResponseBody.fromJson(res.data);
+        await call<any, GetOwnFamilies.ResponseBody>(Family.GetOwnFamilies, {}, (res) => {
+            const responseBody = GetOwnFamilies.ResponseBody.fromJson(res.data);
             families.value = responseBody.families;
         });
+    }
+
+    async function fetchFamilyMembersAsync(forceFetch: boolean) {
+        const memberInfoStore = useMemberInfoStore();
+        if (memberInfoStore.needMemberInfo()) return;
+        if (!forceFetch && members.value.length > 0) return;
+
+        await call<any, GetFamilyMember.ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
+            const responseBody = GetFamilyMember.ResponseBody.fromJson(response.data);
+            members.value = responseBody.members;
+        })
     }
 
     function toSelectItemValue(): SelectFamilyOption [] {
         return CollectionUtil.convertList<SelectFamilyOption>(
             families.value,
-            (item: FamilySummary) => new SelectFamilyOption(item.id, item.color, item.image ?? "", item.name)
+            (item: GetOwnFamilies.FamilySummary) => new SelectFamilyOption(item.id, item.color, item.image ?? "", item.name)
         )
     }
 
@@ -56,14 +69,17 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         if (hasSelectedFamilyId()) {
             familiesViewStore.fetchFamilyMembersAsync();
             familyMemberInfoStore.fetchFamilyMemberAsync();
+            fetchFamilyMembersAsync(true);
         }
     }
 
 
     return {
         families,
+        members,
         selectorState,
         fetchOwnFamiliesAsync,
+        fetchFamilyMembersAsync,
         toSelectItemValue,
         changeFamily,
         hasSelectFamily

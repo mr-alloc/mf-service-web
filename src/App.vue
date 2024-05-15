@@ -10,7 +10,7 @@
     </div>
     <div class="background"
          :class="[{ curtain: backgroundStore.needCurtainManager }, { popup: backgroundStore.needBackground || backgroundStore.needPopup}]"
-         v-show="backgroundStore.needBackground">
+         v-show="backgroundStore.needBackground" v-on:click="methods.clickBackground">
       <InitNickname v-show="backgroundStore.needNicknameInitializer"/>
       <LoadingSpinner v-show="backgroundStore.needCurtainManager" :title="backgroundStore.loadingInfo.title"
                       :content="backgroundStore.loadingInfo.content"/>
@@ -25,9 +25,17 @@ import InitNickname from "@/components/global/InitNickname.vue";
 import LeftHeader from "@/components/global/LeftHeader.vue";
 import LoadingSpinner from "@/components/global/LoadingSpinner.vue";
 import GlobalPopup from "@/components/global/GlobalPopup.vue";
+import {CurrentPopup} from "@/stores/status/CurrentPopup";
 
 const backgroundStore = useBackgroundStore();
 const methods = {
+  clickBackground(event: MouseEvent) {
+    backgroundStore.doIfHasPopup((popup: CurrentPopup) => {
+      if (!popup.hasButtonProxy()) {
+        backgroundStore.returnGlobalPopup();
+      }
+    })
+  }
 }
 
 </script>

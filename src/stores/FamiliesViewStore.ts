@@ -17,7 +17,7 @@ export const useFamiliesViewStore = defineStore("families", () => {
     async function fetchFamilyMembersAsync() {
         await call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
             const responseBody = ResponseBody.fromJson(response.data);
-            members.value = responseBody.members;
+            members.value = responseBody.members.sort((a, b) => b.role - a.role)
             newMemberCount.value = responseBody.members.filter((member) => member.isNewMember).length;
         });
     }

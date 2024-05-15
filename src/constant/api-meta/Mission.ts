@@ -4,7 +4,8 @@ import FamilyMission from "@/constant/api-meta/FamilyMission";
 
 const createMissionSpec = Spec.of(HttpMethod.POST, "/v1/mission/create")
     .andDefaultMessage("미션 생성에 실패 하였습니다.")
-    .andPairs([]);
+    .andPairs([])
+    .whenFamily(FamilyMission.CreateFamilyMission);
 const getMemberCalendarSpec = Spec.of(HttpMethod.GET, "/v1/mission/calendar")
     .andDefaultMessage("이번달 미션정보 조회에 실패 했어요.")
     .andPairs([])
@@ -12,5 +13,10 @@ const getMemberCalendarSpec = Spec.of(HttpMethod.GET, "/v1/mission/calendar")
 
 export default {
     CreateMission: createMissionSpec,
-    GetMemberCalendar: getMemberCalendarSpec
+    GetMemberCalendar: getMemberCalendarSpec,
+    GetMissionDetail: Spec.of(HttpMethod.GET, `/v1/mission/{missionId}`)
+        .whenFamily(FamilyMission.GetFamilyMissionDetail)
+        .andPairs([]),
+    ChangeMissionAttribute: Spec.of(HttpMethod.PUT, `/v1/mission/{missionId}`)
+        .andDefaultMessage("미션 정보 수정에 실패 하였습니다.")
 }
