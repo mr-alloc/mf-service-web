@@ -1,11 +1,11 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
-import {MemberInfo} from "@/stores/MemberInfo";
+import {ProfileMember} from "@/stores/MemberInfoStore";
 
 export const useProfileMemberStore = defineStore("profileMember", () => {
-    const profileMember = ref<ProfileMember>(MemberInfo.ofDefault());
+    const profileMember = ref<IProfileMember>(ProfileMember.ofDefault());
 
-    function updateProfileMember(newer: ProfileMember) {
+    function updateProfileMember(newer: IProfileMember) {
         profileMember.value = newer;
     }
 
@@ -16,7 +16,7 @@ export const useProfileMemberStore = defineStore("profileMember", () => {
 })
 
 
-export interface ProfileMember {
+export interface IProfileMember {
     get familyName(): string;
 
     get nickname(): string;

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useRouter} from "vue-router";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
-import {AccountRole} from "@/classes/constant/AccountRole";
+import {AccountRole} from "@/constant/AccountRole";
 import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
 
 let router = useRouter();

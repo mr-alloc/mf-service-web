@@ -35,8 +35,8 @@ import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import DateUtil from "../../utils/DateUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {JoinRequest} from "@/classes/api-spec/family/GetJoinRequests";
-import {MemberRole} from "@/classes/constant/MemberRole";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {MemberRole} from "@/constant/MemberRole";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 
 const memberInfoStore = useMemberInfoStore();
 const familiesViewStore = useFamiliesViewStore();

@@ -33,8 +33,8 @@ import ProfilePreview from "@/components/header/ProfilePreview.vue";
 import CollapsibleMenu from "@/components/header/CollapsibleMenu.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import FamilySelector from "@/components/header/FamilySelector.vue";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
-import {AccountRole} from "@/classes/constant/AccountRole";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
+import {AccountRole} from "@/constant/AccountRole";
 
 const leftMenuStore = useLeftMenuStore();
 const memberInfoStore = useMemberInfoStore();

@@ -1,5 +1,4 @@
-export default class ResponseBody {
-
+export default class FamilyInfo {
     private readonly _id: number;
     private readonly _inviteCode: string;
     private readonly _name: string;
@@ -22,7 +21,11 @@ export default class ResponseBody {
         return this._name;
     }
 
-    static fromJson(json: any): ResponseBody {
-        return new ResponseBody(json.id, json.inviteCode, json.name);
+    static fromJson(json: any): FamilyInfo {
+        return new FamilyInfo(json.id, json.inviteCode, json.name);
+    }
+
+    static ofDefault() {
+        return new FamilyInfo(0, "", "")
     }
 }

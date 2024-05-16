@@ -1,4 +1,4 @@
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 const ACCESS_TOKEN = "mf_ac_tk";

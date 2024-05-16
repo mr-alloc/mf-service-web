@@ -4,7 +4,7 @@ import {call} from "@/utils/NetworkUtil";
 import Family from "@/constant/api-meta/Family";
 import CollectionUtil from "@/utils/CollectionUtil";
 import SelectFamilyOption from "@/classes/SelectFamilyOption";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import * as GetOwnFamilies from "@/classes/api-spec/family/GetOwnFamilies";
 import * as GetFamilyMember from "@/classes/api-spec/family/GetFamilyMember";
 import {hasSelectedFamilyId, setSelectedFamilyId} from "@/utils/LocalCache";
@@ -42,7 +42,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         await call<any, GetFamilyMember.ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
             const responseBody = GetFamilyMember.ResponseBody.fromJson(response.data);
             members.value = responseBody.members;
-        })
+        });
     }
 
     function toSelectItemValue(): SelectFamilyOption [] {
@@ -53,7 +53,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     }
 
 
-    function changeFamily(emitter: any) {
+    async function changeFamily(emitter: any) {
         const memberInfoStore = useMemberInfoStore();
         const familiesViewStore = useFamiliesViewStore();
         const familyMemberInfoStore = useFamilyMemberInfoStore();
@@ -61,15 +61,16 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
 
         //패밀리 선택시 갱신정보
         setSelectedFamilyId(item.id);
-        //멤버 정보 갱신
-        memberInfoStore.fetchMemberInfo(item.title);
         //캘린더 갱신
         emitter.emit("drawMemberCalendar")
         emitter.emit("fetchFamiliesView")
         if (hasSelectedFamilyId()) {
-            familiesViewStore.fetchFamilyMembersAsync();
-            familyMemberInfoStore.fetchFamilyMemberAsync();
-            fetchFamilyMembersAsync(true);
+            await familiesViewStore.fetchFamilyMembersAsync();
+            await familiesViewStore.fetchFamilyInfoAsync();
+            await familyMemberInfoStore.fetchFamilyMemberAsync();
+            await fetchFamilyMembersAsync(true);
+        } else {
+            await memberInfoStore.fetchMemberInfo();
         }
     }
 

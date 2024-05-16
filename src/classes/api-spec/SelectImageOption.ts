@@ -21,6 +21,10 @@ export default class SelectImageOption {
     get image() {
         return this._image;
     }
+
+    static ofDefault(): SelectImageOption {
+        return new SelectImageOption(0, "", "");
+    }
 }
 
 

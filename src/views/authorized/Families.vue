@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import FamilySelector from "@/components/header/FamilySelector.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {inject, onMounted, reactive} from "vue";
@@ -7,8 +6,8 @@ import {DefaultButtonValue} from "@/classes/DefaultButtonValue";
 import PopupUtil from "@/utils/PopupUtil";
 import PageButtonGroup from "@/components/PageButtonGroup.vue";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
-import {MemberRole} from "@/classes/constant/MemberRole";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {MemberRole} from "@/constant/MemberRole";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import FamilyInfo from "@/components/main/FamilyInfo.vue";
 import TappableView from "@/components/global/TappableView.vue";
 import {TabViewComponent} from "@/classes/TabViewComponent";

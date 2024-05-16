@@ -7,12 +7,14 @@ import * as AcceptJoinRequest from "@/classes/api-spec/family/AcceptJoinRequest"
 import * as RejectJoinRequest from "@/classes/api-spec/family/RejectJoinRequest";
 import {call} from "@/utils/NetworkUtil";
 import Family from "@/constant/api-meta/Family";
+import FamilyInfo from "@/classes/FamilyInfo";
 
 export const useFamiliesViewStore = defineStore("families", () => {
 
     const joinRequests = ref<Array<GetJoinRequests.JoinRequest>>([]);
     const members = ref<Array<GetFamilyMember.FamilyMember>>([]);
     const newMemberCount = ref<number>(0);
+    const familyInfo = ref<FamilyInfo>(FamilyInfo.ofDefault());
 
     async function fetchFamilyMembersAsync() {
         await call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
@@ -44,12 +46,20 @@ export const useFamiliesViewStore = defineStore("families", () => {
         });
     }
 
+    async function fetchFamilyInfoAsync() {
+        await call<any, ResponseBody>(Family.GetFamilyInfo, {}, (response) => {
+            familyInfo.value = FamilyInfo.fromJson(response.data);
+        });
+    }
+
     return {
         joinRequests,
         fetchJoinRequestsAsync,
         acceptJoinRequestAsync,
         rejectJoinRequestAsync,
         members,
-        fetchFamilyMembersAsync
+        fetchFamilyMembersAsync,
+        fetchFamilyInfoAsync,
+        familyInfo
     }
 });

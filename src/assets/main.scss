@@ -46,6 +46,10 @@ ul {
   padding: 0;
 }
 
+img {
+  user-select: none;
+}
+
 //remove number input spinner
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,

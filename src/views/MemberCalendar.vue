@@ -1,7 +1,7 @@
 <template>
   <div class="calendar-container" v-show="state.thisMonth">
     <div class="calendar-title">
-      <span class="title-text">{{ state.calendarTitle }}</span>
+      <span class="title-text">{{ `${state.calendarTitle} 달력` }}</span>
       <div class="calendar-control">
         <button class="control-button" type="button" v-on:click="methods.setMonth(-1)">
           <FontAwesomeIcon icon="caret-left"/>
@@ -47,12 +47,12 @@
                     v-for="(mission, index) in state.memberCalendarMap.get(DateUtil.toString(date)) ?? []"
                     :key="index" v-on:click="methods.clickSchedule($event, mission)"
                 >
-                  <span class="schedule-title">
-                  {{
-                      /*`${methods.toTimeString(mission.startDate)}*/
-                      `${mission.title}`
-                    }}
-                  </span>
+                  <div class="schedule-title">
+                    <span class="status" :class="[MissionStatus.fromCode(mission.status)?.simpleName]">{{
+                        MissionStatus.fromCode(mission.status)?.name
+                      }}</span>
+                    <span>{{ mission.title }}</span>
+                  </div>
                 </li>
               </TransitionGroup>
             </div>
@@ -82,10 +82,12 @@ import CollectionUtil from "@/utils/CollectionUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import TemporalUtil from "@/utils/TemporalUtil";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
+import MissionStatus from "@/constant/MissionStatus";
 
 
 const emitter = inject("emitter");
-
+const familiesViewStore = useFamiliesViewStore();
 const state = reactive({
   calendarTitle: '',
   thisMonth: moment(),

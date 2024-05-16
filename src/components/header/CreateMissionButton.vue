@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";

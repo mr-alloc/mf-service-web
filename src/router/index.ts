@@ -2,7 +2,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import MemberCalendar from '../views/MemberCalendar.vue'
 import SignIn from '../views/SignIn.vue'
 import SignUp from '../views/SignUp.vue'
-import {MemberInfo, useMemberInfoStore} from "@/stores/MemberInfo";
+import {ProfileMember, useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
@@ -86,7 +86,7 @@ router.beforeEach(async (to, from, next) => {
                 } else {
                     alertStore.none("반가워요!", `${nickname}님, 오늘도 좋은 하루 되세요!`)
                 }
-                memberInfoStore.updateMemberInfo(new MemberInfo(id, nickname, role, profileImageUrl))
+                memberInfoStore.updateMemberInfo(new ProfileMember(id, nickname, role, profileImageUrl))
                 ownFamiliesStore.fetchOwnFamiliesAsync(true);
                 return;
             },

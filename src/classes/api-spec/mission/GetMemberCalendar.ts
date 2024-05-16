@@ -3,6 +3,7 @@ import DateUtil from "@/utils/DateUtil";
 
 export interface IMission {
     id: number;
+    status: number;
     title: string;
     startDate: number;
 
@@ -11,13 +12,15 @@ export interface IMission {
 
 export class FamilyMission implements IMission {
     private readonly _id: number;
+    private readonly _status: number;
     private readonly _title: string;
     private readonly _startTime: number;
     private readonly _endTime: number;
     private readonly _startDate: number;
 
-    constructor(id: number, title: string, startTime: number, endTime: number, startDate: number) {
+    constructor(id: number, status: number, title: string, startTime: number, endTime: number, startDate: number) {
         this._id = id;
+        this._status = status;
         this._title = title;
         this._startTime = startTime;
         this._endTime = endTime;
@@ -26,6 +29,10 @@ export class FamilyMission implements IMission {
 
     get id(): number {
         return this._id;
+    }
+
+    get status(): number {
+        return this._status;
     }
 
     get title(): string {
@@ -50,19 +57,21 @@ export class FamilyMission implements IMission {
 
 
     static fromJson(json: any): FamilyMission {
-        return new FamilyMission(json.id, json.name, json.startTime ?? 0, json.endTime ?? 0, json.startDate);
+        return new FamilyMission(json.id, json.status, json.name, json.startTime ?? 0, json.endTime ?? 0, json.startDate);
     }
 
 }
 
 export class CalendarMission implements IMission {
     private readonly _id: number;
+    private readonly _status: number;
     private readonly _title: string;
     private readonly _deadline: number;
     private readonly _startDate: number;
 
-    constructor(id: number, title: string, deadline: number, startDate: number) {
+    constructor(id: number, status: number, title: string, deadline: number, startDate: number) {
         this._id = id;
+        this._status = status;
         this._title = title;
         this._deadline = deadline;
         this._startDate = startDate;
@@ -70,6 +79,10 @@ export class CalendarMission implements IMission {
 
     get id(): number {
         return this._id;
+    }
+
+    get status(): number {
+        return this._status;
     }
 
     get title(): string {
@@ -89,7 +102,7 @@ export class CalendarMission implements IMission {
     }
 
     static fromJson(json: any): CalendarMission {
-        return new CalendarMission(json.id, json.name, json.deadline ?? 0, json.startDate);
+        return new CalendarMission(json.id, json.status, json.name, json.deadline ?? 0, json.startDate);
     }
 }
 

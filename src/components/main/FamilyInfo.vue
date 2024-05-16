@@ -4,7 +4,7 @@
       <li class="pair-item">
         <span class="pair-of-left">초대코드</span>
         <span class="pair-of-right">
-          {{ state.inviteCode }}
+          {{ familiesViewStore.familyInfo.inviteCode }}
           <IconButton :icon="['far', 'copy']" :click-behavior="methods.copyInviteCode"/>
         </span>
       </li>
@@ -12,35 +12,25 @@
   </div>
 </template>
 <script setup lang="ts">
-import {inject, onMounted, reactive} from "vue";
-import {call} from "@/utils/NetworkUtil";
-import ResponseBody from "@/classes/api-spec/family/GetFamilyInfo";
-import Family from "@/constant/api-meta/Family";
+import {inject, onMounted} from "vue";
 import {useAlertStore} from "@/stores/AlertStore";
 import IconButton from "@/components/global/IconButton.vue";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
 const emitter = inject("emitter")!;
-const state = reactive({
-  inviteCode: ""
-});
 const alertStore = useAlertStore();
+const familiesViewStore = useFamiliesViewStore();
 const methods = {
-  fetchFamilyInfo() {
-    call<any, ResponseBody>(Family.GetFamilyInfo, {}, (response) => {
-      const responseBody = ResponseBody.fromJson(response.data);
-      state.inviteCode = responseBody.inviteCode;
-    });
-  },
   copyInviteCode() {
-    navigator.clipboard.writeText(state.inviteCode).then(() => {
+    navigator.clipboard.writeText(familiesViewStore.familyInfo.inviteCode).then(() => {
       alertStore.success("클립보드 알림", "초대코드가 복사되었습니다.")
     })
   }
 }
 onMounted(() => {
-  methods.fetchFamilyInfo();
+  familiesViewStore.fetchFamilyInfoAsync();
   emitter.on("fetchFamilyMember", () => {
-    methods.fetchFamilyInfo();
+    familiesViewStore.fetchFamilyInfoAsync();
   });
 });
 </script>

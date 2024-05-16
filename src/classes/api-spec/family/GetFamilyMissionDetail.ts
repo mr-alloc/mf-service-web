@@ -21,9 +21,9 @@ export class FamilyMissionDetail {
     private readonly _type: string;
     private readonly _status: number;
     private readonly _assignee: number;
-    private readonly _reporter: string;
+    private readonly _reporter: number;
 
-    constructor(id: number, title: string, type: string, status: number, assignee: number, reporter: string) {
+    constructor(id: number, title: string, type: string, status: number, assignee: number, reporter: number) {
         this._id = id;
         this._title = title;
         this._type = type;
@@ -52,11 +52,11 @@ export class FamilyMissionDetail {
         return this._assignee;
     }
 
-    get reporter(): string {
+    get reporter(): number {
         return this._reporter;
     }
 
     static fromJson(json: any): FamilyMissionDetail {
-        return new FamilyMissionDetail(json.id, json.title, json.type, json.status, json.assignee, json.reporter);
+        return new FamilyMissionDetail(json.id, json.title, json.type.toString(), json.status, json.assignee, json.reporter);
     }
 }

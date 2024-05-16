@@ -20,20 +20,24 @@
 <script lang="ts" setup>
 import BlinkInput from "@/components/global/BlinkInput.vue";
 import SimpleButton from "@/components/global/SimpleButton.vue";
-import {inject, onMounted, reactive} from "vue";
+import {onMounted, reactive} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import Member from "@/constant/api-meta/Member";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
+import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
+import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
 
+const familyMemberInfoStore = useFamilyMemberInfoStore();
 const familiesViewStore = useFamiliesViewStore();
 const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
 const notificationStore = useAlertStore();
+const profileMemberStore = useProfileMemberStore();
 const state = reactive({
   nicknameInputValidate: false,
   nicknameSubmittable: false,
@@ -42,7 +46,6 @@ const state = reactive({
 });
 
 const nickNameRE = /^[가-힣a-zA-Z0-9 ]{2,10}$/;
-const emitter = inject("emitter")!;
 const methods = {
   ifEnterOnNickname() {
     if (methods.validateNickname()) {
@@ -76,11 +79,13 @@ const methods = {
             notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
             if (hasSelectedFamilyId()) {
               await familiesViewStore.fetchFamilyMembersAsync();
+              await familyMemberInfoStore.fetchFamilyMemberAsync();
+              profileMemberStore.updateProfileMember(familyMemberInfoStore.familyMemberInfo);
             }
           } else {
             notificationStore.alert(AlertType.SUCCESS, "첫번째 미션 클리어!", `닉네임 설정에 성공 했어요!\n환영해요 ${nicknameInput.value}님!`);
+            await memberInfoStore.fetchMemberInfo();
           }
-          await memberInfoStore.fetchMemberInfo("");
           nicknameInput.value = "";
           backgroundStore.returnNicknameInitializer()
         },

@@ -1,23 +1,23 @@
 import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
-import type {ProfileMember} from "@/stores/ProfileMemberStore";
+import type {IProfileMember} from "@/stores/ProfileMemberStore";
 
 export class ResponseBody {
-    private readonly _memberInfo: FamilyMemberInfo
+    private readonly _memberInfo: FamilyProfileMember
 
-    constructor(memberInfo: FamilyMemberInfo) {
+    constructor(memberInfo: FamilyProfileMember) {
         this._memberInfo = memberInfo;
     }
 
-    get memberInfo(): FamilyMemberInfo {
+    get memberInfo(): FamilyProfileMember {
         return this._memberInfo;
     }
 
     static fromJson(json: any): ResponseBody {
-        return new ResponseBody(FamilyMemberInfo.fromJson(json.memberInfo));
+        return new ResponseBody(FamilyProfileMember.fromJson(json.memberInfo));
     }
 }
 
-export class FamilyMemberInfo implements ProfileMember {
+export class FamilyProfileMember implements IProfileMember {
 
     private readonly _id: number
     private readonly _familyName: string
@@ -53,11 +53,11 @@ export class FamilyMemberInfo implements ProfileMember {
         return this._profile;
     }
 
-    static ofDefault(): FamilyMemberInfo {
-        return new FamilyMemberInfo(0, "", "", 0, DEFAULT_USER_PROFILE);
+    static ofDefault(): FamilyProfileMember {
+        return new FamilyProfileMember(0, "", "", 0, DEFAULT_USER_PROFILE);
     }
 
-    static fromJson(json: any): FamilyMemberInfo {
-        return new FamilyMemberInfo(json.id, json.familyName, json.nickname, json.role, json.profile);
+    static fromJson(json: any): FamilyProfileMember {
+        return new FamilyProfileMember(json.id, json.familyName, json.nickname, json.role, json.profile);
     }
 }

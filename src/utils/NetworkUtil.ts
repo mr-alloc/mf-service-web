@@ -9,16 +9,14 @@ import {
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {type AlertStore, AlertType, useAlertStore} from "@/stores/AlertStore";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
     response => response,
     error => {
         const alertStore = useAlertStore();
-        if (error.response?.status === 400) {
-
-        } else if (error.response?.status === 401) {
+        if (error.response?.status === 401) {
             handleUnAuthorized(error, alertStore);
         } else if (error.response?.status === 403) {
             handleForbidden(error, alertStore);

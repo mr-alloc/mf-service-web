@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {MemberRole} from "@/classes/constant/MemberRole";
+import {MemberRole} from "@/constant/MemberRole";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
 const familiesViewStore = useFamiliesViewStore();

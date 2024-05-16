@@ -3,16 +3,14 @@ import {ref} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {removeAccessToken} from "@/utils/LocalCache";
-import {useAlertStore} from "@/stores/AlertStore";
-import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
 import {useRouter} from "vue-router";
-import {type ProfileMember, useProfileMemberStore} from "@/stores/ProfileMemberStore";
+import {type IProfileMember, useProfileMemberStore} from "@/stores/ProfileMemberStore";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
-    const memberInfo = ref<MemberInfo>(MemberInfo.ofDefault());
+    const memberInfo = ref<ProfileMember>(ProfileMember.ofDefault());
 
-    function updateMemberInfo (memberInfoValue: MemberInfo) {
+    function updateMemberInfo(memberInfoValue: ProfileMember) {
         memberInfo.value = memberInfoValue
         const profileMemberStore = useProfileMemberStore();
         profileMemberStore.updateProfileMember(memberInfoValue);
@@ -27,16 +25,14 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
     }
 
     function removeMemberInfo() {
-        memberInfo.value = MemberInfo.ofDefault();
+        memberInfo.value = ProfileMember.ofDefault();
     }
 
-    async function fetchMemberInfo(familyName: string) {
-        const backgroundStore = useBackgroundStore();
-        const alertStore = useAlertStore();
+    async function fetchMemberInfo() {
         await call<any, any>(MemberAPI.GetInfo, null,
             (response) => {
                 const { id, nickname, role } = response.data
-                updateMemberInfo(new MemberInfo(id, nickname, role))
+                updateMemberInfo(new ProfileMember(id, nickname, role))
                 return;
             },
             (sepc, error) => {
@@ -72,7 +68,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
     }
 })
 
-export class MemberInfo implements ProfileMember {
+export class ProfileMember implements IProfileMember {
 
     private readonly _id: number
     private readonly _nickname: string
@@ -106,8 +102,8 @@ export class MemberInfo implements ProfileMember {
         return "";
     }
 
-    static ofDefault(): MemberInfo {
-        return new MemberInfo(0, '', 0)
+    static ofDefault(): ProfileMember {
+        return new ProfileMember(0, '', 0)
     }
 
     notExist(): boolean {

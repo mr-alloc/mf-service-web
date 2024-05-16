@@ -28,7 +28,7 @@ import SimpleButton from "@/components/global/SimpleButton.vue";
 import {call} from "@/utils/NetworkUtil";
 import {useRouter} from "vue-router";
 import AccountAPI from "@/constant/api-meta/Account";
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {
   removeAccessToken,
   removeRefreshToken,
@@ -129,7 +129,7 @@ const methods = {
   justify-content: center;
 
   .form-wrapper {
-    padding: 15px 0px;
+    padding: 15px 20px;
     display: flex;
     width: 100%;
     justify-content: space-evenly;

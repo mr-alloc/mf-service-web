@@ -2,11 +2,13 @@
   <div class="simple-radio-container">
     <label v-show="props.label" v-if="props.label">{{ props.label }}</label>
     <div class="radio-selector">
-      <input type="hidden" :id="props.id" :name="props.name" v-model="state.value"/>
+      <input type="hidden" :id="props.id" :name="props.name"
+             :value="props.options?.[props.currentSelectedIndex!]?.value" v-model="state.value"/>
       <ul class="option-button-group">
         <li class="radio-button" :key="index" v-for="(option, index) in props.options"
             :style="{ backgroundColor: `#${option.color}` }"
-            :class="{ selected: option.value === state.value }" v-on:click="methods.selectValue(option.value)">
+            :class="{ selected: (index === props?.currentSelectedIndex) || (option.value === state.value) }"
+            v-on:click="methods.selectValue(option.value)">
           {{ option.text }}
         </li>
         <li class="radio-button" v-if="props.etcOption" :class="{ selected: state.etcSelected }"
@@ -26,7 +28,7 @@
 </template>
 <script setup lang="ts">
 import SelectOption from "@/classes/SelectOption";
-import {onMounted, reactive} from "vue";
+import {reactive} from "vue";
 
 const state = reactive({
   value: '',
@@ -43,7 +45,7 @@ const props = defineProps({
   etcOption: SelectOption,
   etcValueFunction: Function,
   etcPlaceholder: String,
-  defaultSelected: String
+  currentSelectedIndex: Number
 })
 
 const methods = {
@@ -67,13 +69,8 @@ const methods = {
   },
   selectEtcValue() {
     state.value = props.etcValueFunction && props.etcValueFunction(state.etcValue);
-    console.log('state.value2', state.value);
   }
 }
-
-onMounted(() => {
-  methods.selectValue(props.defaultSelected ?? props.options?.[0]!.value ?? '0')
-});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";

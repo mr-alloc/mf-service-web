@@ -1,5 +1,5 @@
 import CollectionUtil from "@/utils/CollectionUtil";
-import type {IEnum} from "@/classes/constant/IEnum";
+import type {IEnum} from "@/constant/IEnum";
 
 export class MemberRole implements IEnum<MemberRole> {
     static readonly REGULAR: MemberRole = new MemberRole(0, "일반", "regular");

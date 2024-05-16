@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import {RouterView} from 'vue-router'
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import InitNickname from "@/components/global/InitNickname.vue";
+import InitNickname from "@/components/global/NicknameInitializer.vue";
 import LeftHeader from "@/components/global/LeftHeader.vue";
 import LoadingSpinner from "@/components/global/LoadingSpinner.vue";
 import GlobalPopup from "@/components/global/GlobalPopup.vue";

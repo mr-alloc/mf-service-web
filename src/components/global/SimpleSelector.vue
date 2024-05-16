@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from "vue";
+import {reactive, ref} from "vue";
 import SelectImageOption from "@/classes/api-spec/SelectImageOption";
 
 const select = ref<HTMLSelectElement | null>(null);
@@ -11,13 +11,13 @@ const props = defineProps({
   defaultOptionName: String,
   allowNoImage: Boolean,
   defaultSelected: Number,
-  currentSelectedId: Number,
+  currentSelectedIndex: Number,
   beforeChange: Function
 });
 const defaultOption = new SelectImageOption(0, props.defaultOptionName ?? "없음", props.allowNoImage ? "NO_IMAGE" : "");
 const state = reactive({
   isSelectMode: false,
-  currentSelected: props.options?.[props.options?.findIndex(option => option.id === props.currentSelectedId)] ?? defaultOption
+  selectedIndex: -1
 });
 const methods = {
   clickSelector() {
@@ -25,39 +25,36 @@ const methods = {
   },
   selectOption(index: number) {
     state.isSelectMode = false;
-    props.beforeChange && props.beforeChange(props.options?.[index]);
-  },
-  selectOptionById(id: number) {
-    const index = props.options?.findIndex(option => option.id === id)!;
-    if (index === -1) {
-      state.currentSelected = defaultOption;
-      return;
+    console.log('index:', index)
+    if (props.options?.length! - 1 < index) {
+      Array.from(select.value?.options!).forEach(option => {
+        option.selected = false;
+      })
     }
-    state.currentSelected = props.options?.[index]!;
+    props.beforeChange && props.beforeChange(props.options?.[index]);
   }
 }
-
-onMounted(() => {
-  if (props.defaultSelected) {
-    methods.selectOptionById(props.defaultSelected);
-  }
-
-});
 </script>
 <template>
   <div class="simple-selector-container" :class="{ 'no-label': !props.title }">
     <label :for="props.id" v-if="props.title">{{ props.title }}</label>
     <div class="option-item current-selected-area pushable"
-         :class="{ 'no-image': state.currentSelected.id === 0 || state.currentSelected.image === 'NO_IMAGE', 'blink': state.isSelectMode }"
+         :class="{ 'no-image': ((props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.id ?? defaultOption.id) === 0) || ((props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image) === 'NO_IMAGE'), 'blink': state.isSelectMode }"
          v-on:click="methods.clickSelector()"
     >
-      <div class="item-image-area" :class="{ collapse: !state.currentSelected.image }">
+      <div class="item-image-area"
+           :class="{ collapse: !props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image }">
         <div class="option-image-frame">
-          <img v-if="state.currentSelected.image" :src="state.currentSelected.image" :alt="state.currentSelected.name"/>
+          <img
+              v-if="props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image"
+              :src="props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image"
+              :alt="props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.name ?? defaultOption.name"/>
         </div>
       </div>
       <div class="option-title">
-        <span class="title-text">{{ state.currentSelected.name }}</span>
+        <span class="title-text">{{
+            props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.name ?? defaultOption.name
+          }}</span>
       </div>
     </div>
     <Transition name="down-fade">
@@ -87,7 +84,7 @@ onMounted(() => {
         </ul>
         <select ref="select" :id="props.id" :name="props.id" :style="{ display: 'none' }">
           <option v-for="(option, index) in props.options" :key="index" :value="option.id"
-                  :selected="props.currentSelectedId === option.id">{{ option.name }}
+                  :selected="props.currentSelectedIndex === index">{{ option.name }}
           </option>
         </select>
       </div>

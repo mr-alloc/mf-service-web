@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useMemberInfoStore} from "@/stores/MemberInfo";
+import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {useRouter} from "vue-router";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";

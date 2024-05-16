@@ -6,7 +6,8 @@
           <span>미션 종류</span>
         </div>
         <div class="detail-content">
-          <BlinkSelect id="mission-type" :options="state.typeOptions" :current-selected="`${state.detail.type}`"/>
+          <BlinkSelect id="mission-type" :options="state.typeOptions"
+                       :current-selected-index="state.typeOptions.findIndex(option => option.value === state.detail?.type)"/>
         </div>
       </li>
       <li class="detail-pair">
@@ -14,7 +15,8 @@
           <span>미션 상태</span>
         </div>
         <div class="detail-content">
-          <SimpleRadio id="mission-status" :options="state.statusOptions" :default-selected="`${state.detail.status}`"/>
+          <SimpleRadio id="mission-status" :options="state.statusOptions"
+                       :current-selected-index="state.statusOptions.findIndex(option => option.value === `${state.detail?.status ?? 0}`)"/>
         </div>
       </li>
       <li class="detail-pair">
@@ -24,7 +26,7 @@
         <div class="detail-content">
           <SimpleSelector default-option-name="멤버 선택" :default-selected="2" :before-change="methods.selectMember"
                           :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"
-                          :current-selected-id="state.detail.assignee"/>
+                          :current-selected-index="state.members.findIndex(member => member.id === state.detail.assignee)"/>
         </div>
       </li>
       <li class="detail-pair">
@@ -32,7 +34,8 @@
           <span>미션 생성자</span>
         </div>
         <div class="detail-content">
-          <ImageNicknamePair :option="new SelectImageOption(1, '샘플 유저', DEFAULT_USER_PROFILE)"/>
+          <ImageNicknamePair
+              :option="state.members.find(member => member.id === state.detail.reporter) ?? SelectImageOption.ofDefault()"/>
         </div>
       </li>
     </ul>
@@ -45,7 +48,6 @@ import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import SimpleSelector from "@/components/global/SimpleSelector.vue";
 import SelectImageOption from "@/classes/api-spec/SelectImageOption";
 import ImageNicknamePair from "@/components/global/ImageNicknamePair.vue";
-import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
 import SelectOption from "@/classes/SelectOption";
 import SimpleRadio from "@/components/global/SimpleRadio.vue";
 import BlinkTextArea from "@/components/global/BlinkTextArea.vue";
@@ -101,7 +103,6 @@ onMounted(() => {
     call<any, GetFamilyMissionDetail.ResponseBody>(FamilyMission.GetFamilyMissionDetail, {missionId: props.missionId}, (response) => {
       const responseBody = GetFamilyMissionDetail.ResponseBody.fromJson(response.data);
       state.detail = responseBody.mission;
-      console.log('detail: ', state.detail)
       backgroundStore.readyPopup();
     });
   }

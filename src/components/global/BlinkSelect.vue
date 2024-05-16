@@ -3,7 +3,9 @@
     <label v-if="props.title" :for="props.id" class="select-title">{{ props.title }}</label>
     <div class="option-selector" id="select-values" :class="{ blink: state.selectMode}">
       <div class="selected-value" v-on:click="methods.clickSelector()">
-        <span class="value-text">{{ props?.options?.[select?.selectedIndex!]?.text }}</span>
+        <span class="value-text">{{
+            props?.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.text
+          }}</span>
       </div>
       <Transition name="bounce">
         <ul class="select-option-wrapper" v-show="state.selectMode">
@@ -16,13 +18,15 @@
       </Transition>
     </div>
     <select :id="props.id" class="select-values" ref="select" style="display: none;" :name="props.name">
-      <option v-for="option in props.options" :key="option.value" :value="option.value">{{ option.text }}</option>
+      <option v-for="(option, index) in props.options" :selected="props.currentSelectedIndex === index"
+              :key="option.value" :value="option.value">{{ option.text }}
+      </option>
     </select>
   </div>
 </template>
 <script setup lang="ts">
 import SelectOption from "@/classes/SelectOption";
-import {onMounted, reactive, ref} from "vue";
+import {reactive, ref} from "vue";
 
 const select = ref<HTMLSelectElement | null>(null);
 const state = reactive({
@@ -34,7 +38,7 @@ const props = defineProps({
   options: Array<SelectOption>,
   name: String,
   id: String,
-  currentSelected: String,
+  currentSelectedIndex: Number,
   beforeChange: Function
 })
 
@@ -48,12 +52,6 @@ const methods = {
     state.selectMode = false;
   }
 }
-
-onMounted(() => {
-  if (props.currentSelected) {
-    methods.selectValue(props.currentSelected ?? "0")
-  }
-});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";
