@@ -3,12 +3,12 @@
     <label v-show="props.label" v-if="props.label">{{ props.label }}</label>
     <div class="radio-selector">
       <input type="hidden" :id="props.id" :name="props.name"
-             :value="props.options?.[props.currentSelectedIndex!]?.value" v-model="state.value"/>
+             :value="props.options?.[props.currentIndex!]?.value ?? state.value" v-model="state.value"/>
       <ul class="option-button-group">
         <li class="radio-button" :key="index" v-for="(option, index) in props.options"
             :style="{ backgroundColor: `#${option.color}` }"
-            :class="{ selected: (index === props?.currentSelectedIndex) || (option.value === state.value) }"
-            v-on:click="methods.selectValue(option.value)">
+            :class="{ selected: (state.value === '' && index === props?.currentIndex) || (option.value === state.value) }"
+            v-on:click="methods.selectValue(option.value, option)">
           {{ option.text }}
         </li>
         <li class="radio-button" v-if="props.etcOption" :class="{ selected: state.etcSelected }"
@@ -45,7 +45,8 @@ const props = defineProps({
   etcOption: SelectOption,
   etcValueFunction: Function,
   etcPlaceholder: String,
-  currentSelectedIndex: Number
+  currentIndex: Number,
+  beforeChange: Function
 })
 
 const methods = {
@@ -58,14 +59,24 @@ const methods = {
       state.value = '';
     }
   },
-  selectValue(value: string) {
-    if (state.value == value) {
-      state.value = '';
-      state.etcSelected = false;
-      return;
+  selectValue(value: string, option?: SelectOption) {
+    if (option) {
+
+      const afterChange = () => {
+        if (state.value == value) {
+          state.value = '';
+        } else {
+          state.value = value;
+        }
+        state.etcSelected = false;
+      }
+
+      if (props.beforeChange) {
+        props.beforeChange(option, afterChange);
+      } else {
+        afterChange();
+      }
     }
-    state.value = value;
-    state.etcSelected = false;
   },
   selectEtcValue() {
     state.value = props.etcValueFunction && props.etcValueFunction(state.etcValue);

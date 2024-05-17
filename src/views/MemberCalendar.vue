@@ -48,10 +48,11 @@
                     :key="index" v-on:click="methods.clickSchedule($event, mission)"
                 >
                   <div class="schedule-title">
-                    <span class="status" :class="[MissionStatus.fromCode(mission.status)?.simpleName]">{{
+                    <span class="status" :class="[MissionStatus.fromCode(mission.status)?.simpleName]"
+                          :style="{ backgroundColor: `#${MissionStatus.fromCode(mission.status)?.color}` }">{{
                         MissionStatus.fromCode(mission.status)?.name
                       }}</span>
-                    <span>{{ mission.title }}</span>
+                    <span class="title-text">{{ mission.title }}</span>
                   </div>
                 </li>
               </TransitionGroup>
@@ -327,7 +328,7 @@ onMounted(() => {
 
           .daily-schedules {
             list-style: none;
-            padding: 0;
+            padding: 2px;
             flex-grow: 1;
 
             .each-schedule {
@@ -343,7 +344,20 @@ onMounted(() => {
                 border-radius: 5px;
                 cursor: pointer;
                 transition: $duration;
-                padding: 0 3px;
+                padding: 2px 2px;
+                display: flex;
+                width: max-content;
+
+                .status {
+                  font-weight: bold;
+                  padding: 0 3px;
+                  border-radius: 5px;
+                  font-size: .64rem;
+                }
+
+                .title-text {
+                  padding: 0 2px;
+                }
 
                 &:hover {
                   background-color: rgb(0, 0, 0, .2);

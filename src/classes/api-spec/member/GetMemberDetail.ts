@@ -1,5 +1,5 @@
 import DateUtil from "@/utils/DateUtil";
-import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
+import LocalAsset from "@/constant/LocalAsset";
 
 export class ResponseBody {
     private readonly _id: number;
@@ -11,7 +11,7 @@ export class ResponseBody {
 
     constructor(id: number, profile: string, nickname: string, email: string, lastSignedInAt: number, registeredAt: number) {
         this._id = id;
-        this._profile = profile ?? DEFAULT_USER_PROFILE;
+        this._profile = profile ?? LocalAsset.DEFAULT_USER_PROFILE;
         this._nickname = nickname;
         this._email = email;
         this._lastSignedInAt = DateUtil.secondToDateTimeString(lastSignedInAt);

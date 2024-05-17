@@ -1,6 +1,6 @@
 import type {ISelectImageOptionConvertable} from "@/classes/api-spec/SelectImageOption";
 import SelectImageOption from "@/classes/api-spec/SelectImageOption";
-import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
+import LocalAsset from "@/constant/LocalAsset";
 
 export class FamilyMember implements ISelectImageOptionConvertable {
 
@@ -46,7 +46,7 @@ export class FamilyMember implements ISelectImageOptionConvertable {
         return new FamilyMember(
             json.id,
             json.nickname,
-            json.profileImageUrl ?? DEFAULT_USER_PROFILE,
+            json.profileImageUrl ?? LocalAsset.DEFAULT_USER_PROFILE,
             json.role,
             json.isNewMember
         );

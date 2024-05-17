@@ -31,6 +31,7 @@ import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
 import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
+import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 const familyMemberInfoStore = useFamilyMemberInfoStore();
 const familiesViewStore = useFamiliesViewStore();
@@ -38,6 +39,7 @@ const memberInfoStore = useMemberInfoStore();
 const backgroundStore = useBackgroundStore();
 const notificationStore = useAlertStore();
 const profileMemberStore = useProfileMemberStore();
+const ownFamiliesStore = useOwnFamiliesStore();
 const state = reactive({
   nicknameInputValidate: false,
   nicknameSubmittable: false,
@@ -56,7 +58,7 @@ const methods = {
     const nicknameInput: HTMLInputElement = document.getElementsByName('nickname')[0]! as HTMLInputElement;
 
     //기존 닉네임이 같은지
-    if (memberInfoStore.memberInfo?.nickname === nicknameInput.value) {
+    if (!ownFamiliesStore.hasSelectFamily && memberInfoStore.memberInfo?.nickname === nicknameInput.value) {
       state.nicknameInputValidate = false
       state.defaultMessage = "기존과 다른 닉네임으로 설정 해주세요!"
       return false;
@@ -79,6 +81,7 @@ const methods = {
             notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
             if (hasSelectedFamilyId()) {
               await familiesViewStore.fetchFamilyMembersAsync();
+              await ownFamiliesStore.fetchFamilyMembersAsync(true);
               await familyMemberInfoStore.fetchFamilyMemberAsync();
               profileMemberStore.updateProfileMember(familyMemberInfoStore.familyMemberInfo);
             }

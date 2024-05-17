@@ -16,5 +16,7 @@ export default {
         .andPairs([]),
     ChangeMissionAttribute: Spec.of(HttpMethod.PUT, `/v1/family/mission/{missionId}`)
         .andDefaultMessage("패밀리 미션 정보 수정에 실패 하였습니다.")
-        .andPairs([])
+        .andPairs([
+            [-4, "변경할 내용이 없습니다."]
+        ])
 }

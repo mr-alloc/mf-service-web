@@ -1,5 +1,5 @@
-import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
 import type {IProfileMember} from "@/stores/ProfileMemberStore";
+import LocalAsset from "@/constant/LocalAsset";
 
 export class ResponseBody {
     private readonly _memberInfo: FamilyProfileMember
@@ -30,7 +30,7 @@ export class FamilyProfileMember implements IProfileMember {
         this._familyName = familyName;
         this._nickname = nickname;
         this._role = role;
-        this._profile = profile ?? DEFAULT_USER_PROFILE;
+        this._profile = profile ?? LocalAsset.DEFAULT_USER_PROFILE;
     }
 
     get id(): number {
@@ -54,7 +54,7 @@ export class FamilyProfileMember implements IProfileMember {
     }
 
     static ofDefault(): FamilyProfileMember {
-        return new FamilyProfileMember(0, "", "", 0, DEFAULT_USER_PROFILE);
+        return new FamilyProfileMember(0, "", "", 0, LocalAsset.DEFAULT_USER_PROFILE);
     }
 
     static fromJson(json: any): FamilyProfileMember {

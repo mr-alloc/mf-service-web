@@ -7,7 +7,7 @@
         </div>
         <div class="detail-content">
           <BlinkSelect id="mission-type" :options="state.typeOptions"
-                       :current-selected-index="state.typeOptions.findIndex(option => option.value === state.detail?.type)"/>
+                       :current-index="state.typeOptions.findIndex(option => option.value === state.detail?.type)"/>
         </div>
       </li>
       <li class="detail-pair">
@@ -15,27 +15,27 @@
           <span>미션 상태</span>
         </div>
         <div class="detail-content">
-          <SimpleRadio id="mission-status" :options="state.statusOptions"
-                       :current-selected-index="state.statusOptions.findIndex(option => option.value === `${state.detail?.status ?? 0}`)"/>
+          <SimpleRadio id="mission-status" :options="state.statusOptions" :before-change="methods.selectStatus"
+                       :current-index="state.statusOptions.findIndex(option => option.value === `${state.detail?.status ?? 0}`)"/>
         </div>
       </li>
-      <li class="detail-pair">
+      <li class="detail-pair" v-if="ownFamiliesStore.hasSelectFamily">
         <div class="detail-title">
           <span>미션 수행자</span>
         </div>
         <div class="detail-content">
-          <SimpleSelector default-option-name="멤버 선택" :default-selected="2" :before-change="methods.selectMember"
+          <SimpleSelector default-option-name="멤버 선택" :before-change="methods.selectMember" id="assignee"
                           :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"
-                          :current-selected-index="state.members.findIndex(member => member.id === state.detail.assignee)"/>
+                          :current-index="state.members.findIndex(member => member.id === state.detail.assignee)"/>
         </div>
       </li>
-      <li class="detail-pair">
+      <li class="detail-pair" v-if="ownFamiliesStore.hasSelectFamily">
         <div class="detail-title">
           <span>미션 생성자</span>
         </div>
         <div class="detail-content">
           <ImageNicknamePair
-              :option="state.members.find(member => member.id === state.detail.reporter) ?? SelectImageOption.ofDefault()"/>
+              :option="state.members.find(member => member.id === state.detail.reporter) ?? SelectImageOption.of(0, '', LocalAsset.DEFAULT_USER_PROFILE)"/>
         </div>
       </li>
     </ul>
@@ -57,7 +57,10 @@ import {call} from "@/utils/NetworkUtil";
 import FamilyMission from "@/constant/api-meta/FamilyMission";
 import * as ChangeFamilyMissionAttribute from "@/classes/api-spec/mission/ChangeFamilyMissionAttribute";
 import * as GetFamilyMissionDetail from "@/classes/api-spec/family/GetFamilyMissionDetail";
+import * as GetMissionDetail from "@/classes/api-spec/mission/GetMissionDetail";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
+import LocalAsset from "@/constant/LocalAsset";
+import Mission from "@/constant/api-meta/Mission";
 
 
 const backgroundStore = useBackgroundStore();
@@ -82,18 +85,35 @@ const state = reactive({
   detail: {} as GetFamilyMissionDetail.FamilyMissionDetail
 });
 const methods = {
-  selectMember(member: SelectImageOption) {
+  selectMember(member: SelectImageOption, afterChange: () => void) {
     PopupUtil.innerConfirm("미션 수행자 변경", `${member.name}님을 미션 수행자로 지정하시겠습니까?`, () => {
       const requestBody = ChangeFamilyMissionAttribute.RequestBody.forAssignee(props.missionId!, member.id);
+
       call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(FamilyMission.ChangeMissionAttribute, requestBody, (response) => {
         const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
         if (responseBody.assignee === member.id) {
           alertStore.success("수행자 변경", `${member.name}님을 미션 수행자로 지정하였습니다.`);
-          // state.detail.assignee = member.id;
+          afterChange();
         } else {
           alertStore.warning("수행자 변경", `${member.name}님을 미션 수행자로 지정하지 못했습니다.`);
         }
       });
+    });
+  },
+  selectStatus(option: SelectOption, afterChange: () => void) {
+    PopupUtil.innerConfirm("미션 상태 변경", `${option.text}으로 변경하시겠습니까?`, () => {
+      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forStatus(props.missionId!, Number(option.value));
+
+      call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(FamilyMission.ChangeMissionAttribute, requestBody,
+          (response) => {
+            const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
+            if (responseBody.status === parseInt(option.value)) {
+              alertStore.success("상태 변경", `${option.text}으로 변경하였습니다.`);
+              afterChange();
+            } else {
+              alertStore.warning("상태 변경", `${option.text}으로 변경하지 못했습니다.`);
+            }
+          });
     });
   }
 }
@@ -105,7 +125,14 @@ onMounted(() => {
       state.detail = responseBody.mission;
       backgroundStore.readyPopup();
     });
+  } else {
+    call<any, GetMissionDetail.ResponseBody>(Mission.GetMissionDetail, {missionId: props.missionId}, (response) => {
+      const responseBody = GetMissionDetail.ResponseBody.fromJson(response.data);
+      state.detail = responseBody.mission;
+      backgroundStore.readyPopup();
+    });
   }
+
 });
 </script>
 <style scoped lang="scss">

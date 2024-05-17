@@ -4,7 +4,7 @@
       <BlinkInput id="family-name" name="familyName" type="text" label="패밀리명" placeHolder="패밀리명을 입력해주세요"
                   :is-hold="state.inputHold" :validate="methods.validateFamilyName"
                   warning-message="숫자, 영문, 한글로 2~20만 가능합니다."/>
-      <BlinkInput id="family-description" name="familyDescription" type="text" label="패밀리 설명"
+      <BlinkInput id="family-description" name="familyDescription" type="text" label="패밀리 설명 (선택)"
                   placeHolder="패밀리 설명을 입력해주세요"
                   :is-hold="state.inputHold" :no-mark="true"/>
     </div>

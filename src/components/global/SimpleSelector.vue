@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import SelectImageOption from "@/classes/api-spec/SelectImageOption";
+import LocalAsset from "@/constant/LocalAsset";
 
 const select = ref<HTMLSelectElement | null>(null);
 const props = defineProps({
@@ -11,13 +12,12 @@ const props = defineProps({
   defaultOptionName: String,
   allowNoImage: Boolean,
   defaultSelected: Number,
-  currentSelectedIndex: Number,
+  currentIndex: Number,
   beforeChange: Function
 });
-const defaultOption = new SelectImageOption(0, props.defaultOptionName ?? "없음", props.allowNoImage ? "NO_IMAGE" : "");
 const state = reactive({
   isSelectMode: false,
-  selectedIndex: -1
+  selectedOption: SelectImageOption.ofDefault()
 });
 const methods = {
   clickSelector() {
@@ -25,56 +25,59 @@ const methods = {
   },
   selectOption(index: number) {
     state.isSelectMode = false;
-    console.log('index:', index)
-    if (props.options?.length! - 1 < index) {
-      Array.from(select.value?.options!).forEach(option => {
-        option.selected = false;
-      })
+
+    const afterChange = () => {
+      //동일한 값 선택
+      if (props.options?.[index].id === state.selectedOption.id) return;
+
+      Array.from(select.value?.options!).filter((opt, idx) => idx === index).forEach(opt => opt.selected = true);
+      state.selectedOption = props.options?.[index] as SelectImageOption;
     }
-    props.beforeChange && props.beforeChange(props.options?.[index]);
+
+    if (props.beforeChange) {
+      props.beforeChange && props.beforeChange(props.options?.[index], afterChange);
+    } else {
+      afterChange();
+    }
   }
 }
+onMounted(() => {
+  state.selectedOption = props.options?.[0] as SelectImageOption;
+  if (props.currentIndex) {
+    Array.from(select.value?.options!).filter((opt, idx) => idx === props.currentIndex).forEach(opt => opt.selected = true);
+  }
+})
 </script>
 <template>
-  <div class="simple-selector-container" :class="{ 'no-label': !props.title }">
+  <div class="simple-selector-container" :class="{ 'no-label': props.title === undefined }">
     <label :for="props.id" v-if="props.title">{{ props.title }}</label>
     <div class="option-item current-selected-area pushable"
-         :class="{ 'no-image': ((props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.id ?? defaultOption.id) === 0) || ((props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image) === 'NO_IMAGE'), 'blink': state.isSelectMode }"
-         v-on:click="methods.clickSelector()"
-    >
+         :class="{
+            'no-image': state.selectedOption?.image === LocalAsset.DEFAULT_NO_IMAGE,
+            'blink': state.isSelectMode
+        }" v-on:click="methods.clickSelector()">
       <div class="item-image-area"
-           :class="{ collapse: !props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image }">
+           :class="{ collapse: state.selectedOption?.image === LocalAsset.DEFAULT_NO_IMAGE }">
         <div class="option-image-frame">
           <img
-              v-if="props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image"
-              :src="props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.image ?? defaultOption.image"
-              :alt="props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.name ?? defaultOption.name"/>
+              v-if="state.selectedOption?.image !== LocalAsset.DEFAULT_NO_IMAGE"
+              :src="state.selectedOption?.image"
+              :alt="state.selectedOption?.name"/>
         </div>
       </div>
       <div class="option-title">
-        <span class="title-text">{{
-            props.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.name ?? defaultOption.name
-          }}</span>
+        <span class="title-text">{{ state.selectedOption?.name }}</span>
       </div>
     </div>
     <Transition name="down-fade">
       <div class="select-item-area" v-show="state.isSelectMode">
         <ul class="option-item-group">
-          <li class="option-item" v-on:click="methods.selectOption(props.options?.length!)">
-            <div class="item-image-area collapse">
-              <div class="option-image-frame">
-              </div>
-            </div>
-            <div class="option-title">
-              <span class="title-text">{{ defaultOption.name }}</span>
-            </div>
-          </li>
           <li class="option-item" v-for="(option, index) in props.options" :key="index"
+              :class="{ 'no-image': option.image === LocalAsset.DEFAULT_NO_IMAGE }"
               v-on:click="methods.selectOption(index)">
-            <input type="hidden" name="optionId" :value="option.id"/>
             <div class="item-image-area">
               <div class="option-image-frame">
-                <img :src="option.image" :alt="option.name"/>
+                <img v-if="option.image !== LocalAsset.DEFAULT_NO_IMAGE" :src="option.image" :alt="option.name"/>
               </div>
             </div>
             <div class="option-title">
@@ -83,9 +86,7 @@ const methods = {
           </li>
         </ul>
         <select ref="select" :id="props.id" :name="props.id" :style="{ display: 'none' }">
-          <option v-for="(option, index) in props.options" :key="index" :value="option.id"
-                  :selected="props.currentSelectedIndex === index">{{ option.name }}
-          </option>
+          <option v-for="(option, index) in props.options" :key="index" :value="option.id">{{ option.name }}</option>
         </select>
       </div>
     </Transition>
@@ -106,19 +107,6 @@ const methods = {
     width: max-content;
     padding: 3px 8px;
     border-radius: 5px;
-
-    &.no-image {
-
-      .option-image-frame {
-        width: 0;
-
-        img {
-          display: none;
-        }
-      }
-
-    }
-
   }
 
   .select-item-area {
@@ -196,6 +184,19 @@ const methods = {
     }
   }
 
+  &.no-image {
+    .item-image-area {
+      width: 0;
+
+      .option-image-frame {
+        width: 0;
+
+        img {
+          display: none;
+        }
+      }
+    }
+  }
 }
 
 </style>

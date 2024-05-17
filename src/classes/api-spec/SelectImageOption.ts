@@ -1,3 +1,5 @@
+import LocalAsset from "@/constant/LocalAsset";
+
 export default class SelectImageOption {
 
     private readonly _id: number;
@@ -23,7 +25,11 @@ export default class SelectImageOption {
     }
 
     static ofDefault(): SelectImageOption {
-        return new SelectImageOption(0, "", "");
+        return new SelectImageOption(0, "", LocalAsset.DEFAULT_NO_IMAGE);
+    }
+
+    static of(id: number, name: string, image: string) {
+        return new SelectImageOption(id, name, image);
     }
 }
 

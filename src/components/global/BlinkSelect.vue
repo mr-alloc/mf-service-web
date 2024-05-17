@@ -4,7 +4,7 @@
     <div class="option-selector" id="select-values" :class="{ blink: state.selectMode}">
       <div class="selected-value" v-on:click="methods.clickSelector()">
         <span class="value-text">{{
-            props?.options?.[props.currentSelectedIndex ?? select?.selectedIndex!]?.text
+            props?.options?.[props.currentIndex ?? select?.selectedIndex!]?.text
           }}</span>
       </div>
       <Transition name="bounce">
@@ -18,7 +18,7 @@
       </Transition>
     </div>
     <select :id="props.id" class="select-values" ref="select" style="display: none;" :name="props.name">
-      <option v-for="(option, index) in props.options" :selected="props.currentSelectedIndex === index"
+      <option v-for="(option, index) in props.options" :selected="props.currentIndex === index"
               :key="option.value" :value="option.value">{{ option.text }}
       </option>
     </select>
@@ -38,7 +38,7 @@ const props = defineProps({
   options: Array<SelectOption>,
   name: String,
   id: String,
-  currentSelectedIndex: Number,
+  currentIndex: Number,
   beforeChange: Function
 })
 

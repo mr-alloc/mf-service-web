@@ -77,8 +77,11 @@ export async function call<REQ, RES>(
         //replace path variables
         const bodyEntries = Object.entries(body);
         for (const [key, value] of bodyEntries) {
+            const beforeReplace = bindPath;
             bindPath = bindPath.replace(`{${key}}`, `${value}`);
-            delete body[key];
+            if (beforeReplace !== bindPath) {
+                delete body[key];
+            }
         }
     }
     let request;

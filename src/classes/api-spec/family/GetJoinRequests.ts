@@ -1,4 +1,4 @@
-import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
+import LocalAsset from "@/constant/LocalAsset";
 
 export class JoinRequest {
     private readonly _memberId: number;
@@ -10,7 +10,7 @@ export class JoinRequest {
     constructor(memberId: number, nickname: string, profile: string, introduce: string, requestedAt: number) {
         this._memberId = memberId;
         this._nickname = nickname;
-        this._profile = profile ?? DEFAULT_USER_PROFILE;
+        this._profile = profile ?? LocalAsset.DEFAULT_USER_PROFILE;
         this._introduce = introduce;
         this._requestedAt = requestedAt;
     }

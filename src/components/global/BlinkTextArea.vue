@@ -15,7 +15,7 @@ const props = defineProps({
     <label :for="props.id">{{ props.label }}</label>
     <div class="text-area-wrapper">
       <textarea class="blink-input" :id="props.id" :name="props.name" :placeholder="props.placeHolder"
-                :class="{ hold: props.isHold }">하이 모두들 안녕 내가 누군지아니</textarea>
+                :class="{ hold: props.isHold }"></textarea>
     </div>
   </div>
 </template>

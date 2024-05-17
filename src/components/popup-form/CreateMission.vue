@@ -7,7 +7,7 @@
                     :is-hold="state.inputHold" :validate="methods.validateMissionTitle"
                     warning-message="미션 제목을 입력해 주세요." :no-mark="true"
         />
-        <BlinkInput id="mission-content" name="missionContent" type="text" label="부제 (옵션)" placeHolder="미션 부제"
+        <BlinkInput id="mission-content" name="missionContent" type="text" label="부제 (선택)" placeHolder="미션 부제"
                     :is-hold="state.inputHold" :no-mark="true"
         />
         <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
@@ -32,12 +32,13 @@ import {useThrottleFn} from "@vueuse/core";
 import SimpleSelector from "@/components/global/SimpleSelector.vue";
 import Family from "@/constant/api-meta/Family";
 import {ResponseBody} from "@/classes/api-spec/family/GetFamilyMember";
-import type SelectImageOption from "@/classes/api-spec/SelectImageOption";
+import SelectImageOption from "@/classes/api-spec/SelectImageOption";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import DateUtil from "@/utils/DateUtil";
+import LocalAsset from "@/constant/LocalAsset";
 
-const notificationStore = useAlertStore();
+const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
 const emitter = inject("emitter");
@@ -65,7 +66,7 @@ const state = reactive({
     new SelectOption("604800", "일주일"),
     new SelectOption("2592000", "30일"),
   ],
-  members: [] as Array<SelectImageOption>
+  members: [SelectImageOption.of(0, "멤버선택", LocalAsset.DEFAULT_NO_IMAGE)]
 });
 
 const methods = {
@@ -89,7 +90,7 @@ const methods = {
     if (hasSelectedFamilyId()) {
       call<any, ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
         const responseBody = ResponseBody.fromJson(response.data);
-        state.members = responseBody.members.map((member) => member.toSelectImageOption());
+        responseBody.members.forEach((member) => state.members.push(member.toSelectImageOption()));
       })
     }
   }
@@ -102,7 +103,7 @@ onMounted(() => {
   emitter.on("validateCreateMissionForm", useThrottleFn(() => {
     methods.checkAllInput();
     if (!state.isSubmittable) {
-      notificationStore.alert(AlertType.INFO, "생성 가이드", "입력되지 않은 값이 있는것 같아요! 한번 더 확인후 생성해주세요!")
+      alertStore.alert(AlertType.INFO, "생성 가이드", "입력되지 않은 값이 있는것 같아요! 한번 더 확인후 생성해주세요!")
       return;
     }
 
@@ -115,20 +116,24 @@ onMounted(() => {
     const requestBody = {
       name: missionTitleInput.value,
       subName: missionContentInput.value,
-      assignee: parseInt(assigneeInput.value),
+      assignee: parseInt(assigneeInput?.value),
       type: missionTypeSelect.value,
       startDate: DateUtil.toUtc(props.startDate ?? DateUtil.getTodayStr(DateUtil.DEFAULT_DATE_FORMAT), DateUtil.DEFAULT_DATE_FORMAT),
-      deadline: missionDeadlineInput.value
+      deadline: missionDeadlineInput?.value
+    }
+    if (assigneeInput?.value === '0') {
+      alertStore.info("수행자 미지정", "수행자를 선택해 주세요.");
+      return;
     }
 
-    if (missionDeadlineInput.value === '') {
-      notificationStore.alert(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
+    if (missionDeadlineInput?.value === '') {
+      alertStore.alert(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
       return;
     }
 
     call<any, any>(Mission.CreateMission, requestBody, (response) => {
           const missionName = missionTitleInput.value;
-          notificationStore.alert(AlertType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
+          alertStore.alert(AlertType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
           emitter.emit("drawMemberCalendar")
           //이벤트 발행 취소
           emitter.off("validateCreateMissionForm")
@@ -137,7 +142,7 @@ onMounted(() => {
         (spec, error) => {
           const body = error.response.data;
           const message = spec.getMessage(body.code);
-          notificationStore.alert(AlertType.WARNING, "미션 생성 오류", message);
+          alertStore.alert(AlertType.WARNING, "미션 생성 오류", message);
         }
     )
 

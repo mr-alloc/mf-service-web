@@ -16,7 +16,7 @@ function popupCreateMission(emitter: any, startDate: string) {
             backgroundStore.returnGlobalPopup()
             emitter.off("validateCreateMissionForm")
         }, () => {
-            alertStore.alert(AlertType.WARNING, "미션생성 취소", "이 메세지가 사라지기 전까지 한번 더 취소 버튼을 누르시면 취소되요!", 5)
+            alertStore.alert(AlertType.WARNING, "미션생성 취소", "이 메세지가 사라지기 전까지 한번 더 취소 버튼을 누르시면 취소돼요!", 5)
             return 5;
         });
     backgroundStore.useGlobalPopup(createMissionPopup);
@@ -35,7 +35,7 @@ function popupCreateFamily(emitter: any) {
             backgroundStore.returnGlobalPopup()
             emitter.off("validateCreateFamilyForm")
         }, () => {
-            alertStore.alert(AlertType.WARNING, "패밀리 생성 취소", "이 메세지가 사라지기 전까지 한번 더 취소 버튼을 누르시면 취소되요!", 5)
+            alertStore.alert(AlertType.WARNING, "패밀리 생성 취소", "이 메세지가 사라지기 전까지 한번 더 취소 버튼을 누르시면 취소돼요!", 5)
             return 5;
         });
     backgroundStore.useGlobalPopup(createFamilyPopup);

@@ -3,9 +3,9 @@ import {ref} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {removeAccessToken} from "@/utils/LocalCache";
-import {DEFAULT_USER_PROFILE} from "@/constant/LocalAsset";
 import {useRouter} from "vue-router";
 import {type IProfileMember, useProfileMemberStore} from "@/stores/ProfileMemberStore";
+import LocalAsset from "@/constant/LocalAsset";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<ProfileMember>(ProfileMember.ofDefault());
@@ -79,7 +79,7 @@ export class ProfileMember implements IProfileMember {
         this._id = id;
         this._nickname = nickname;
         this._role = role;
-        this._profile = profile ?? DEFAULT_USER_PROFILE;
+        this._profile = profile ?? LocalAsset.DEFAULT_USER_PROFILE;
     }
 
     get role(): number {
