@@ -1,7 +1,9 @@
 @import './base.scss';
 
 $super-light-signature-purple: #dcc6e9;
+$little-light-signature-purple: #b18ce1;
 $light-signature-purple: #be66f5;
+$greater-light-signature-purple: #9d42ee;
 $signature-purple: #8a1acb;
 $text-signature-purple: #3d0394;
 
@@ -10,6 +12,10 @@ $standard-gray-in-white: #c2c1c1;
 $standard-weight-gray-in-white: #a4a4a4;
 $standard-dark-gray-in-white: #848383;
 $standard-clean-black: #151515;
+
+$soft-green: #3d9c3d;
+$soft-orange: #f5a623;
+$soft-red: #ce3737;
 
 $standard-box-shadow: 0 0 10px 0 rgba(65, 65, 65, 0.75);
 
@@ -64,6 +70,7 @@ button.btn-primary {
   border-radius: 5px;
   width: 90%;
   transition: $duration;
+  user-select: none;
 
   &:hover {
     cursor: pointer;
@@ -289,3 +296,51 @@ textarea.blink-input {
   }
 }
 
+.signature-shiny {
+  animation: signature-shiny 1s infinite ease;
+}
+
+@keyframes signature-shiny {
+  0% {
+  }
+
+  10% {
+    box-shadow: 0 0 2px 0 $super-light-signature-purple;
+  }
+
+  20% {
+    box-shadow: 0 0 4px 0 $little-light-signature-purple;
+  }
+
+  30% {
+    box-shadow: 0 0 6px 0 $light-signature-purple;
+  }
+
+  40% {
+    box-shadow: 0 0 8px 0 $greater-light-signature-purple;
+  }
+
+  50% {
+    box-shadow: 0 0 10px 0 $signature-purple;
+  }
+
+  60% {
+    box-shadow: 0 0 8px 0 $greater-light-signature-purple;
+  }
+
+  70% {
+    box-shadow: 0 0 6px 0 $light-signature-purple;
+  }
+
+  80% {
+    box-shadow: 0 0 4px 0 $little-light-signature-purple;
+  }
+
+  90% {
+    box-shadow: 0 0 2px 0 $super-light-signature-purple;
+  }
+
+  100% {
+  }
+
+}

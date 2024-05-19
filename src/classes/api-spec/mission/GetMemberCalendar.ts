@@ -4,8 +4,12 @@ import DateUtil from "@/utils/DateUtil";
 export interface IMission {
     id: number;
     status: number;
-    title: string;
+    type: number;
+    name: string;
     startDate: number;
+    deadline?: number;
+    startStamp?: number;
+    endStamp?: number;
 
     get groupingDate(): string;
 }
@@ -13,17 +17,19 @@ export interface IMission {
 export class FamilyMission implements IMission {
     private readonly _id: number;
     private readonly _status: number;
-    private readonly _title: string;
-    private readonly _startTime: number;
-    private readonly _endTime: number;
+    private readonly _type: number;
+    private readonly _name: string;
     private readonly _startDate: number;
+    private readonly _startStamp: number;
+    private readonly _endStamp: number;
 
-    constructor(id: number, status: number, title: string, startTime: number, endTime: number, startDate: number) {
+    constructor(id: number, status: number, type: number, name: string, startStamp: number, endStamp: number, startDate: number) {
         this._id = id;
         this._status = status;
-        this._title = title;
-        this._startTime = startTime;
-        this._endTime = endTime;
+        this._type = type;
+        this._name = name;
+        this._startStamp = startStamp;
+        this._endStamp = endStamp;
         this._startDate = startDate;
     }
 
@@ -35,20 +41,24 @@ export class FamilyMission implements IMission {
         return this._status;
     }
 
-    get title(): string {
-        return this._title;
+    get type(): number {
+        return this._type;
+    }
+
+    get name(): string {
+        return this._name;
     }
 
     get startDate(): number {
         return this._startDate;
     }
 
-    get startTime(): number {
-        return this._startTime;
+    get startStamp(): number {
+        return this._startStamp;
     }
 
-    get endTime(): number {
-        return this._endTime;
+    get endStamp(): number {
+        return this._endStamp;
     }
 
     get groupingDate(): string {
@@ -57,7 +67,7 @@ export class FamilyMission implements IMission {
 
 
     static fromJson(json: any): FamilyMission {
-        return new FamilyMission(json.id, json.status, json.name, json.startTime ?? 0, json.endTime ?? 0, json.startDate);
+        return new FamilyMission(json.id, json.status, json.type, json.name, json.startStamp ?? 0, json.endStamp ?? 0, json.startDate);
     }
 
 }
@@ -65,14 +75,16 @@ export class FamilyMission implements IMission {
 export class CalendarMission implements IMission {
     private readonly _id: number;
     private readonly _status: number;
-    private readonly _title: string;
+    private readonly _type: number;
+    private readonly _name: string;
     private readonly _deadline: number;
     private readonly _startDate: number;
 
-    constructor(id: number, status: number, title: string, deadline: number, startDate: number) {
+    constructor(id: number, status: number, type: number, name: string, deadline: number, startDate: number) {
         this._id = id;
         this._status = status;
-        this._title = title;
+        this._type = type;
+        this._name = name;
         this._deadline = deadline;
         this._startDate = startDate;
     }
@@ -85,8 +97,12 @@ export class CalendarMission implements IMission {
         return this._status;
     }
 
-    get title(): string {
-        return this._title;
+    get type(): number {
+        return this._type;
+    }
+
+    get name(): string {
+        return this._name;
     }
 
     get deadline(): number {
@@ -102,7 +118,7 @@ export class CalendarMission implements IMission {
     }
 
     static fromJson(json: any): CalendarMission {
-        return new CalendarMission(json.id, json.status, json.name, json.deadline ?? 0, json.startDate);
+        return new CalendarMission(json.id, json.status, json.type, json.name, json.deadline ?? 0, json.startDate);
     }
 }
 
@@ -161,7 +177,7 @@ export class ResponseBody {
         return this._holidays;
     }
 
-    static fromJson(json: any, missionMapper: (mission: any) => IMission): ResponseBody {
+    static fromJson(json: any, missionMapper: (mission: IMission) => IMission): ResponseBody {
         const calendar = json.calendar.map(missionMapper);
         const holidays = json.holidays.map((holiday: any) => CalendarHoliday.fromJson(holiday));
         return new ResponseBody(calendar, holidays);

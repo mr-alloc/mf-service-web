@@ -24,4 +24,8 @@ export default class SelectOption {
     static of(value: string, text: string, color?: string): SelectOption {
         return new SelectOption(value, text, color);
     }
+
+    static ofDefault() {
+        return new SelectOption("", "선택", "00000")
+    }
 }

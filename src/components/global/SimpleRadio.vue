@@ -61,7 +61,6 @@ const methods = {
   },
   selectValue(value: string, option?: SelectOption) {
     if (option) {
-
       const afterChange = () => {
         if (state.value == value) {
           state.value = '';

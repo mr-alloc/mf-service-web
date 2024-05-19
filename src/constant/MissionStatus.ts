@@ -1,14 +1,14 @@
 import CollectionUtil from "@/utils/CollectionUtil";
+import SelectOption from "@/classes/SelectOption";
 
 export default class MissionStatus {
 
     static readonly CREATED = new MissionStatus(0, "created", "대기", "e0e0e0");
     static readonly IN_PROGRESS = new MissionStatus(1, "in-progress", "진행중", "eddbfb");
     static readonly COMPLETED = new MissionStatus(2, "completed", "완료", "c8ffd4");
-    static readonly PAUSED = new MissionStatus(3, "paused", "정지", "fcd1d1");
-    static readonly DELETED = new MissionStatus(4, "deleted", "삭제", "");
+    static readonly DELETED = new MissionStatus(3, "deleted", "삭제", "");
 
-    static readonly CACHED = CollectionUtil.toMap(MissionStatus.values(), (status) => status.code);
+    private static readonly CACHED = CollectionUtil.toMap(MissionStatus.values(), (status) => status.code);
 
 
     private readonly _code: number;
@@ -33,7 +33,6 @@ export default class MissionStatus {
             MissionStatus.CREATED,
             MissionStatus.IN_PROGRESS,
             MissionStatus.COMPLETED,
-            MissionStatus.PAUSED,
             MissionStatus.DELETED
         ];
     }
@@ -52,5 +51,9 @@ export default class MissionStatus {
 
     get color(): string {
         return this._color;
+    }
+
+    static toSelectOption(status: MissionStatus): SelectOption {
+        return new SelectOption(status.code.toString(), status.name, status.color);
     }
 }

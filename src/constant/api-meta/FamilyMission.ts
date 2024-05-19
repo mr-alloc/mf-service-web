@@ -18,5 +18,10 @@ export default {
         .andDefaultMessage("패밀리 미션 정보 수정에 실패 하였습니다.")
         .andPairs([
             [-4, "변경할 내용이 없습니다."]
+        ]),
+    DeleteFamilyMission: Spec.of(HttpMethod.DELETE, `/v1/family/mission/{missionId}`)
+        .andPairs([
+            [-2, "존재하지 않는 미션입니다."],
+            [-5, "잘못된 접근입니다."]
         ])
 }

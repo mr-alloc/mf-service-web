@@ -52,7 +52,7 @@
                           :style="{ backgroundColor: `#${MissionStatus.fromCode(mission.status)?.color}` }">{{
                         MissionStatus.fromCode(mission.status)?.name
                       }}</span>
-                    <span class="title-text">{{ mission.title }}</span>
+                    <span class="title-text">{{ mission.name }}</span>
                   </div>
                 </li>
               </TransitionGroup>
@@ -108,6 +108,7 @@ const methods = {
   },
   drawCalendar() {
     state.calendarTitle = state.thisMonth.get('year') + "년 " + (state.thisMonth.get('month') + 1) + "월"
+
     const startOfThisMonth = moment(state.thisMonth).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     state.startDate = startOfCalendar.clone();

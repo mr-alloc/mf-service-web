@@ -23,6 +23,13 @@ const methods = {
   },
   clickInnerBackground(event: MouseEvent) {
     event.stopPropagation();
+  },
+  clickPopupArea(event: MouseEvent) {
+    backgroundStore.doIfHasPopup(popup => {
+      if (!popup.hasButtonProxy()) {
+        event.stopPropagation();
+      }
+    })
   }
 }
 const props = defineProps({
@@ -32,7 +39,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="global-popup-area">
+  <div class="global-popup-area" v-on:click="methods.clickPopupArea">
     <Transition name="fall-fade">
       <div class="global-popup-wrapper" v-show="backgroundStore.needPopup"
            :class="[backgroundStore.popupInfo?.type, { 'prepare': backgroundStore.isPopupPrepare }]"
@@ -181,7 +188,7 @@ const props = defineProps({
   .inner-background {
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     display: flex;

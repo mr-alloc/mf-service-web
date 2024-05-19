@@ -35,7 +35,7 @@ const methods = {
     }
 
     if (props.beforeChange) {
-      props.beforeChange && props.beforeChange(props.options?.[index], afterChange);
+      props.beforeChange(props.options?.[index], afterChange);
     } else {
       afterChange();
     }

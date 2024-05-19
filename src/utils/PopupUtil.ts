@@ -74,7 +74,7 @@ function popupRequestJoinFamily(emitter: any) {
 function popupMissionDetail(mission: IMission) {
     const backgroundStore = useBackgroundStore();
 
-    const missionDetailPopup = new CurrentPopup(PopupType.NORMAL, mission.title)
+    const missionDetailPopup = new CurrentPopup(PopupType.NORMAL, '미션 상세정보')
         .addBodyComponent("MissionDetail", {missionId: mission.id})
         .addButton("닫기", () => backgroundStore.returnGlobalPopup())
         .addProgress();
@@ -108,7 +108,7 @@ function alert(title: string, message: string) {
     backgroundStore.useGlobalPopup(alertPopup);
 }
 
-function innerConfirm(title: string, description: string, ifConfirm: () => void) {
+function innerConfirm(title: string, description: string, ifConfirm: () => void, ifCancel?: () => void) {
     const backgroundStore = useBackgroundStore();
 
     const confirmPopup = new CurrentPopup(PopupType.NORMAL, title, description)
@@ -117,6 +117,7 @@ function innerConfirm(title: string, description: string, ifConfirm: () => void)
             backgroundStore.returnInnerPopup()
         })
         .addButton("취소", () => {
+            ifCancel && ifCancel();
             backgroundStore.returnInnerPopup()
         });
 

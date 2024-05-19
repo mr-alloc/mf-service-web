@@ -3,14 +3,12 @@
     <label v-if="props.title" :for="props.id" class="select-title">{{ props.title }}</label>
     <div class="option-selector" id="select-values" :class="{ blink: state.selectMode}">
       <div class="selected-value" v-on:click="methods.clickSelector()">
-        <span class="value-text">{{
-            props?.options?.[props.currentIndex ?? select?.selectedIndex!]?.text
-          }}</span>
+        <span class="value-text">{{ state.selectOption.text }}</span>
       </div>
       <Transition name="bounce">
         <ul class="select-option-wrapper" v-show="state.selectMode">
-          <li v-for="option in props.options"
-              :key="option.value" class="select-option" v-on:click="methods.selectValue(option.value)"
+          <li v-for="(option, index) in props.options"
+              :key="option.value" class="select-option" v-on:click="methods.selectOption(index)"
               :class="{ selected: option.value === select?.value }">
             <span class="option-text">{{ option.text }}</span>
           </li>
@@ -18,7 +16,7 @@
       </Transition>
     </div>
     <select :id="props.id" class="select-values" ref="select" style="display: none;" :name="props.name">
-      <option v-for="(option, index) in props.options" :selected="props.currentIndex === index"
+      <option v-for="(option) in props.options"
               :key="option.value" :value="option.value">{{ option.text }}
       </option>
     </select>
@@ -26,11 +24,12 @@
 </template>
 <script setup lang="ts">
 import SelectOption from "@/classes/SelectOption";
-import {reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 
 const select = ref<HTMLSelectElement | null>(null);
 const state = reactive({
   selectMode: false,
+  selectOption: SelectOption.ofDefault(),
 })
 
 const props = defineProps({
@@ -46,12 +45,30 @@ const methods = {
   clickSelector() {
     state.selectMode = !state.selectMode;
   },
-  selectValue(value: string) {
-    const selectElement: HTMLSelectElement = select.value!;
-    selectElement.value = value;
+  selectOption(index: number) {
     state.selectMode = false;
+
+    const afterChange = () => {
+      if (props.options?.[index].value === state.selectOption.value) return;
+
+      Array.from(select.value?.options!).filter((opt, idx) => idx === index).forEach(opt => opt.selected = true);
+      state.selectOption = props.options?.[index] as SelectOption;
+    }
+
+    if (props.beforeChange) {
+      props.beforeChange(props.options?.[index], afterChange);
+    } else {
+      afterChange();
+    }
   }
 }
+
+onMounted(() => {
+  state.selectOption = props.options?.[0] as SelectOption;
+  if (props.currentIndex) {
+    Array.from(select.value?.options!).filter((opt, idx) => idx === props.currentIndex).forEach(opt => opt.selected = true);
+  }
+})
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";

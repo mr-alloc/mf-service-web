@@ -10,6 +10,7 @@ import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import {type AlertStore, AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
+import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
@@ -69,7 +70,8 @@ export async function call<REQ, RES>(
     success: ((value: AxiosResponse<RES, any>) => any) | null | undefined,
     error?: ((consumeSpec: Spec, axiosError: any) => any) | null | undefined
 ) {
-    const targetSpec = hasSelectedFamilyId() && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
+    const ownFamiliesStore = useOwnFamiliesStore();
+    const targetSpec = ownFamiliesStore.hasSelectFamily && hasSelectedFamilyId() && spec.hasFamilyApiSpec() ? spec.familyApiSpec : spec;
     let bindPath = targetSpec.path;
     pathVariableRE.lastIndex = 0;
     const pathVariables = pathVariableRE.exec(bindPath);
