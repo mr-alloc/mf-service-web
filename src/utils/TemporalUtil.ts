@@ -31,7 +31,6 @@ function secondsToTimeStr(remainSeconds: number) {
     const hour = String(`${hours}`).padStart(2, "0");
     const minute = String(`${minutes}`).padStart(2, "0");
     const second = String(`${seconds}`).padStart(2, "0");
-    console.log('isNegative', isNegative);
     return negativeStr + daysStr + (hasSecondsMod ? `${hour}:${minute}:${second}` : '');
 }
 

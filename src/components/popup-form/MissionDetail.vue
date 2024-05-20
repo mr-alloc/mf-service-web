@@ -79,6 +79,7 @@ import ModifiableTitle from "@/components/global/ModifiableTitle.vue";
 import TemporalUtil from "../../utils/TemporalUtil";
 import ExpandableFeatureMenuButton from "@/components/global/ExpandableFeatureMenuButton.vue";
 import ExecutableFeature from "@/classes/api-spec/ExecutableFeature";
+import MissionType from "@/constant/MissionType";
 
 
 const emitter = inject("emitter");
@@ -183,17 +184,18 @@ const methods = {
           });
     });
   },
-  calcRemainTime() {
-    if (state.remainSeconds === 0) {
-      state.remainTimeStr = '만료';
-      return;
+  calcRemainTime(currentStatus: MissionStatus) {
+    switch (currentStatus) {
+      case MissionStatus.COMPLETED:
+        state.remainTimeStr = '완료';
+        return;
     }
     state.remainTimeStr = TemporalUtil.secondsToTimeStr(state.remainSeconds--);
   },
   countRemainTime() {
     state.remainSeconds = state.detail.remainSeconds;
     const currentStatus = MissionStatus.fromCode(state.detail.status);
-    methods.calcRemainTime();
+    methods.calcRemainTime(currentStatus);
     if (currentStatus === MissionStatus.IN_PROGRESS) {
       setInterval(methods.calcRemainTime, 1000);
     }
@@ -209,12 +211,8 @@ const methods = {
 }
 const state = reactive({
   members: ownFamiliesStore.members.map(member => member.toSelectImageOption()),
-  statusOptions: MissionStatus.values().map(MissionStatus.toSelectOption),
-  typeOptions: [
-    new SelectOption("1", "미션"),
-    new SelectOption("2", "미션팩"),
-    new SelectOption("3", "스텝미션"),
-  ],
+  statusOptions: MissionStatus.values().filter(MissionStatus.NOT_DELETED_FILTER).map(MissionStatus.toSelectOption),
+  typeOptions: MissionType.values().map(MissionType.toSelectOption),
   features: [
     new ExecutableFeature('삭제', methods.deleteMission)
   ],
@@ -305,6 +303,7 @@ onMounted(() => {
       }
 
       .remain-time {
+        padding: 0 20px;
         font-size: 1.2rem;
         font-weight: bold;
 

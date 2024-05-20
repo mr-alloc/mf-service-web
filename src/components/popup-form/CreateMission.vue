@@ -2,18 +2,20 @@
   <div class="create-mission-container">
     <div class="container-body">
       <div class="mission-form" id="create-mission-form">
-        <BlinkSelect id="mission-type" title="미션종류" :options="state.missionOptions" name="missionType"/>
-        <BlinkInput id="mission-title" name="missionTitle" type="text" label="제목" placeHolder="미션 제목"
+        <BlinkSelect id="mission-type" title="미션종류" :options="state.missionOptions" name="missionType"
+                     :before-change="methods.changeType"/>
+        <BlinkInput id="mission-title" name="missionTitle" type="text" label="제목" placeHolder="[11:00] 필라테스 예약"
                     :is-hold="state.inputHold" :validate="methods.validateMissionTitle"
                     warning-message="미션 제목을 입력해 주세요." :no-mark="true"
         />
-        <BlinkInput id="mission-content" name="missionContent" type="text" label="부제 (선택)" placeHolder="미션 부제"
+        <BlinkInput id="mission-content" name="missionContent" type="text" label="설명 (선택)" placeHolder="설명을 입력해주세요."
                     :is-hold="state.inputHold" :no-mark="true"
         />
         <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
                         :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"/>
         <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한 (미션 시작시 적용)"
                      :etc-option="new SelectOption('0', '기타(일)')"
+                     v-if="state.missionType.isNotIn(MissionType.SCHEDULE)"
                      etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
       </div>
     </div>
@@ -37,6 +39,7 @@ import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import DateUtil from "@/utils/DateUtil";
 import LocalAsset from "@/constant/LocalAsset";
+import MissionType from "@/constant/MissionType";
 
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
@@ -46,6 +49,8 @@ const props = defineProps({
   startDate: String
 })
 const state = reactive({
+  missionType: MissionType.SCHEDULE,
+
   inputHold: false,
   isSubmittable: false,
 
@@ -54,11 +59,7 @@ const state = reactive({
   missionContentInputValidate: false,
 
   //미션 종류
-  missionOptions: [
-    new SelectOption("1", "미션"),
-    new SelectOption("2", "미션팩"),
-    new SelectOption("3", "스텝미션"),
-  ],
+  missionOptions: MissionType.values().map(MissionType.toSelectOption),
   deadlineOptions: [
     new SelectOption("3600", "한시간"),
     new SelectOption("21600", "6시간"),
@@ -93,6 +94,12 @@ const methods = {
         responseBody.members.forEach((member) => state.members.push(member.toSelectImageOption()));
       })
     }
+  },
+  changeType(option: SelectOption, afterChange: () => void) {
+    state.missionType = MissionType.fromValue(parseInt(option.value));
+    //셀렉터 상태변경
+    afterChange();
+    //화면상태 변경
   }
 }
 
@@ -147,7 +154,7 @@ onMounted(() => {
     )
 
   }, 2000))
-})
+});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";
@@ -157,8 +164,5 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   padding: 20px;
-
-  .container-body {
-  }
 }
 </style>

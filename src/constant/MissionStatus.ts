@@ -23,8 +23,8 @@ export default class MissionStatus {
         this._color = color;
     }
 
-    static fromCode(code: number): MissionStatus | undefined {
-        return MissionStatus.CACHED.get(code);
+    static fromCode(code: number): MissionStatus {
+        return MissionStatus.CACHED.get(code) ?? MissionStatus.CREATED;
     }
 
 
@@ -55,5 +55,10 @@ export default class MissionStatus {
 
     static toSelectOption(status: MissionStatus): SelectOption {
         return new SelectOption(status.code.toString(), status.name, status.color);
+    }
+
+
+    static NOT_DELETED_FILTER(status: MissionStatus): boolean {
+        return status !== MissionStatus.DELETED;
     }
 }
