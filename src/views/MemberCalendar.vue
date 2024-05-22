@@ -131,8 +131,8 @@ const methods = {
         (res) => {
           const responseBody = ResponseBody.fromJson(res.data, (mission) => {
             return hasSelectedFamilyId()
-                ? CalendarMission.fromJson(mission)
-                : FamilyMission.fromJson(mission)
+                ? FamilyMission.fromJson(mission)
+                : CalendarMission.fromJson(mission)
           });
 
           state.memberCalendarMap = CollectionUtil.groupBy<string, IMission>(
@@ -348,12 +348,22 @@ onMounted(() => {
                 padding: 2px 2px;
                 display: flex;
                 width: max-content;
+                justify-content: center;
+                align-items: center;
 
                 .status {
                   font-weight: bold;
-                  padding: 0 3px;
+                  padding: 2px 3px;
                   border-radius: 5px;
                   font-size: .64rem;
+
+                  &.always {
+                    color: crimson;
+                  }
+
+                  &.completed {
+                    color: #016401;
+                  }
                 }
 
                 .title-text {

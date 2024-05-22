@@ -5,7 +5,7 @@
       <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features"/>
     </div>
     <ul class="detail-specifications-group">
-      <li class="detail-pair">
+      <li class="detail-pair" v-if="MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
         <div class="detail-title">
           <span>미션 종류</span>
         </div>
@@ -14,7 +14,7 @@
                        :current-index="state.typeOptions.findIndex(option => option.value === `${state.detail?.type}`)"/>
         </div>
       </li>
-      <li class="detail-pair">
+      <li class="detail-pair" v-if="MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
         <div class="detail-title">
           <span>미션 상태</span>
         </div>
@@ -23,7 +23,8 @@
                        :current-index="state.statusOptions.findIndex(option => option.value === `${state.detail?.status ?? 0}`)"/>
         </div>
       </li>
-      <li class="detail-pair" v-if="ownFamiliesStore.hasSelectFamily">
+      <li class="detail-pair"
+          v-if="ownFamiliesStore.hasSelectFamily && MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
         <div class="detail-title">
           <span>미션 수행자</span>
         </div>
@@ -33,7 +34,8 @@
                           :current-index="state.members.findIndex(member => member.id === state.detail.assignee)"/>
         </div>
       </li>
-      <li class="detail-pair" v-if="ownFamiliesStore.hasSelectFamily">
+      <li class="detail-pair"
+          v-if="ownFamiliesStore.hasSelectFamily && MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
         <div class="detail-title">
           <span>미션 생성자</span>
         </div>
@@ -241,14 +243,16 @@ onMounted(() => {
     flex-direction: row;
     margin: 20px 0;
     justify-content: flex-start;
-
+    border: 1px solid $standard-light-gray-in-white;
+    border-radius: 10px;
+    width: max-content;
 
     .detail-pair {
       display: flex;
       flex-direction: column;
       width: max-content;
-      border: 1px solid $standard-light-gray-in-white;
       border-collapse: collapse;
+      border-radius: 5px;
 
       .detail-title {
         overflow: hidden;
@@ -275,6 +279,10 @@ onMounted(() => {
         .detail-title {
           border-top-left-radius: 5px;
         }
+      }
+
+      &:not(:last-child) {
+        border-right: 1px solid $standard-light-gray-in-white;
       }
 
       &:last-child {

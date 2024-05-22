@@ -7,6 +7,7 @@ export default class MissionStatus {
     static readonly IN_PROGRESS = new MissionStatus(1, "in-progress", "진행중", "eddbfb");
     static readonly COMPLETED = new MissionStatus(2, "completed", "완료", "c8ffd4");
     static readonly DELETED = new MissionStatus(3, "deleted", "삭제", "");
+    static readonly ALWAYS = new MissionStatus(4, "always", "일정", "fce1e6");
 
     private static readonly CACHED = CollectionUtil.toMap(MissionStatus.values(), (status) => status.code);
 
@@ -33,7 +34,8 @@ export default class MissionStatus {
             MissionStatus.CREATED,
             MissionStatus.IN_PROGRESS,
             MissionStatus.COMPLETED,
-            MissionStatus.DELETED
+            MissionStatus.DELETED,
+            MissionStatus.ALWAYS
         ];
     }
 
@@ -52,6 +54,15 @@ export default class MissionStatus {
     get color(): string {
         return this._color;
     }
+
+    isNotIn(...others: MissionStatus[]): boolean {
+        return others.every(other => other.code !== this.code);
+    }
+
+    isIn(...others: MissionStatus[]): boolean {
+        return others.some(other => other.code === this.code);
+    }
+
 
     static toSelectOption(status: MissionStatus): SelectOption {
         return new SelectOption(status.code.toString(), status.name, status.color);

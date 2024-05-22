@@ -2,6 +2,7 @@ import {CurrentPopup, PopupType} from "@/stores/status/CurrentPopup";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import type {IMission} from "@/classes/api-spec/mission/GetMemberCalendar";
+import MissionType from "@/constant/MissionType";
 
 function popupCreateMission(emitter: any, startDate: string) {
     const backgroundStore = useBackgroundStore();
@@ -73,8 +74,9 @@ function popupRequestJoinFamily(emitter: any) {
 
 function popupMissionDetail(mission: IMission) {
     const backgroundStore = useBackgroundStore();
+    console.log('mission', mission);
 
-    const missionDetailPopup = new CurrentPopup(PopupType.NORMAL, '미션 상세정보')
+    const missionDetailPopup = new CurrentPopup(PopupType.NORMAL, `${MissionType.fromValue(mission.type).name} 상세정보`)
         .addBodyComponent("MissionDetail", {missionId: mission.id})
         .addButton("닫기", () => backgroundStore.returnGlobalPopup())
         .addProgress();

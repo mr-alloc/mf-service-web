@@ -2,6 +2,8 @@
   <div class="create-mission-container">
     <div class="container-body">
       <div class="mission-form" id="create-mission-form">
+        <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
+                        :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"/>
         <BlinkSelect id="mission-type" title="미션종류" :options="state.missionOptions" name="missionType"
                      :before-change="methods.changeType"/>
         <BlinkInput id="mission-title" name="missionTitle" type="text" label="제목" placeHolder="[11:00] 필라테스 예약"
@@ -11,8 +13,7 @@
         <BlinkInput id="mission-content" name="missionContent" type="text" label="설명 (선택)" placeHolder="설명을 입력해주세요."
                     :is-hold="state.inputHold" :no-mark="true"
         />
-        <SimpleSelector id="mission-assignee" name="assignee" title="수행자" default-option-name="멤버 선택"
-                        :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"/>
+        <OptionalTimePicker/>
         <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한 (미션 시작시 적용)"
                      :etc-option="new SelectOption('0', '기타(일)')"
                      v-if="state.missionType.isNotIn(MissionType.SCHEDULE)"
@@ -40,6 +41,7 @@ import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import DateUtil from "@/utils/DateUtil";
 import LocalAsset from "@/constant/LocalAsset";
 import MissionType from "@/constant/MissionType";
+import OptionalTimePicker from "@/components/global/OptionalTimePicker.vue";
 
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();

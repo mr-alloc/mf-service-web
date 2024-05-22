@@ -4,7 +4,7 @@ import SelectOption from "@/classes/SelectOption";
 export default class MissionType {
 
     static readonly NONE = new MissionType(-1, '');
-    static readonly SCHEDULE = new MissionType(0, '스케줄');
+    static readonly SCHEDULE = new MissionType(0, '일정');
     static readonly MISSION = new MissionType(1, '일반미션');
     static readonly PACKAGE = new MissionType(2, '미션팩');
     static readonly STEP = new MissionType(3, '단계미션');
@@ -36,6 +36,7 @@ export default class MissionType {
     }
 
     static fromValue(value: number): MissionType {
+        console.log('value', value);
         return MissionType.CACHED.get(value) ?? MissionType.NONE;
     }
 
