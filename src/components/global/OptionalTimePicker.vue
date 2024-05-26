@@ -2,6 +2,7 @@
   <div class="optional-time-picker-container">
     <label v-if="props.label" :for="props.id">{{ props.label }}</label>
     <div class="time-picker-wrapper">
+      <input type="hidden" :id="props.id" :name="props.name"/>
       <button class="active-button" type="button" v-on:click="methods.activatePicker">
         <FontAwesomeIcon :icon="['fas', state.isActive ? 'minus' : 'plus']"/>
         <span class="button-text">{{ state.isActive ? '취소' : '지정' }}</span>

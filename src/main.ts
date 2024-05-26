@@ -20,6 +20,7 @@ import FamilyMembers from "@/components/main/FamilyMembers.vue";
 import JoinRequests from "@/components/main/JoinRequests.vue";
 import FamilyInviteCode from "@/components/global/FamilyInviteCode.vue";
 import MissionDetail from "@/components/popup-form/MissionDetail.vue";
+import CreateAnniversary from "@/components/popup-form/CreateAnniversary.vue";
 
 const emitter = mitt();
 const app = createApp(App)
@@ -43,6 +44,7 @@ app.component("FamilyMembers", FamilyMembers)
 app.component("JoinRequests", JoinRequests)
 app.component("FamilyInviteCode", FamilyInviteCode)
 app.component("MissionDetail", MissionDetail)
+app.component("CreateAnniversary", CreateAnniversary)
 app.provide("emitter", emitter)
 
 

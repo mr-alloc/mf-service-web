@@ -99,11 +99,16 @@ div.pushable {
 }
 
 
-@mixin mobile {
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  body {
     display: flex;
     place-items: center;
-    @content;
+  }
+
+  #app {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
   }
 }
 

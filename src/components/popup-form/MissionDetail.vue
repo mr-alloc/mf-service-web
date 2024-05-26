@@ -45,7 +45,7 @@
         </div>
       </li>
     </ul>
-    <div class="deadline-timer">
+    <div class="deadline-timer" v-if="MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
       <div class="timer-count-wrapper">
         <span class="guide-text signature-shiny">남은 시간</span>
         <span class="remain-time">{{ state.remainTimeStr }}</span>

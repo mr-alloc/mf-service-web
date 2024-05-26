@@ -18,6 +18,12 @@ function secondToDateTimeString(second: number): string {
         .format(DEFAULT_DATE_TIME_FORMAT)
 }
 
+function secondsToString(second: number, format: string): string {
+    return moment(new Date((second + TempralUtil.getOffsetSecond()) * 1000))
+        .utc(false)
+        .format(format)
+}
+
 function toKoreanString(second: number): string {
     const now = moment().utc().unix();
     const seconds = now - second;
@@ -44,8 +50,11 @@ function toKoreanString(second: number): string {
 }
 
 function toUtc(date: string, format: string): number {
+    if (date === '') return 0;
+
     return moment(date, format).utc(false).unix();
 }
+
 
 export default {
     DEFAULT_DATE_FORMAT,
@@ -53,6 +62,7 @@ export default {
     DEFAULT_TIME_ZONE,
     secondToDateString,
     secondToDateTimeString,
+    secondsToString,
     toKoreanString,
     isSameMonth(m1: Moment, m2: Moment): boolean {
         return m1.year() === m2.year() && m1.month() === m2.month();

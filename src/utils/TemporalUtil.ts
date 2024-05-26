@@ -46,6 +46,10 @@ function secondsToTimeStr(remainSeconds: number, ignoreSeconds?: boolean) {
     return dayPrefix + timeSuffix;
 }
 
+function toMoment(timestamp: number, isLocalTime: boolean) {
+    return moment.unix(timestamp).utc(isLocalTime);
+}
+
 export default {
     SECONDS_IN_MINUTE,
     SECONDS_IN_HOUR,
@@ -54,6 +58,7 @@ export default {
     getOffsetSecond,
     getEpochSecond,
     secondsToTimeStr,
-    isAfterNoon
+    isAfterNoon,
+    toMoment
 
 }

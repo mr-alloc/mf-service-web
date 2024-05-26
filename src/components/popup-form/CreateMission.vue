@@ -13,7 +13,7 @@
         <BlinkInput id="mission-content" name="missionContent" type="text" label="설명 (선택)" placeHolder="설명을 입력해주세요."
                     :is-hold="state.inputHold" :no-mark="true"
         />
-        <OptionalTimePicker/>
+        <OptionalTimePicker id="schedule-time" name="scheduleTime" label="일정"/>
         <SimpleRadio id="mission-deadline" :options="state.deadlineOptions" label="기한 (미션 시작시 적용)"
                      :etc-option="new SelectOption('0', '기타(일)')"
                      v-if="state.missionType.isNotIn(MissionType.SCHEDULE)"

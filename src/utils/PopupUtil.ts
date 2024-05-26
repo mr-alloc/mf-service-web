@@ -3,6 +3,7 @@ import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import type {IMission} from "@/classes/api-spec/mission/GetMemberCalendar";
 import MissionType from "@/constant/MissionType";
+import {useCalendarStore} from "@/stores/CalendarStore";
 
 function popupCreateMission(emitter: any, startDate: string) {
     const backgroundStore = useBackgroundStore();
@@ -126,6 +127,26 @@ function innerConfirm(title: string, description: string, ifConfirm: () => void,
     backgroundStore.useInnerPopup(confirmPopup);
 }
 
+function popupCreateAnniversary(emitter: any) {
+    const calendarStore = useCalendarStore();
+    const backgroundStore = useBackgroundStore();
+
+    const currentPopup = new CurrentPopup(PopupType.NORMAL, "휴가 또는 기념일 생성")
+        .addBodyComponent("CreateAnniversary", {
+            startTimeStamp: calendarStore.startTimestamp,
+            endTimeStamp: calendarStore.endTimestamp
+        })
+        .addButton("생성", () => {
+            emitter.emit("validateCreateAnniversaryForm");
+        })
+        .addButton("취소", () => {
+            backgroundStore.returnGlobalPopup();
+            emitter.off("validateCreateAnniversaryForm");
+        });
+
+    backgroundStore.useGlobalPopup(currentPopup);
+}
+
 export default {
     popupCreateMission,
     popupCreateFamily,
@@ -134,5 +155,6 @@ export default {
     popupMissionDetail,
     confirm,
     alert,
-    innerConfirm
+    innerConfirm,
+    popupCreateAnniversary
 }

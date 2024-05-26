@@ -21,44 +21,69 @@
         <li>금</li>
         <li>토</li>
       </ul>
+      <ul class="calendar-row member-calendar" v-show="state.calendar">
+        <li class="each-day-item" v-for="(day, index) in state.calendar as Array<CalendarDay>" :key="index"
+            v-on:click="methods.selectDate(day)" :id="`calendar-${day.dateStr}`"
+            :class="{
+              'this-month': DateUtil.isSameMonth(day.value, state.thisMonth),
+              holiday: state.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
+              selected: calendarStore.selectedDate === day.dateStr || calendarStore.selectedSecondDate === day.dateStr,
+              range: (calendarStore.startTimestamp && calendarStore.endTimestamp) && (calendarStore.startTimestamp + TemporalUtil.getOffsetSecond()) <= day.timestamp && day.timestamp <= (calendarStore.endTimestamp + TemporalUtil.getOffsetSecond()),
+              start: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.startTimestamp + TemporalUtil.getOffsetSecond() === day.timestamp,
+              end: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.endTimestamp + TemporalUtil.getOffsetSecond() === day.timestamp
+            }">
+          <div class="item-header">
+            <span class="date" :class="{ today: DateUtil.toString(moment()) === day.dateStr }">
+              {{ day.day == 1 ? day.value.format('M/D') : day.value.format('D') }}
+            </span>
+            <span class="mission-count"
+                  v-show="state.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
+              {{ state.memberCalendarMap.get(day.dateStr)?.length }}
+            </span>
+            <span class="holiday-name" v-show="state.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))">
+              {{ state.holidaysMap.get(DateUtil.to(day.value, 'MM-DD'))?.name }}
+            </span>
+          </div>
+          <div class="item-body">
+            <TransitionGroup class="daily-schedules" tag="ul" name="fade">
+              <li class="each-schedule"
+                  v-for="(mission, index) in state.memberCalendarMap.get(day.dateStr) ?? []"
+                  :key="index" v-on:click="methods.clickSchedule($event, mission)"
+              >
+                <div class="schedule-title">
+                  <span class="status" :class="[MissionStatus.fromCode(mission.status)?.simpleName]"
+                        :style="{ backgroundColor: `#${MissionStatus.fromCode(mission.status)?.color}` }">{{
+                      MissionStatus.fromCode(mission.status)?.name
+                    }}</span>
+                  <span class="title-text">{{ mission.name }}</span>
+                </div>
+              </li>
+            </TransitionGroup>
+          </div>
+        </li>
+      </ul>
       <Transition name="fade">
-        <ul class="calendar-row member-calendar" v-show="state.calendar">
-          <li class="each-day-item" v-for="(date, index) in state.calendar" :key="index"
-              v-on:click="methods.createMission(DateUtil.to(date, 'YYYY-MM-DD'))"
-              :class="{
-              'this-month': DateUtil.isSameMonth(date, state.thisMonth),
-              holiday: state.holidaysMap.has(DateUtil.to(date, 'MM-DD'))
-              }">
-            <div class="item-header">
-              <span class="date" :class="{ today: DateUtil.toString(moment()) === DateUtil.toString(date)}">
-                {{ date.get('date') == 1 ? date.format('M/D') : date.format('D') }}
-              </span>
-              <span class="mission-count"
-                    v-show="state.memberCalendarMap.get(DateUtil.toString(date))?.length ?? 0 > 0">
-                {{ state.memberCalendarMap.get(DateUtil.toString(date))?.length }}
-              </span>
-              <span class="holiday-name" v-show="state.holidaysMap.has(DateUtil.to(date, 'MM-DD'))">
-                {{ state.holidaysMap.get(DateUtil.to(date, 'MM-DD'))?.name }}
-              </span>
-            </div>
-            <div class="item-body">
-              <TransitionGroup class="daily-schedules" tag="ul" name="fade">
-                <li class="each-schedule"
-                    v-for="(mission, index) in state.memberCalendarMap.get(DateUtil.toString(date)) ?? []"
-                    :key="index" v-on:click="methods.clickSchedule($event, mission)"
-                >
-                  <div class="schedule-title">
-                    <span class="status" :class="[MissionStatus.fromCode(mission.status)?.simpleName]"
-                          :style="{ backgroundColor: `#${MissionStatus.fromCode(mission.status)?.color}` }">{{
-                        MissionStatus.fromCode(mission.status)?.name
-                      }}</span>
-                    <span class="title-text">{{ mission.name }}</span>
-                  </div>
-                </li>
-              </TransitionGroup>
-            </div>
-          </li>
-        </ul>
+        <div class="calendar-controller" v-show="calendarStore.isSelected">
+          <PeriodIndicator :start="calendarStore.startTimestamp" :end="calendarStore.endTimestamp"/>
+          <ul class="calendar-feature-group">
+            <li class="feature-item" v-on:click="methods.createMission()">
+              <FontAwesomeIcon :icon="faPlus"/>
+              <span class="description">미션추가</span>
+            </li>
+            <li class="feature-item">
+              <FontAwesomeIcon :icon="faRecycle"/>
+              <span class="description">루틴추가</span>
+            </li>
+            <li class="feature-item" v-on:click="methods.createAnniversary">
+              <FontAwesomeIcon :icon="faCalendarDay"/>
+              <span class="description">휴가/기념일 지정</span>
+            </li>
+            <li class="feature-item" v-on:click="calendarStore.resetSelected">
+              <FontAwesomeIcon :icon="faRectangleXmark"/>
+              <span class="description">선택취소</span>
+            </li>
+          </ul>
+        </div>
       </Transition>
     </div>
   </div>
@@ -66,7 +91,7 @@
 
 <script setup lang="ts">
 import {inject, onMounted, reactive} from "vue";
-import moment, {type Moment} from "moment-timezone";
+import moment from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {call} from "@/utils/NetworkUtil";
 import Mission from "@/constant/api-meta/Mission";
@@ -83,22 +108,32 @@ import CollectionUtil from "@/utils/CollectionUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import TemporalUtil from "@/utils/TemporalUtil";
-import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import MissionStatus from "@/constant/MissionStatus";
+import {useCalendarStore} from "@/stores/CalendarStore";
+import CalendarDay from "@/classes/CalendarDay";
+import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
+import {faRecycle} from "@fortawesome/free-solid-svg-icons/faRecycle";
+import {faCalendarDay} from "@fortawesome/free-solid-svg-icons/faCalendarDay";
+import {faRectangleXmark} from "@fortawesome/free-regular-svg-icons/faRectangleXmark";
+import PeriodIndicator from "@/components/global/PeriodIndicator.vue";
 
 
 const emitter = inject("emitter");
-const familiesViewStore = useFamiliesViewStore();
+const calendarStore = useCalendarStore();
 const state = reactive({
   calendarTitle: '',
   thisMonth: moment(),
-  calendar: [] as Array<Moment>,
+  calendar: [] as Array<CalendarDay>,
   startDate: moment(),
   endDate: moment(),
   memberCalendarMap: new Map<string, Array<IMission>>(),
-  holidaysMap: new Map<string, CalendarHoliday>()
+  holidaysMap: new Map<string, CalendarHoliday>(),
+  selectedDate: ''
 })
 const methods = {
+  createAnniversary(event: MouseEvent) {
+    PopupUtil.popupCreateAnniversary(emitter);
+  },
   createMission(startDate?: string) {
     PopupUtil.popupCreateMission(emitter, startDate ?? DateUtil.to(moment(), 'YYYY-MM-DD'));
   },
@@ -122,7 +157,7 @@ const methods = {
     while (interval < endOfCalendar.diff(startOfCalendar, 'days')) {
       const cloned = startOfCalendar.clone();
       const date = cloned.add(interval, 'days');
-      state.calendar.push(date);
+      state.calendar.push(new CalendarDay(date, true));
       interval++;
     }
 
@@ -157,7 +192,13 @@ const methods = {
   clickSchedule(e: MouseEvent, mission: IMission) {
     e.stopPropagation();
     PopupUtil.popupMissionDetail(mission);
-  }
+  },
+  selectDate(day: CalendarDay) {
+    calendarStore.selectDate(day.value);
+    // const start = TemporalUtil.toMoment(calendarStore.startTimestamp, true);
+    // const end = TemporalUtil.toMoment(calendarStore.endTimestamp, true);
+    // console.log(`start: "${start.format(DateUtil.DEFAULT_DATE_FORMAT)}"(${calendarStore.startTimestamp}), end: "${end.format(DateUtil.DEFAULT_DATE_FORMAT)}"(${calendarStore.endTimestamp})`);
+  },
 }
 onMounted(() => {
   methods.drawCalendar();
@@ -219,6 +260,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    position: relative;
 
 
     .calendar-row {
@@ -236,8 +278,7 @@ onMounted(() => {
     }
 
     .calendar-header {
-      border-top: 1px solid $standard-light-gray-in-white;
-      border-bottom: 1px solid $standard-light-gray-in-white;
+      border: 0.5px solid $standard-light-gray-in-white;
       height: 30px;
       flex-shrink: 0;
 
@@ -264,18 +305,60 @@ onMounted(() => {
       grid-auto-rows: 1fr;
       flex-wrap: wrap;
       flex-grow: 1;
+      position: relative;
 
       .each-day-item {
-        border-right: 1px solid $standard-light-gray-in-white;
-        border-bottom: 1px solid $standard-light-gray-in-white;
-        transition: $duration;
+        border: 0.5px solid $standard-light-gray-in-white;
+        transition: $duration, border 0s, transform .1s, position 0s;
         display: flex;
         flex-direction: column;
         background-color: rgb(0, 0, 0, .2);
         overflow: hidden;
+        top: 0;
+        left: 0;
 
         &.this-month {
           background-color: white;
+        }
+
+        &.range {
+          background-color: $super-light-signature-purple;
+
+          &:hover {
+            background-color: $super-light-signature-purple !important;
+          }
+        }
+
+        &.selected {
+          background-color: $little-light-signature-purple !important;
+          position: relative;
+          z-index: 1;
+
+          &:hover {
+            background-color: $little-light-signature-purple !important;
+          }
+        }
+
+        &.start::before, &.end::before {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          padding: 2px 4px;
+          font-weight: bold;
+          font-size: .64rem;
+          border-radius: 5px;
+          transform: translate(-50%, 3px);
+          background-color: $standard-clean-black;
+          line-height: 1;
+          color: white;
+        }
+
+        &.start::before {
+          content: '시작일';
+        }
+
+        &.end::before {
+          content: '종료일';
         }
 
         &.holiday {
@@ -331,13 +414,21 @@ onMounted(() => {
             list-style: none;
             padding: 2px;
             flex-grow: 1;
+            text-align: center;
+            flex-wrap: wrap;
 
             .each-schedule {
               text-align: left;
               flex-grow: 1;
               line-height: 1;
+              display: flex;
+              flex-direction: row;
               overflow: hidden;
               padding: 0;
+              margin: 0 2px;
+              border-radius: 5px;
+              transition: $duration;
+              align-items: flex-start;
 
               .schedule-title {
                 font-size: .74rem;
@@ -367,21 +458,105 @@ onMounted(() => {
                 }
 
                 .title-text {
-                  padding: 0 2px;
+                  padding: 0 5px;
                 }
 
-                &:hover {
-                  background-color: rgb(0, 0, 0, .2);
-                }
+              }
+
+              &:hover {
+                background-color: rgb(0, 0, 0, .2);
               }
             }
-
           }
         }
 
         &.this-month:hover {
-          background-color: rgb(0, 0, 0, .2);
+          background-color: white;
           cursor: pointer;
+        }
+      }
+    }
+
+    .calendar-controller {
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      width: max-content;
+      padding: 10px 20px;
+      flex-shrink: 0;
+      background-color: white;
+      border-top: 1px solid $standard-light-gray-in-white;
+      bottom: 100px;
+      left: 50%;
+      transform: translate(-50%, 50%);
+      box-shadow: $standard-box-shadow;
+      border-radius: 5px;
+      z-index: 1;
+      transition: $duration;
+
+      .panel-header {
+        font-size: .84rem;
+        font-weight: bold;
+        padding: 5px 0;
+        border-bottom: 1px solid $standard-light-gray-in-white;
+      }
+
+      .calendar-feature-group {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding: 2px;
+
+        .feature-item {
+          display: flex;
+          cursor: pointer;
+          transition: $duration;
+          border-radius: 5px;
+          width: 2.5rem;
+          height: 2.5rem;
+          justify-content: center;
+          align-items: center;
+          margin: 0 2px;
+          position: relative;
+
+          .description {
+            font-size: .84rem;
+            position: absolute;
+            z-index: -1;
+            opacity: 0;
+            background-color: $standard-clean-black;
+            color: white;
+            border-radius: 5px;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: $duration;
+            width: max-content;
+            padding: 2px 5px;
+
+            &:after {
+              border-top: 10px solid $standard-clean-black;
+              border-left: 10px solid transparent;
+              border-right: 10px solid transparent;
+              border-bottom: 0 solid transparent;
+              border-radius: 10px;
+              content: "";
+              position: absolute;
+              top: 90%;
+              left: 50%;
+              transform: translateX(-50%);
+            }
+          }
+
+          &:hover {
+            background-color: rgb(0, 0, 0, .2);
+
+            .description {
+              z-index: 1;
+              opacity: 1;
+            }
+          }
         }
       }
     }

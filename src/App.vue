@@ -54,6 +54,7 @@ const methods = {
   }
 
   .background {
+    z-index: 1;
 
     &.curtain {
       position: absolute;
