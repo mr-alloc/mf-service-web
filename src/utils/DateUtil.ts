@@ -1,5 +1,6 @@
 import moment, {type Moment} from "moment-timezone";
 import TempralUtil from "@/utils/TemporalUtil";
+import CalendarDay from "@/classes/CalendarDay";
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 const DEFAULT_DATE_TIME_FORMAT = 'YYYY년 MM월 DD일 HH:mm:ss';
@@ -55,6 +56,21 @@ function toUtc(date: string, format: string): number {
     return moment(date, format).utc(false).unix();
 }
 
+function getCalendarDays(momentValue: Moment): Array<CalendarDay> {
+
+    const startOfThisMonth = moment(momentValue).startOf('month');
+    const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
+    // print start of this month's day and days
+
+    const endOfThisMonth = moment(momentValue).endOf('month');
+    const endOfCalendar = endOfThisMonth.add(7 - endOfThisMonth.day(), 'days');
+    return [...new Array(endOfCalendar.diff(startOfCalendar, 'days')).keys()]
+        .map((_, interval) => {
+            const cloned = startOfCalendar.clone();
+            const date = cloned.add(interval, 'days');
+            return new CalendarDay(date, true);
+        });
+}
 
 export default {
     DEFAULT_DATE_FORMAT,
@@ -76,5 +92,6 @@ export default {
     toUtc,
     getTodayStr(format: string): string {
         return moment().format(format);
-    }
+    },
+    getCalendarDays
 }

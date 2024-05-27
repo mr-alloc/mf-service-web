@@ -133,8 +133,8 @@ function popupCreateAnniversary(emitter: any) {
 
     const currentPopup = new CurrentPopup(PopupType.NORMAL, "휴가 또는 기념일 생성")
         .addBodyComponent("CreateAnniversary", {
-            startTimeStamp: calendarStore.startTimestamp,
-            endTimeStamp: calendarStore.endTimestamp
+            startTimestamp: calendarStore.startTimestamp,
+            endTimestamp: calendarStore.endTimestamp
         })
         .addButton("생성", () => {
             emitter.emit("validateCreateAnniversaryForm");

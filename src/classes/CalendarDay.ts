@@ -51,4 +51,8 @@ export default class CalendarDay {
     get day(): number {
         return this._day;
     }
+
+    isSameMonth(month: number): boolean {
+        return this._month === month;
+    }
 }
