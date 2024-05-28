@@ -88,7 +88,10 @@ const methods =  {
     props.ifVisibleNeed && props.ifVisibleNeed(state.isVisible);
   }
 }
-
+defineExpose({
+  value: state.value,
+  input: input
+})
 onMounted(() => {
   if (props.type === 'password') {
     state.isPassword = true;

@@ -5,6 +5,8 @@ import CalendarDay from "@/classes/CalendarDay";
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 const DEFAULT_DATE_TIME_FORMAT = 'YYYY년 MM월 DD일 HH:mm:ss';
 const DEFAULT_TIME_ZONE = 'Asia/Seoul';
+const YYYYMM = 'YYYYMM';
+const YYYYMMDD = 'YYYYMMDD';
 
 function secondToDateString(second: number): string {
     const totalSeconds = second + TempralUtil.getOffsetSecond();
@@ -80,6 +82,10 @@ export default {
     secondToDateTimeString,
     secondsToString,
     toKoreanString,
+    YYYYMM,
+    YYYYMMDD,
+
+
     isSameMonth(m1: Moment, m2: Moment): boolean {
         return m1.year() === m2.year() && m1.month() === m2.month();
     },

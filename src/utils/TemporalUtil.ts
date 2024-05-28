@@ -50,6 +50,10 @@ function toMoment(timestamp: number, isLocalTime: boolean) {
     return moment.unix(timestamp).utc(isLocalTime);
 }
 
+function getDiffDays(startTimeStamp: number, endTimeStamp: number) {
+    return ((endTimeStamp - startTimeStamp) / SECONDS_IN_DAY) + 1;
+}
+
 export default {
     SECONDS_IN_MINUTE,
     SECONDS_IN_HOUR,
@@ -59,6 +63,6 @@ export default {
     getEpochSecond,
     secondsToTimeStr,
     isAfterNoon,
-    toMoment
-
+    toMoment,
+    getDiffDays
 }

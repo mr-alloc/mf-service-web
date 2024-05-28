@@ -1,16 +1,14 @@
 <template>
   <div class="multiple-datepicker-container">
-    <label class="title" v-if="props.label" :for="props.id">{{ props.label }}</label>
     <div class="collapse-controller">
       <button type="button" class="btn-primary" v-on:click="methods.toggleCollapse()">
-        <FontAwesomeIcon class="fa-1x" :icon="faCalendarAlt"/>
-        <span class="btn-content">{{ state.isSelectMode ? '닫기' : '날짜 선택' }}</span>
+        <FontAwesomeIcon v-show="!state.isSelectMode" class="fa-1x" :icon="faCalendarAlt"/>
+        <span class="btn-content">{{ state.isSelectMode ? '닫기' : '여러날짜 선택' }}</span>
       </button>
     </div>
     <Transition name="down-fade">
       <div class="mini-calendar-area" v-show="state.isSelectMode">
-        <div class="calendar-info">
-          <div class="title"></div>
+        <div class="title">5월</div>
           <ul class="days-name-group">
             <li class="day-name">일</li>
             <li class="day-name">월</li>
@@ -28,7 +26,6 @@
             </li>
           </ul>
         </div>
-      </div>
     </Transition>
   </div>
 </template>
@@ -41,10 +38,8 @@ import {faCalendarAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const props = defineProps({
-  id: String,
-  label: String,
-  name: String,
   timestamp: Number,
+  defaultSelect: Number
 });
 const state = reactive({
   thisMonth: TemporalUtil.toMoment(props.timestamp!, true).month(),
@@ -65,15 +60,23 @@ const methods = {
     }
   }
 }
+
+defineExpose({
+  selected: state.selected
+})
 onMounted(() => {
   const momentValue = TemporalUtil.toMoment(props.timestamp ?? TemporalUtil.getEpochSecond(), false);
   state.calendarDays = DateUtil.getCalendarDays(momentValue);
+  if (props.defaultSelect) {
+    state.selected.add(TemporalUtil.toMoment(props.defaultSelect, true).date());
+  }
 });
 </script>
 <style scoped lang="scss">
 @import '@/assets/main';
 
 .multiple-datepicker-container {
+  margin: 10px 0;
 
   .collapse-controller {
 
@@ -88,70 +91,68 @@ onMounted(() => {
   }
 
   .mini-calendar-area {
+    padding: 5px 8px;
 
-    .calendar-info {
+    .title {
+      font-weight: bold;
+      text-align: center;
+    }
 
+    .days-name-group {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
 
-      .title {
+      .day-name {
+        font-size: .84rem;
+        text-align: center;
+        padding: 5px;
+        font-weight: bold;
 
+        &:first-child {
+          color: crimson;
+        }
+
+        &:last-child {
+          color: royalblue;
+        }
       }
 
-      .days-name-group {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
 
-        .day-name {
-          font-size: .84rem;
-          text-align: center;
-          padding: 5px;
-          font-weight: bold;
+    }
 
-          &:first-child {
-            color: crimson;
-          }
+    .days-item-group {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
 
-          &:last-child {
-            color: royalblue;
+      .day {
+        padding: 2px 5px;
+        font-size: .84rem;
+        border-radius: 5px;
+        width: 30px;
+        text-align: center;
+        transition: $duration;
+        margin: 1px;
+
+        &.hide {
+          opacity: 0;
+
+          &:hover {
+            background-color: unset;
+            cursor: unset;
           }
         }
 
-
-      }
-
-      .days-item-group {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-
-        .day {
-          padding: 2px 5px;
-          font-size: .84rem;
-          border-radius: 5px;
-          width: 30px;
-          text-align: center;
-          transition: $duration;
-          margin: 1px;
-
-          &.hide {
-            opacity: 0;
-
-            &:hover {
-              background-color: unset;
-              cursor: unset;
-            }
-          }
-
-          &.contain {
-            background-color: $standard-weight-gray-in-white;
-
-            &:hover {
-              background-color: $standard-weight-gray-in-white;
-            }
-          }
+        &.contain {
+          background-color: $standard-weight-gray-in-white;
 
           &:hover {
-            background-color: $standard-gray-in-white;
-            cursor: pointer;
+            background-color: $standard-weight-gray-in-white;
           }
+        }
+
+        &:hover {
+          background-color: $standard-gray-in-white;
+          cursor: pointer;
         }
       }
     }

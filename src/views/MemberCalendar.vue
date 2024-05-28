@@ -26,7 +26,8 @@
             v-on:click="methods.selectDate(day)" :id="`calendar-${day.dateStr}`"
             :class="{
               'this-month': DateUtil.isSameMonth(day.value, state.thisMonth),
-              holiday: state.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
+              holiday: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
+              anniversary: calendarStore.anniversaryMap.has(day.dateStr),
               selected: calendarStore.selectedDate === day.dateStr || calendarStore.selectedSecondDate === day.dateStr,
               range: (calendarStore.startTimestamp && calendarStore.endTimestamp) && (calendarStore.startTimestamp + TemporalUtil.getOffsetSecond()) <= day.timestamp && day.timestamp <= (calendarStore.endTimestamp + TemporalUtil.getOffsetSecond()),
               start: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.startTimestamp + TemporalUtil.getOffsetSecond() === day.timestamp,
@@ -37,17 +38,24 @@
               {{ day.day == 1 ? day.value.format('M/D') : day.value.format('D') }}
             </span>
             <span class="mission-count"
-                  v-show="state.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
-              {{ state.memberCalendarMap.get(day.dateStr)?.length }}
+                  v-show="calendarStore.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
+              {{ calendarStore.memberCalendarMap.get(day.dateStr)?.length }}
             </span>
-            <span class="holiday-name" v-show="state.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))">
-              {{ state.holidaysMap.get(DateUtil.to(day.value, 'MM-DD'))?.name }}
+            <span class="holiday-name" v-show="calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))">
+              {{ calendarStore.holidaysMap.get(DateUtil.to(day.value, 'MM-DD'))?.name }}
+            </span>
+            <span class="anniversary-name"
+                  :class="{ slash: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))}"
+                  v-if="calendarStore.anniversaryMap.has(day.dateStr)">
+              {{
+                `${calendarStore.anniversaryMap.get(day.dateStr)?.[0].name}` + (calendarStore.anniversaryMap.get(day.dateStr)!.length > 1 ? `${calendarStore.anniversaryMap.get(day.dateStr)!.length - 1}개` : ``)
+              }}
             </span>
           </div>
           <div class="item-body">
             <TransitionGroup class="daily-schedules" tag="ul" name="fade">
               <li class="each-schedule"
-                  v-for="(mission, index) in state.memberCalendarMap.get(day.dateStr) ?? []"
+                  v-for="(mission, index) in calendarStore.memberCalendarMap.get(day.dateStr) ?? []"
                   :key="index" v-on:click="methods.clickSchedule($event, mission)"
               >
                 <div class="schedule-title">
@@ -74,9 +82,15 @@
               <FontAwesomeIcon :icon="faRecycle"/>
               <span class="description">루틴추가</span>
             </li>
-            <li class="feature-item" v-on:click="methods.createAnniversary">
+            <li class="feature-item" v-show="calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0"
+                v-on:click="methods.createAnniversary">
               <FontAwesomeIcon :icon="faCalendarDay"/>
               <span class="description">휴가/기념일 지정</span>
+            </li>
+            <li class="feature-item" v-show="calendarStore.startTimestamp > 0 && calendarStore.endTimestamp === 0"
+                v-on:click="methods.createAnniversary">
+              <FontAwesomeIcon :icon="faCalendarDays"/>
+              <span class="description">휴가/기념일 중복 지정</span>
             </li>
             <li class="feature-item" v-on:click="calendarStore.resetSelected">
               <FontAwesomeIcon :icon="faRectangleXmark"/>
@@ -93,20 +107,9 @@
 import {inject, onMounted, reactive} from "vue";
 import moment from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {call} from "@/utils/NetworkUtil";
-import Mission from "@/constant/api-meta/Mission";
-import {
-  CalendarHoliday,
-  CalendarMission,
-  FamilyMission,
-  type IMission,
-  RequestBody,
-  ResponseBody
-} from "@/classes/api-spec/mission/GetMemberCalendar"
+import {type IMission,} from "@/classes/api-spec/mission/GetMemberCalendar"
 import DateUtil from "@/utils/DateUtil";
-import CollectionUtil from "@/utils/CollectionUtil";
 import PopupUtil from "@/utils/PopupUtil";
-import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import TemporalUtil from "@/utils/TemporalUtil";
 import MissionStatus from "@/constant/MissionStatus";
 import {useCalendarStore} from "@/stores/CalendarStore";
@@ -116,6 +119,7 @@ import {faRecycle} from "@fortawesome/free-solid-svg-icons/faRecycle";
 import {faCalendarDay} from "@fortawesome/free-solid-svg-icons/faCalendarDay";
 import {faRectangleXmark} from "@fortawesome/free-regular-svg-icons/faRectangleXmark";
 import PeriodIndicator from "@/components/global/PeriodIndicator.vue";
+import {faCalendarDays} from "@fortawesome/free-solid-svg-icons";
 
 
 const emitter = inject("emitter");
@@ -126,8 +130,6 @@ const state = reactive({
   calendar: [] as Array<CalendarDay>,
   startDate: moment(),
   endDate: moment(),
-  memberCalendarMap: new Map<string, Array<IMission>>(),
-  holidaysMap: new Map<string, CalendarHoliday>(),
   selectedDate: ''
 })
 const methods = {
@@ -150,44 +152,20 @@ const methods = {
     // print start of this month's day and days
 
     const endOfThisMonth = moment(state.thisMonth).endOf('month');
-    const endOfCalendar = endOfThisMonth.add(7 - endOfThisMonth.day(), 'days');
+    const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
     state.endDate = endOfCalendar.clone();
     let interval = 0;
     state.calendar = [];
-    while (interval < endOfCalendar.diff(startOfCalendar, 'days')) {
+    const diffDays = endOfCalendar.diff(startOfCalendar, 'days') + 1;
+    while (interval < diffDays) {
       const cloned = startOfCalendar.clone();
       const date = cloned.add(interval, 'days');
       state.calendar.push(new CalendarDay(date, true));
       interval++;
     }
 
+    calendarStore.fetchOwnCalendar(state.startDate, state.endDate);
 
-    call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(state.startDate, state.endDate),
-        (res) => {
-          const responseBody = ResponseBody.fromJson(res.data, (mission) => {
-            return hasSelectedFamilyId()
-                ? FamilyMission.fromJson(mission)
-                : CalendarMission.fromJson(mission)
-          });
-
-          state.memberCalendarMap = CollectionUtil.groupBy<string, IMission>(
-              responseBody.calendar,
-              (mission) => mission.groupingDate
-          );
-
-          state.holidaysMap = CollectionUtil.toMap<string, CalendarHoliday>(
-              responseBody.holidays.filter(h => !h.isLunar),
-              (holiday) => holiday.date,
-          )
-        },
-        (spec, error) => {
-          console.log(error);
-        });
-
-  },
-  toTimeString(time: number) {
-    const schedule = moment(new Date((time + TemporalUtil.getOffsetSecond()) * 1000));
-    return schedule.format('HH:mm');
   },
   clickSchedule(e: MouseEvent, mission: IMission) {
     e.stopPropagation();
@@ -372,6 +350,10 @@ onMounted(() => {
               margin-left: 5px;
             }
           }
+        }
+
+        &.anniversary {
+          background-color: $soft-light-sky-blue;
         }
 
 

@@ -127,6 +127,17 @@ function innerConfirm(title: string, description: string, ifConfirm: () => void,
     backgroundStore.useInnerPopup(confirmPopup);
 }
 
+function innerAlert(type: PopupType, title: string, description: string) {
+    const backgroundStore = useBackgroundStore();
+
+    const alertPopup = new CurrentPopup(type, title, description)
+        .addButton("확인", () => {
+            backgroundStore.returnInnerPopup()
+        });
+
+    backgroundStore.useInnerPopup(alertPopup);
+}
+
 function popupCreateAnniversary(emitter: any) {
     const calendarStore = useCalendarStore();
     const backgroundStore = useBackgroundStore();
@@ -156,5 +167,6 @@ export default {
     confirm,
     alert,
     innerConfirm,
-    popupCreateAnniversary
+    innerAlert,
+    popupCreateAnniversary,
 }

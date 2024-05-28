@@ -2,6 +2,20 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import type {Moment} from "moment-timezone";
 import DateUtil from "@/utils/DateUtil";
+import {
+    CalendarHoliday,
+    CalendarMission,
+    FamilyMission,
+    type IMission,
+    RequestBody,
+    ResponseBody
+} from "@/classes/api-spec/mission/GetMemberCalendar";
+import AnniversaryValue from "@/classes/api-spec/AnniversaryValue";
+import CalendarAnniversary from "@/classes/CalendarAnniversary";
+import {call} from "@/utils/NetworkUtil";
+import Mission from "@/constant/api-meta/Mission";
+import {hasSelectedFamilyId} from "@/utils/LocalCache";
+import CollectionUtil from "@/utils/CollectionUtil";
 
 export const useCalendarStore = defineStore('calendar', () => {
 
@@ -11,6 +25,9 @@ export const useCalendarStore = defineStore('calendar', () => {
     const startTimestamp = ref(0);
     const endTimestamp = ref(0);
     const isSelected = ref(false);
+    const memberCalendarMap = ref<Map<string, Array<IMission>>>(new Map<string, Array<IMission>>());
+    const holidaysMap = ref<Map<string, CalendarHoliday>>(new Map<string, CalendarHoliday>());
+    const anniversaryMap = ref<Map<string, Array<CalendarAnniversary>>>(new Map<string, Array<CalendarAnniversary>>());
 
     function resetSelected() {
         selectedDate.value = '';
@@ -19,6 +36,34 @@ export const useCalendarStore = defineStore('calendar', () => {
         endTimestamp.value = 0;
         isSelected.value = false;
     }
+
+    async function fetchOwnCalendar(startDate: Moment, endDate: Moment) {
+        await call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(startDate, endDate),
+            (res) => {
+                const responseBody = ResponseBody.fromJson(res.data, (mission) => {
+                    return hasSelectedFamilyId()
+                        ? FamilyMission.fromJson(mission)
+                        : CalendarMission.fromJson(mission)
+                });
+                //일정
+                memberCalendarMap.value = CollectionUtil.groupBy<string, IMission>(
+                    responseBody.calendar,
+                    (mission) => mission.groupingDate
+                );
+                //공휴일
+                holidaysMap.value = CollectionUtil.toMap<string, CalendarHoliday>(
+                    responseBody.holidays.filter(h => !h.isLunar),
+                    (holiday) => holiday.date,
+                );
+                //기념일
+                anniversaryMap.value = new Map();
+            },
+            (spec, error) => {
+                console.log(error);
+            });
+    }
+
+
 
     function selectDate(selectedDateValue: Moment) {
         const date = DateUtil.to(selectedDateValue, DateUtil.DEFAULT_DATE_FORMAT);
@@ -76,6 +121,21 @@ export const useCalendarStore = defineStore('calendar', () => {
         }
     }
 
+    function addAnniversary(value: AnniversaryValue) {
+        const anniversaries = CalendarAnniversary.of(value);
+        anniversaries.forEach((anniversary) => {
+            const date = anniversary.date;
+            if (anniversaryMap.value.has(date)) {
+                const anniversaries = anniversaryMap.value.get(date);
+                if (anniversaries) {
+                    anniversaries.push(anniversary);
+                }
+            } else {
+                anniversaryMap.value.set(date, [anniversary]);
+            }
+        });
+    }
+
     return {
         selectedDate,
         selectedSecondDate,
@@ -83,6 +143,11 @@ export const useCalendarStore = defineStore('calendar', () => {
         startTimestamp,
         endTimestamp,
         resetSelected,
-        isSelected
+        isSelected,
+        fetchOwnCalendar,
+        addAnniversary,
+        memberCalendarMap,
+        holidaysMap,
+        anniversaryMap
     }
 })
