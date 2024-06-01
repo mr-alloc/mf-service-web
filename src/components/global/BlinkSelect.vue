@@ -62,7 +62,9 @@ const methods = {
     }
   }
 }
-
+defineExpose({
+  value: state.selectOption.value === SelectOption.ofDefault().value ? props.options?.[0].value : state.selectOption.value
+})
 onMounted(() => {
   state.selectOption = props.options?.[0] as SelectOption;
   if (props.currentIndex) {

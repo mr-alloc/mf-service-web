@@ -35,6 +35,7 @@ export class MemberRole implements IEnum<MemberRole> {
         return this._level <= level;
     }
 
+
     static from(level: number): MemberRole {
         return MemberRole.CACHED.get(level) ?? MemberRole.REGULAR;
     }

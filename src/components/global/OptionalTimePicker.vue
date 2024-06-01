@@ -9,28 +9,30 @@
       </button>
       <Transition name="down-fade">
         <div class="current-picked-area" v-show="state.isActive">
-          <div class="am-pm-status">
-            <div class="current-value" v-on:click="state.isAmPmSelectMode = !state.isAmPmSelectMode">
-              <span class="status-text" :class="TemporalUtil.isAfterNoon(state.selectedSeconds) ? 'pm' : 'am'">{{
-                  TemporalUtil.isAfterNoon(state.selectedSeconds) ? "오후" : "오전"
+          <div class="selector-group">
+            <div class="am-pm-status">
+              <div class="current-value" v-on:click="state.isAmPmSelectMode = !state.isAmPmSelectMode">
+              <span class="status-text" :class="state.isAfterNoon ? 'pm' : 'am'">{{
+                  state.isAfterNoon ? "오후" : "오전"
+                }}</span>
+              </div>
+              <Transition name="down-fade">
+                <ul class="status-group" v-show="state.isAmPmSelectMode">
+                  <li class="status-item" v-on:click="methods.toAm()">
+                    <span class="status-text am">오전</span>
+                  </li>
+                  <li class="status-item" v-on:click="methods.toPm()">
+                    <span class="status-text pm">오후</span>
+                  </li>
+                </ul>
+              </Transition>
+            </div>
+            <div class="current-time-value" v-on:click="() => state.isSelectMode = !state.isSelectMode">
+              <FontAwesomeIcon :icon="['far', 'clock']"/>
+              <span class="time-text">{{
+                  TemporalUtil.secondsToTimeStr(state.selectedSeconds, true)
                 }}</span>
             </div>
-            <Transition name="down-fade">
-              <ul class="status-group" v-show="state.isAmPmSelectMode">
-                <li class="status-item" v-on:click="methods.toAm()">
-                  <span class="status-text am">오전</span>
-                </li>
-                <li class="status-item" v-on:click="methods.toPm()">
-                  <span class="status-text pm">오후</span>
-                </li>
-              </ul>
-            </Transition>
-          </div>
-          <div class="current-time-value" v-on:click="() => state.isSelectMode = !state.isSelectMode">
-            <FontAwesomeIcon :icon="['far', 'clock']"/>
-            <span class="time-text">{{
-                TemporalUtil.secondsToTimeStr(TemporalUtil.isAfterNoon(state.selectedSeconds) ? state.selectedSeconds - TemporalUtil.SECONDS_IN_HALF_DAY : state.selectedSeconds, true)
-              }}</span>
           </div>
           <Transition name="down-fade">
             <ul class="time-group" v-show="state.isSelectMode">
@@ -66,15 +68,15 @@ const state = reactive({
   isActive: false,
   isSelectMode: false,
   isAmPmSelectMode: false,
+  isAfterNoon: false,
   divideMinuteCriteria: 60 * TemporalUtil.SECONDS_IN_MINUTE,
   times: [] as Array<number>,
   selectedSeconds: 0,
+  resultSeconds: 0,
 });
 const methods = {
   selectTime(seconds: number) {
-    state.selectedSeconds = state.selectedSeconds > TemporalUtil.SECONDS_IN_HALF_DAY
-        ? seconds + TemporalUtil.SECONDS_IN_HALF_DAY
-        : seconds;
+    state.selectedSeconds = seconds;
     state.isSelectMode = false;
   },
   addSeconds(seconds: number) {
@@ -93,24 +95,27 @@ const methods = {
     if (!state.isActive) {
       state.isSelectMode = false;
       state.isAmPmSelectMode = false;
+      state.selectedSeconds = 0;
     }
   },
   toAm() {
-    state.selectedSeconds -= state.selectedSeconds - (TemporalUtil.SECONDS_IN_HALF_DAY) < 0
-        ? 0
-        : TemporalUtil.SECONDS_IN_HALF_DAY;
+    state.isAfterNoon = false;
     state.isAmPmSelectMode = false;
+    state.resultSeconds = state.selectedSeconds;
   },
   toPm() {
-    state.selectedSeconds += state.selectedSeconds - (TemporalUtil.SECONDS_IN_HALF_DAY) > 0
-        ? 0
-        : TemporalUtil.SECONDS_IN_HALF_DAY;
+    state.isAfterNoon = true;
     state.isAmPmSelectMode = false;
+    state.resultSeconds = state.selectedSeconds + TemporalUtil.SECONDS_IN_HALF_DAY;
   }
 }
+
+defineExpose({
+  value: state.resultSeconds
+})
 onMounted(() => {
   state.times = [...Array((TemporalUtil.SECONDS_IN_DAY / 2) / state.divideMinuteCriteria).keys()]
-      .map((_, idx) => idx * state.divideMinuteCriteria);
+      .map((_, idx) => (idx + 1) * state.divideMinuteCriteria);
 })
 </script>
 <style scoped lang="scss">
@@ -148,7 +153,7 @@ onMounted(() => {
       position: absolute;
       background-color: white;
       top: 45px;
-      left: 60px;
+      left: 50%;
       z-index: 2;
 
       .minute-item {
@@ -165,62 +170,27 @@ onMounted(() => {
 
     .current-picked-area {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
 
-      .am-pm-status {
-        position: relative;
+      .selector-group {
+        display: flex;
+        flex-direction: row;
 
-        .current-value {
-          padding: 3px 8px;
-          width: max-content;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          transition: $duration;
-          border-radius: 5px;
-          background-color: white;
+        .am-pm-status {
+          position: relative;
 
-          .status-text {
-            padding: 3px 5px;
-            line-height: 1;
-            font-weight: bold;
-            border-radius: 5px;
-            width: max-content;
-            margin: 3px 0;
-
-            &.am {
-              background-color: #b1f6c8;
-              color: #068806;
-            }
-
-            &.pm {
-              background-color: #9db0f5;
-              color: #084f91;
-            }
-          }
-
-          &:hover {
-            cursor: pointer;
-            background-color: $standard-light-gray-in-white;
-          }
-        }
-
-        .status-group {
-          position: absolute;
-          top: 35px;
-          background-color: white;
-          border-radius: 5px;
-          border: 1px solid $standard-light-gray-in-white;
-          width: max-content;
-
-
-          .status-item {
+          .current-value {
             padding: 3px 8px;
+            width: max-content;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             transition: $duration;
-
+            border-radius: 5px;
+            background-color: white;
 
             .status-text {
               padding: 3px 5px;
@@ -246,31 +216,72 @@ onMounted(() => {
               background-color: $standard-light-gray-in-white;
             }
           }
+
+          .status-group {
+            position: absolute;
+            top: 35px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid $standard-light-gray-in-white;
+            width: max-content;
+
+
+            .status-item {
+              padding: 3px 8px;
+              transition: $duration;
+
+
+              .status-text {
+                padding: 3px 5px;
+                line-height: 1;
+                font-weight: bold;
+                border-radius: 5px;
+                width: max-content;
+                margin: 3px 0;
+
+                &.am {
+                  background-color: #b1f6c8;
+                  color: #068806;
+                }
+
+                &.pm {
+                  background-color: #9db0f5;
+                  color: #084f91;
+                }
+              }
+
+              &:hover {
+                cursor: pointer;
+                background-color: $standard-light-gray-in-white;
+              }
+            }
+          }
+        }
+
+        .current-time-value {
+          position: relative;
+          width: max-content;
+          padding: 0 12px;
+          display: flex;
+          justify-content: left;
+          align-items: center;
+          transition: $duration;
+          border-radius: 5px;
+          z-index: 1;
+
+          .time-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 5px 8px;
+          }
+
+          &:hover {
+            cursor: pointer;
+            background-color: $standard-light-gray-in-white;
+          }
         }
       }
 
-      .current-time-value {
-        position: relative;
-        width: max-content;
-        padding: 0 12px;
-        display: flex;
-        justify-content: left;
-        align-items: center;
-        transition: $duration;
-        border-radius: 5px;
-        z-index: 1;
-
-        .time-text {
-          font-weight: bold;
-          font-size: 1.1rem;
-          padding: 5px 8px;
-        }
-
-        &:hover {
-          cursor: pointer;
-          box-shadow: $standard-box-shadow;
-        }
-      }
 
       .quick-times-group {
         display: flex;

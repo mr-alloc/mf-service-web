@@ -29,28 +29,30 @@
               holiday: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
               anniversary: calendarStore.anniversaryMap.has(day.dateStr),
               selected: calendarStore.selectedDate === day.dateStr || calendarStore.selectedSecondDate === day.dateStr,
-              range: (calendarStore.startTimestamp && calendarStore.endTimestamp) && (calendarStore.startTimestamp + TemporalUtil.getOffsetSecond()) <= day.timestamp && day.timestamp <= (calendarStore.endTimestamp + TemporalUtil.getOffsetSecond()),
-              start: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.startTimestamp + TemporalUtil.getOffsetSecond() === day.timestamp,
-              end: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.endTimestamp + TemporalUtil.getOffsetSecond() === day.timestamp
+              range: (calendarStore.startTimestamp && calendarStore.endTimestamp) && (calendarStore.startTimestamp + TemporalUtil.getOffsetSecond()) <= day.localTimestamp && day.localTimestamp <= (calendarStore.endTimestamp + TemporalUtil.getOffsetSecond()),
+              start: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.startTimestamp + TemporalUtil.getOffsetSecond() === day.localTimestamp,
+              end: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.endTimestamp + TemporalUtil.getOffsetSecond() === day.localTimestamp
             }">
           <div class="item-header">
             <span class="date" :class="{ today: DateUtil.toString(moment()) === day.dateStr }">
               {{ day.day == 1 ? day.value.format('M/D') : day.value.format('D') }}
             </span>
-            <span class="mission-count"
-                  v-show="calendarStore.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
-              {{ calendarStore.memberCalendarMap.get(day.dateStr)?.length }}
-            </span>
-            <span class="holiday-name" v-show="calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))">
-              {{ calendarStore.holidaysMap.get(DateUtil.to(day.value, 'MM-DD'))?.name }}
-            </span>
-            <span class="anniversary-name"
-                  :class="{ slash: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))}"
-                  v-if="calendarStore.anniversaryMap.has(day.dateStr)">
-              {{
-                `${calendarStore.anniversaryMap.get(day.dateStr)?.[0].name}` + (calendarStore.anniversaryMap.get(day.dateStr)!.length > 1 ? `${calendarStore.anniversaryMap.get(day.dateStr)!.length - 1}개` : ``)
-              }}
-            </span>
+            <div class="day-description">
+              <span class="mission-count"
+                    v-show="calendarStore.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
+                {{ calendarStore.memberCalendarMap.get(day.dateStr)?.length }}
+              </span>
+              <span class="holiday-name" v-show="calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))">
+                {{ calendarStore.holidaysMap.get(DateUtil.to(day.value, 'MM-DD'))?.name }}
+              </span>
+              <span class="anniversary-name"
+                    :class="{ slash: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))}"
+                    v-if="calendarStore.anniversaryMap.has(day.dateStr)">
+                {{
+                  `${calendarStore.anniversaryMap.get(day.dateStr)?.[0].name}` + (calendarStore.anniversaryMap.get(day.dateStr)!.length > 1 ? `${calendarStore.anniversaryMap.get(day.dateStr)!.length - 1}개` : ``)
+                }}
+              </span>
+            </div>
           </div>
           <div class="item-body">
             <TransitionGroup class="daily-schedules" tag="ul" name="fade">
@@ -74,7 +76,7 @@
         <div class="calendar-controller" v-show="calendarStore.isSelected">
           <PeriodIndicator :start="calendarStore.startTimestamp" :end="calendarStore.endTimestamp"/>
           <ul class="calendar-feature-group">
-            <li class="feature-item" v-on:click="methods.createMission()">
+            <li class="feature-item" v-on:click="methods.createMission">
               <FontAwesomeIcon :icon="faPlus"/>
               <span class="description">미션추가</span>
             </li>
@@ -136,8 +138,10 @@ const methods = {
   createAnniversary(event: MouseEvent) {
     PopupUtil.popupCreateAnniversary(emitter);
   },
-  createMission(startDate?: string) {
-    PopupUtil.popupCreateMission(emitter, startDate ?? DateUtil.to(moment(), 'YYYY-MM-DD'));
+  createMission() {
+    const startDate = TemporalUtil.toMoment(calendarStore.startTimestamp, true).format(DateUtil.DEFAULT_DATE_FORMAT);
+    const diffDays = TemporalUtil.getDiffDays(calendarStore.startTimestamp, calendarStore.endTimestamp);
+    PopupUtil.popupCreateMission(emitter, startDate, diffDays);
   },
   setMonth(month: number) {
     state.thisMonth.add(month, 'month');
@@ -165,6 +169,7 @@ const methods = {
     }
 
     calendarStore.fetchOwnCalendar(state.startDate, state.endDate);
+    calendarStore.fetchOwnAnniversaries(state.thisMonth);
 
   },
   clickSchedule(e: MouseEvent, mission: IMission) {
@@ -265,11 +270,11 @@ onMounted(() => {
       }
 
       li:nth-child(1) {
-        background-color: #f8dddd;
+        color: crimson;
       }
 
       li:nth-child(7) {
-        background-color: #d1dbee;
+        color: #5da8fa;
       }
 
       li:not(:last-child) {
@@ -290,31 +295,23 @@ onMounted(() => {
         transition: $duration, border 0s, transform .1s, position 0s;
         display: flex;
         flex-direction: column;
-        background-color: rgb(0, 0, 0, .2);
+        //background-color: rgb(0, 0, 0, .2);
         overflow: hidden;
         top: 0;
         left: 0;
 
         &.this-month {
-          background-color: white;
+          //background-color: white;
         }
 
         &.range {
           background-color: $super-light-signature-purple;
-
-          &:hover {
-            background-color: $super-light-signature-purple !important;
-          }
         }
 
         &.selected {
           background-color: $little-light-signature-purple !important;
           position: relative;
           z-index: 1;
-
-          &:hover {
-            background-color: $little-light-signature-purple !important;
-          }
         }
 
         &.start::before, &.end::before {
@@ -344,6 +341,8 @@ onMounted(() => {
           color: crimson;
 
           .item-header {
+            display: flex;
+            flex-direction: row;
 
             .holiday-name {
               font-weight: bold;
@@ -376,13 +375,18 @@ onMounted(() => {
             }
           }
 
-          .mission-count {
-            border-radius: 15px;
-            color: white;
-            background-color: crimson;
-            font-weight: bold;
-            padding: 1px 4px;
-            margin: 0 5px;
+          .day-description {
+            display: flex;
+            flex-direction: row;
+
+            .mission-count {
+              border-radius: 15px;
+              color: white;
+              background-color: crimson;
+              font-weight: bold;
+              padding: 1px 4px;
+              margin: 0 5px;
+            }
           }
         }
 
@@ -450,11 +454,6 @@ onMounted(() => {
               }
             }
           }
-        }
-
-        &.this-month:hover {
-          background-color: white;
-          cursor: pointer;
         }
       }
     }

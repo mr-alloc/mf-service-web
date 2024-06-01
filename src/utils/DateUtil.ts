@@ -59,7 +59,6 @@ function toUtc(date: string, format: string): number {
 }
 
 function getCalendarDays(momentValue: Moment): Array<CalendarDay> {
-
     const startOfThisMonth = moment(momentValue).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     // print start of this month's day and days

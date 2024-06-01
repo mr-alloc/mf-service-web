@@ -3,8 +3,8 @@
     <BlinkInput ref="anniversaryName" label="휴가/기념일 이름" id="anniversary-name" name="anniversaryName"
                 place-holder="여름 휴가"
                 :validate="methods.validateName" warning-message="이름을 입력해주세요."/>
-    <BlinkSelect id="repeat-option" title="반복(옵션)" :options="state.repeatOptions" name="missionType"/>
-    <MultipleDatePicker ref="multipleDatePicker" v-if="state.isNotPeriod" id="anniversary-date" label="날짜"
+    <!--    <BlinkSelect id="repeat-option" title="반복(옵션)" :options="state.repeatOptions" name="missionType"/>-->
+    <DatePicker ref="multipleDatePicker" v-if="state.isNotPeriod" id="anniversary-date" label="날짜"
                         name="anniversaryDate"
                         :timestamp="startTimestamp" :default-select="props.startTimestamp"/>
   </div>
@@ -13,7 +13,7 @@
 import BlinkInput from "@/components/global/BlinkInput.vue";
 import {inject, onMounted, reactive, ref} from "vue";
 import SelectOption from "@/classes/SelectOption";
-import MultipleDatePicker from "@/components/global/MultipleDatePicker.vue";
+import DatePicker from "@/components/global/DatePicker.vue";
 import {useCalendarStore} from "@/stores/CalendarStore";
 import {useThrottleFn} from "@vueuse/core";
 import PopupUtil from "@/utils/PopupUtil";
@@ -68,7 +68,6 @@ const methods = {
 }
 
 onMounted(() => {
-  console.log(props.startTimestamp, props.endTimestamp)
   state.isNotPeriod = (props.startTimestamp! > 0) && (props.endTimestamp! === 0)
 
   emitter.on("validateCreateAnniversaryForm", useThrottleFn(() => {

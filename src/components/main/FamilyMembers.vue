@@ -1,16 +1,27 @@
 <script setup lang="ts">
 import {MemberRole} from "@/constant/MemberRole";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
+import {useAlertStore} from "@/stores/AlertStore";
+import type {FamilyMember} from "@/classes/api-spec/family/GetFamilyMember";
 
 const familiesViewStore = useFamiliesViewStore();
+const alertStore = useAlertStore();
+
+const methods = {
+  showMemberProfile(member: FamilyMember) {
+    alertStore.guide("멤버 프로필", "준비중이에요!")
+  }
+}
 </script>
 <template>
   <div class="family-members-container">
     <ul class="member-item-group">
       <li class="member-item-card" :class="{ 'new-member': member.isNewMember }"
-          v-for="(member, index) in familiesViewStore.members" :key="index">
+          v-on:click="methods.showMemberProfile(member)"
+          v-for="(member, index) in familiesViewStore.members as Array<FamilyMember>" :key="index">
         <div class="member-item">
           <div class="role-frame"
+               v-if="MemberRole.SUB_MASTER.isGrantedFrom(member.role)"
                :class="[MemberRole.from(member.role).simpleName, { floating: MemberRole.SUB_MASTER.isGrantedFrom(member.role)}]">
             <span class="role-name">{{ MemberRole.from(member.role).name }}</span>
           </div>

@@ -6,6 +6,7 @@ export default class CalendarDay {
 
     private readonly _value: Moment;
     private readonly _timestamp: number;
+    private readonly _localTimestamp: number;
     private readonly _dateStr: string;
     private readonly _isLocalTime: boolean;
     private readonly _year: number;
@@ -16,11 +17,12 @@ export default class CalendarDay {
     constructor(value: Moment, isLocalTime: boolean = false) {
         const current = TemporalUtil.toMoment(value.unix(), isLocalTime);
         this._value = current;
-        this._timestamp = current.unix();
+        this._timestamp = current.clone().utc(false).unix();
+        this._localTimestamp = current.unix();
         this._dateStr = current.format(DateUtil.DEFAULT_DATE_FORMAT);
         this._isLocalTime = isLocalTime;
         this._year = current.year();
-        this._month = current.month();
+        this._month = current.month() + 1;
         this._day = current.date();
     }
 
@@ -30,6 +32,10 @@ export default class CalendarDay {
 
     get timestamp(): number {
         return this._timestamp;
+    }
+
+    get localTimestamp(): number {
+        return this._localTimestamp;
     }
 
     get dateStr(): string {

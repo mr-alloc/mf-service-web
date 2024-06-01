@@ -16,6 +16,8 @@ import {call} from "@/utils/NetworkUtil";
 import Mission from "@/constant/api-meta/Mission";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import CollectionUtil from "@/utils/CollectionUtil";
+import * as GetAnniversaries from "@/classes/api-spec/GetAnniversaries";
+import Anniversary from "@/constant/api-meta/Anniversary";
 
 export const useCalendarStore = defineStore('calendar', () => {
 
@@ -55,11 +57,23 @@ export const useCalendarStore = defineStore('calendar', () => {
                     responseBody.holidays.filter(h => !h.isLunar),
                     (holiday) => holiday.date,
                 );
-                //기념일
-                anniversaryMap.value = new Map();
             },
             (spec, error) => {
                 console.log(error);
+            });
+    }
+
+
+    async function fetchOwnAnniversaries(month: Moment) {
+        await call<any, GetAnniversaries.ResponseBody>(
+            Anniversary.GetAnniversaries,
+            {yearMonth: month.format(DateUtil.YYYYMM)},
+            (response) => {
+                const responseBody = GetAnniversaries.ResponseBody.fromJson(response.data);
+
+                //기념일
+                anniversaryMap.value = new Map();
+                responseBody.anniversaries.forEach(addAnniversary);
             });
     }
 
@@ -148,6 +162,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         addAnniversary,
         memberCalendarMap,
         holidaysMap,
-        anniversaryMap
+        anniversaryMap,
+        fetchOwnAnniversaries
     }
 })

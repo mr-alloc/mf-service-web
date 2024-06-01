@@ -41,6 +41,9 @@ const methods = {
     }
   }
 }
+defineExpose({
+  value: state.selectedOption.id
+});
 onMounted(() => {
   state.selectedOption = props.options?.[0] as SelectImageOption;
   if (props.currentIndex) {

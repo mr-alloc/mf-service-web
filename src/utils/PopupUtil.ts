@@ -5,12 +5,12 @@ import type {IMission} from "@/classes/api-spec/mission/GetMemberCalendar";
 import MissionType from "@/constant/MissionType";
 import {useCalendarStore} from "@/stores/CalendarStore";
 
-function popupCreateMission(emitter: any, startDate: string) {
+function popupCreateMission(emitter: any, startDate: string, days?: number) {
     const backgroundStore = useBackgroundStore();
     const alertStore = useAlertStore();
 
     const createMissionPopup = new CurrentPopup(PopupType.NORMAL, `미션 생성`)
-        .addBodyComponent("CreateMission", {startDate: startDate})
+        .addBodyComponent("CreateMission", {startDate: startDate, days: days})
         .addButton("생성", () => {
             emitter.emit("validateCreateMissionForm")
         })

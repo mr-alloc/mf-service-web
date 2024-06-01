@@ -51,6 +51,9 @@ function toMoment(timestamp: number, isLocalTime: boolean) {
 }
 
 function getDiffDays(startTimeStamp: number, endTimeStamp: number) {
+    if (!endTimeStamp) {
+        return 0;
+    }
     return ((endTimeStamp - startTimeStamp) / SECONDS_IN_DAY) + 1;
 }
 

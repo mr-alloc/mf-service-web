@@ -14,6 +14,14 @@ export class Undefinable<T> {
     is(condition: (value: T) => boolean): boolean {
         return this._value !== undefined && condition(this._value);
     }
+
+    num(): number {
+        return this._value === undefined ? 0 : this._value as number;
+    }
+
+    str(): string {
+        return this._value === undefined ? "" : this._value as string;
+    }
 }
 
 export const ex = Undefinable.ex;

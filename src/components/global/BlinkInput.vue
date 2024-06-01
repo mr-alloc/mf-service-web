@@ -89,8 +89,7 @@ const methods =  {
   }
 }
 defineExpose({
-  value: state.value,
-  input: input
+  value: state.value
 })
 onMounted(() => {
   if (props.type === 'password') {

@@ -46,7 +46,6 @@ export default class CalendarAnniversary {
     private static forPeriod(value: AnniversaryValue): Array<CalendarAnniversary> {
         const startDay = TemporalUtil.toMoment(value.startTimeStamp!, true);
         const intervalDays = TemporalUtil.getDiffDays(value.startTimeStamp!, value.endTimeStamp!);
-        console.log('intervalDays', intervalDays, value);
         return [...new Array(intervalDays).keys()].map((_, interval) => {
             const date = startDay.clone().add(interval, 'days').format(DateUtil.DEFAULT_DATE_FORMAT);
             return new CalendarAnniversary(AnniversaryType.PERIOD, value.name, date);
@@ -54,9 +53,7 @@ export default class CalendarAnniversary {
     }
 
     private static forSingle(value: AnniversaryValue): Array<CalendarAnniversary> {
-        console.log('forSingle', value)
         const forParse = `${value.yearMonth}${String(value.days?.[0]).padStart(2, "0")}`;
-        console.log('forParse', forParse)
         const date = moment(forParse, DateUtil.YYYYMMDD).format(DateUtil.DEFAULT_DATE_FORMAT);
         return [new CalendarAnniversary(AnniversaryType.SINGLE, value.name, date)];
     }

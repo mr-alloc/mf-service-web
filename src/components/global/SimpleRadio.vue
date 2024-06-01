@@ -46,7 +46,8 @@ const props = defineProps({
   etcValueFunction: Function,
   etcPlaceholder: String,
   currentIndex: Number,
-  beforeChange: Function
+  beforeChange: Function,
+  afterChange: Function
 })
 
 const methods = {
@@ -68,6 +69,7 @@ const methods = {
           state.value = value;
         }
         state.etcSelected = false;
+        props.afterChange && props.afterChange(option);
       }
 
       if (props.beforeChange) {
@@ -81,12 +83,17 @@ const methods = {
     state.value = props.etcValueFunction && props.etcValueFunction(state.etcValue);
   }
 }
+
+defineExpose({
+  value: state.value
+})
 </script>
 <style scoped lang="scss">
 @import "@/assets/main.scss";
 
 .simple-radio-container {
   padding: 0;
+  width: 100%;
 
   .radio-selector {
 
@@ -94,12 +101,13 @@ const methods = {
       list-style: none;
       padding: 0;
       display: flex;
+      justify-content: space-evenly;
       align-items: flex-start;
+      width: 100%;
 
       .radio-button {
         padding: 3px 5px;
         border-radius: 5px;
-        margin: 3px 5px 3px 0;
         border: 1px $standard-gray-in-white solid;
         display: inline-block;
         transition: .2s;
