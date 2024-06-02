@@ -58,18 +58,19 @@ function toUtc(date: string, format: string): number {
     return moment(date, format).utc(false).unix();
 }
 
-function getCalendarDays(momentValue: Moment): Array<CalendarDay> {
+function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar: Moment, startOfThisMonth: Moment, endOfThisMonth: Moment, endOfCalendar: Moment) => void): Array<CalendarDay> {
     const startOfThisMonth = moment(momentValue).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     // print start of this month's day and days
 
     const endOfThisMonth = moment(momentValue).endOf('month');
     const endOfCalendar = endOfThisMonth.add(7 - endOfThisMonth.day(), 'days');
+    calculatedWith && calculatedWith(startOfCalendar, startOfThisMonth, endOfThisMonth, endOfCalendar);
     return [...new Array(endOfCalendar.diff(startOfCalendar, 'days')).keys()]
         .map((_, interval) => {
             const cloned = startOfCalendar.clone();
             const date = cloned.add(interval, 'days');
-            return new CalendarDay(date, true);
+            return new CalendarDay(date.unix() - TempralUtil.getOffsetSecond());
         });
 }
 

@@ -86,7 +86,6 @@ $option-height: 25px;
     border-radius: 10px;
     border: 1px $standard-gray-in-white solid;
     transition: all .2s ease-in-out;
-    position: relative;
 
     &:hover {
       cursor: pointer;

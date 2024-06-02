@@ -10,8 +10,8 @@ function getOffsetSecond(): number {
     return SECONDS_IN_MINUTE * tz(DateUtil.DEFAULT_TIME_ZONE).utcOffset();
 }
 
-function getEpochSecond(): number {
-    return moment().unix();
+function getEpochSecond(isLocalTime: boolean = true): number {
+    return moment().utc(isLocalTime).unix();
 }
 
 function isAfterNoon(seconds: number): boolean {
@@ -50,6 +50,10 @@ function toMoment(timestamp: number, isLocalTime: boolean) {
     return moment.unix(timestamp).utc(isLocalTime);
 }
 
+function toLocalMoment(timestamp: number) {
+    return toMoment(timestamp + getOffsetSecond(), true);
+}
+
 function getDiffDays(startTimeStamp: number, endTimeStamp: number) {
     if (!endTimeStamp) {
         return 0;
@@ -67,5 +71,7 @@ export default {
     secondsToTimeStr,
     isAfterNoon,
     toMoment,
+    toLocalMoment,
     getDiffDays
+
 }

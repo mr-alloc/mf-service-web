@@ -8,14 +8,16 @@
     </div>
     <Transition name="down-fade">
       <div class="mini-calendar-area" v-show="state.isSelectMode">
-        <PeriodIndicator :start="state.startTimestamp" :end="state.endTimestamp"/>
+        <PeriodIndicator v-if="state.scheduleMode.isNotIn(ScheduleMode.REPEAT)" :start="state.startTimestamp"
+                         :end="state.endTimestamp"/>
         <ul class="schedule-mode-group">
           <li :key="mode.value" class="mode-item" :class="{ selected: state.scheduleMode.value === mode.value }"
               v-for="mode in ScheduleMode.values().filter(sh => sh.value != ScheduleMode.SINGLE.value)"
               v-on:click="methods.changeScheduleMode(mode)">{{ mode.alias }}
           </li>
         </ul>
-        <div class="calendar" v-show="state.scheduleMode.isIn(ScheduleMode.MULTIPLE, ScheduleMode.PERIOD)">
+        <div class="calendar"
+             v-show="state.scheduleMode.isIn(ScheduleMode.MULTIPLE, ScheduleMode.PERIOD) || state.isRepeatStartActive || state.isRepeatEndActive">
           <div class="title">{{ state.thisMonth }}월</div>
           <ul class="days-name-group">
             <li class="day-name" :key="day.value" v-for="(day) in DayOfWeek.values()">{{ day.alias }}</li>
@@ -26,9 +28,9 @@
                   hide: !calendarDay.isSameMonth(state.thisMonth),
                   contain: state.selected.has(calendarDay.timestamp),
                   today: DateUtil.toString(moment()) === calendarDay.dateStr,
-                  range: state.startTimestamp <= calendarDay.timestamp && state.endTimestamp >= calendarDay.timestamp,
-                  start: state.startTimestamp === calendarDay.timestamp,
-                  end: state.endTimestamp === calendarDay.timestamp
+                  range: state.scheduleMode.isNotIn(ScheduleMode.REPEAT) && state.startTimestamp <= calendarDay.timestamp && state.endTimestamp >= calendarDay.timestamp,
+                  start: state.scheduleMode.isNotIn(ScheduleMode.REPEAT) ? state.startTimestamp === calendarDay.timestamp : state.isRepeatStartActive && state.startTimestamp === calendarDay.timestamp,
+                  end: state.scheduleMode.isNotIn(ScheduleMode.REPEAT) ? state.endTimestamp === calendarDay.timestamp : state.isRepeatEndActive && state.endTimestamp === calendarDay.timestamp
                 }"
                 v-for="(calendarDay, index) in state.calendarDays as Array<CalendarDay>"
                 :key="index" v-on:click="() => methods.selectDay(calendarDay)">
@@ -36,16 +38,45 @@
             </li>
           </ul>
         </div>
-        <div class="repeat-option" v-show="state.scheduleMode.isIn(ScheduleMode.REPEAT)">
-          <!--          <SimpleRadio :options="RepeatOption.selectOptions()" :after-change="methods.selectRepeatOption" />-->
-          <GroupButton :options="RepeatOption.selectOptions()"/>
+        <div class="repeat-option-container" v-show="state.scheduleMode.isIn(ScheduleMode.REPEAT)">
+          <GroupButton ref="repeatOptionButton" :options="RepeatOption.selectOptions()"
+                       :after-change="methods.selectRepeatOption"/>
+          <div class="option-indicator">
+            <div class="weeks-option-specification" v-show="state.repeatOption.is(RepeatOption.WEEK)">
+              <GroupButton ref="weeksRepeatOptionButton" :options="DayOfWeek.selectOptions()"
+                           :default-selected="`${TemporalUtil.toLocalMoment(props.timestamp).day()}`"
+                           :after-change="(option: SelectOption) => console.log('weeks', option)"/>
+            </div>
+            <div class="months-option-specification" v-show="state.repeatOption.is(RepeatOption.MONTH)">
+              <span class="month-option-key">매월</span>
+              <span class="month-option-text">{{ TemporalUtil.toMoment(props.timestamp, true).format("DD일") }}</span>
+            </div>
+            <div class="years-option-specification" v-show="state.repeatOption.is(RepeatOption.YEAR)">
+              <span class="year-option-key">매년</span>
+              <span class="year-option-text">{{ TemporalUtil.toMoment(props.timestamp, true).format("MM월 DD일") }}</span>
+            </div>
+            <div class="repeat-period-option" v-show="!state.isRepeatStartActive && !state.isRepeatEndActive">
+              <div class="repeat-time">
+                <span class="label-name">시작일</span>
+                <StatelessButton :click-behavior="methods.clickRepeatStart"
+                                 :title="TemporalUtil.toMoment(state.startTimestamp, true).format('YYYY년 MM월 DD일')"/>
+              </div>
+              <div class="repeat-time">
+                <span class="label-name">종료일</span>
+                <StatelessButton :click-behavior="methods.clickRepeatEnd"
+                                 :title="state.endTimestamp > 0 ? TemporalUtil.toMoment(state.endTimestamp, true).format('YYYY년 MM월 DD일') : '없음'"/>
+              </div>
+            </div>
+            <StatelessButton v-if="state.isRepeatStartActive || state.isRepeatEndActive" title="범위 선택취소"
+                             :click-behavior="methods.cancelRepeatActive"/>
+          </div>
         </div>
       </div>
     </Transition>
   </div>
 </template>
 <script setup lang="ts">
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import type CalendarDay from "@/classes/CalendarDay";
 import TemporalUtil from "@/utils/TemporalUtil";
 import DateUtil from "@/utils/DateUtil";
@@ -58,26 +89,51 @@ import PeriodIndicator from "@/components/global/PeriodIndicator.vue";
 import RepeatOption from "@/constant/RepeatOption";
 import type SelectOption from "@/classes/SelectOption";
 import GroupButton from "@/components/global/GroupButton.vue";
+import StatelessButton from "@/components/global/StatelessButton.vue";
+import PopupUtil from "@/utils/PopupUtil";
+import {PopupType} from "@/stores/status/CurrentPopup";
 
-const props = defineProps({
-  timestamp: Number,
-  defaultSelect: Number
-});
+
+const repeatOptionButton = ref(null);
+const weeksRepeatOptionButton = ref(null);
+const props = defineProps<{
+  timestamp: number
+}>();
 const state = reactive({
   scheduleMode: ScheduleMode.values()[0],
   repeatOption: RepeatOption.NONE,
-  thisMonth: TemporalUtil.toMoment(props.timestamp!, true).month() + 1,
+  thisMonth: TemporalUtil.toMoment(props.timestamp, true).month() + 1,
   isSelectMode: false,
   calendarDays: [] as Array<CalendarDay>,
   selected: new Set<number>(),
   firstStamp: 0,
   secondStamp: 0,
   startTimestamp: 0,
-  endTimestamp: 0
+  endTimestamp: 0,
+
+  isRepeatStartActive: false,
+  isRepeatEndActive: false
 });
 const methods = {
+  resetAllValues() {
+    state.selected.clear();
+    state.firstStamp = 0;
+    state.endTimestamp = 0;
+    state.startTimestamp = 0;
+    state.endTimestamp = 0;
+    state.repeatOption = RepeatOption.NONE;
+    state.isRepeatStartActive = false;
+    state.isRepeatEndActive = false;
+    repeatOptionButton.value?.resetValues();
+    weeksRepeatOptionButton.value?.resetValues();
+  },
   toggleCollapse() {
+    state.scheduleMode = ScheduleMode.MULTIPLE;
     state.isSelectMode = !state.isSelectMode;
+
+    if (!state.isSelectMode) {
+      methods.resetAllValues();
+    }
   },
   selectRangeSchedule(calendarDay: CalendarDay) {
     //이미 번위가 정해져 있지만, 다른 날짜를 선택할 경우 모두 초기화
@@ -148,27 +204,58 @@ const methods = {
         break;
       case ScheduleMode.PERIOD.value:
         methods.selectRangeSchedule(calendarDay);
-        const start = state.startTimestamp > 0 ? TemporalUtil.toMoment(state.startTimestamp, true).format(DateUtil.DEFAULT_DATE_FORMAT) : "선택되지 않음";
-        const end = state.endTimestamp > 0 ? TemporalUtil.toMoment(state.endTimestamp, true).format(DateUtil.DEFAULT_DATE_FORMAT) : "선택되지 않음";
+        break;
+      case ScheduleMode.REPEAT.value:
+        if (state.isRepeatStartActive) {
+          state.startTimestamp = calendarDay.timestamp;
+          state.isRepeatStartActive = false;
+        } else if (state.isRepeatEndActive) {
 
-        console.log('start', start, 'end', end);
+          if (state.startTimestamp >= calendarDay.timestamp) {
+            PopupUtil.innerAlert(PopupType.INFO, "종료일 선택 불가", `시작일 ${TemporalUtil.toMoment(state.startTimestamp, true).format("YYYY년 MM월 DD일")} 이후로 선택해주세요.`);
+            return;
+          }
+
+          //종료는 재선택시 없음
+          if (state.endTimestamp == calendarDay.timestamp) {
+            state.endTimestamp = 0;
+            state.isRepeatEndActive = false;
+            return;
+          }
+
+          state.endTimestamp = calendarDay.timestamp;
+          state.isRepeatEndActive = false;
+        }
         break;
     }
   },
   changeScheduleMode(scheduleMode: ScheduleMode) {
     //모드 변경감지(기존 선택값 초기화)
     if (state.scheduleMode.value !== scheduleMode.value) {
-      state.selected.clear();
-      state.firstStamp = 0;
-      state.endTimestamp = 0;
-      state.startTimestamp = 0;
-      state.endTimestamp = 0;
-      state.repeatOption = RepeatOption.NONE;
+      methods.resetAllValues();
+      //반복은 시작일 초기화
+      if (scheduleMode.isIn(ScheduleMode.REPEAT)) {
+        state.startTimestamp = props.timestamp;
+      } else if (scheduleMode.isIn(ScheduleMode.MULTIPLE)) {
+        state.selected.add(props.timestamp);
+      }
     }
+
     state.scheduleMode = scheduleMode;
   },
   selectRepeatOption(selectOption: SelectOption) {
     state.repeatOption = RepeatOption.fromValue(parseInt(selectOption.value));
+    state.startTimestamp = props.timestamp;
+  },
+  clickRepeatStart(event: MouseEvent) {
+    state.isRepeatStartActive = true;
+  },
+  clickRepeatEnd(event: MouseEvent) {
+    state.isRepeatEndActive = true;
+  },
+  cancelRepeatActive(event: MouseEvent) {
+    state.isRepeatStartActive = false;
+    state.isRepeatEndActive = false;
   }
 }
 
@@ -176,11 +263,9 @@ defineExpose({
   selected: state.selected
 })
 onMounted(() => {
-  const momentValue = TemporalUtil.toMoment(props.timestamp ?? TemporalUtil.getEpochSecond(), true);
+  const momentValue = TemporalUtil.toMoment(props.timestamp, true);
   state.calendarDays = DateUtil.getCalendarDays(momentValue);
-  if (props.defaultSelect) {
-    state.selected.add(TemporalUtil.toMoment(props.defaultSelect, true).date());
-  }
+  state.selected.add(props.timestamp);
 });
 </script>
 <style scoped lang="scss">
@@ -191,6 +276,7 @@ onMounted(() => {
   width: 270px;
 
   .collapse-controller {
+    padding: 5px 0;
 
     button {
       width: 100%;
@@ -336,10 +422,71 @@ onMounted(() => {
       }
     }
 
-    .repeat-option {
+    .repeat-option-container {
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
+
+      .option-indicator {
+        width: 100%;
+
+        .months-option-specification {
+          display: flex;
+          font-weight: bold;
+
+          .month-option-key {
+            flex-shrink: 0;
+            padding: 0 8px;
+          }
+
+          .month-option-text {
+            flex-grow: 1;
+            color: $signature-purple;
+            text-align: center;
+          }
+        }
+
+        .years-option-specification {
+          display: flex;
+          font-weight: bold;
+
+          .year-option-key {
+            flex-shrink: 0;
+            padding: 0 8px;
+          }
+
+          .year-option-text {
+            flex-grow: 1;
+            color: $signature-purple;
+            text-align: center;
+          }
+        }
+
+        .repeat-period-option {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          flex: 1 1 50%;
+
+          .repeat-time {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 50%;
+
+            .label-name {
+              font-size: .84rem;
+              font-weight: bold;
+            }
+          }
+
+          .repeat-time {
+            font-size: .75rem;
+          }
+
+        }
+      }
     }
   }
 }

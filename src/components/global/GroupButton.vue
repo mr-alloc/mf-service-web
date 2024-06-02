@@ -15,25 +15,34 @@ import SelectOption from "@/classes/SelectOption";
 import {reactive} from "vue";
 
 const props = defineProps<{
-  options: Array<SelectOption>
+  options: Array<SelectOption>,
+  defaultSelected?: String,
+  afterChange: (option: SelectOption) => void
 }>();
 
 const state = reactive({
-  selected: SelectOption.ofDefault()
+  selected: props.options.find(option => option.value === props.defaultSelected) ?? SelectOption.ofDefault()
 })
 
 const methods = {
   selectOption(option: SelectOption) {
-    console.log("state.selected: ", state.selected.value)
-    console.log("selected option: ", option.value);
 
     if (state.selected.value !== SelectOption.ofDefault().value && state.selected.value === option.value) {
       state.selected = SelectOption.ofDefault();
       return;
     }
     state.selected = option;
+    props.afterChange(option);
+  },
+  resetValues() {
+    state.selected = props.options.find(option => option.value === props.defaultSelected) ?? SelectOption.ofDefault();
   }
 }
+
+defineExpose({
+  resetValues: methods.resetValues,
+  selected: state.selected
+});
 </script>
 <style scoped lang="scss">
 @import "@/assets/main";
@@ -42,6 +51,7 @@ const methods = {
   display: flex;
   justify-content: center;
   width: 100%;
+  padding: 5px 0;
 
   .option-button-group {
     width: 100%;

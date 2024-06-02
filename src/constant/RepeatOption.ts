@@ -26,6 +26,10 @@ export default class RepeatOption {
         return this._alias;
     }
 
+    is(option: RepeatOption) {
+        return this._value === option.value;
+    }
+
     static values(): RepeatOption[] {
         return [
             RepeatOption.WEEK,

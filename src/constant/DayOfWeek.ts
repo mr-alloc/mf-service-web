@@ -1,4 +1,5 @@
 import CollectionUtil from "@/utils/CollectionUtil";
+import SelectOption from "@/classes/SelectOption";
 
 export default class DayOfWeek {
 
@@ -48,5 +49,9 @@ export default class DayOfWeek {
             DayOfWeek.FRIDAY,
             DayOfWeek.SATURDAY
         ];
+    }
+
+    static selectOptions(): Array<SelectOption> {
+        return DayOfWeek.values().map(dayOfWeek => new SelectOption(String(dayOfWeek.value), dayOfWeek.alias));
     }
 }

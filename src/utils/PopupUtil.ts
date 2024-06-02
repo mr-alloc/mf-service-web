@@ -5,12 +5,12 @@ import type {IMission} from "@/classes/api-spec/mission/GetMemberCalendar";
 import MissionType from "@/constant/MissionType";
 import {useCalendarStore} from "@/stores/CalendarStore";
 
-function popupCreateMission(emitter: any, startDate: string, days?: number) {
+function popupCreateMission(emitter: any, timestamp: number) {
     const backgroundStore = useBackgroundStore();
     const alertStore = useAlertStore();
 
     const createMissionPopup = new CurrentPopup(PopupType.NORMAL, `미션 생성`)
-        .addBodyComponent("CreateMission", {startDate: startDate, days: days})
+        .addBodyComponent("CreateMission", {timestamp: timestamp})
         .addButton("생성", () => {
             emitter.emit("validateCreateMissionForm")
         })
@@ -144,8 +144,7 @@ function popupCreateAnniversary(emitter: any) {
 
     const currentPopup = new CurrentPopup(PopupType.NORMAL, "휴가 또는 기념일 생성")
         .addBodyComponent("CreateAnniversary", {
-            startTimestamp: calendarStore.startTimestamp,
-            endTimestamp: calendarStore.endTimestamp
+            timestamp: calendarStore.timestamp,
         })
         .addButton("생성", () => {
             emitter.emit("validateCreateAnniversaryForm");

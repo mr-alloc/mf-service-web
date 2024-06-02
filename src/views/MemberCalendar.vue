@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-container" v-show="state.thisMonth">
+  <div class="calendar-container" v-show="state.timestamp > 0">
     <div class="calendar-title">
       <span class="title-text">{{ `${state.calendarTitle} 달력` }}</span>
       <div class="calendar-control">
@@ -25,13 +25,9 @@
         <li class="each-day-item" v-for="(day, index) in state.calendar as Array<CalendarDay>" :key="index"
             v-on:click="methods.selectDate(day)" :id="`calendar-${day.dateStr}`"
             :class="{
-              'this-month': DateUtil.isSameMonth(day.value, state.thisMonth),
               holiday: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
               anniversary: calendarStore.anniversaryMap.has(day.dateStr),
-              selected: calendarStore.selectedDate === day.dateStr || calendarStore.selectedSecondDate === day.dateStr,
-              range: (calendarStore.startTimestamp && calendarStore.endTimestamp) && (calendarStore.startTimestamp + TemporalUtil.getOffsetSecond()) <= day.localTimestamp && day.localTimestamp <= (calendarStore.endTimestamp + TemporalUtil.getOffsetSecond()),
-              start: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.startTimestamp + TemporalUtil.getOffsetSecond() === day.localTimestamp,
-              end: (calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0) && calendarStore.endTimestamp + TemporalUtil.getOffsetSecond() === day.localTimestamp
+              selected: calendarStore.timestamp === day.timestamp
             }">
           <div class="item-header">
             <span class="date" :class="{ today: DateUtil.toString(moment()) === day.dateStr }">
@@ -73,8 +69,7 @@
         </li>
       </ul>
       <Transition name="fade">
-        <div class="calendar-controller" v-show="calendarStore.isSelected">
-          <PeriodIndicator :start="calendarStore.startTimestamp" :end="calendarStore.endTimestamp"/>
+        <div class="calendar-controller" v-show="calendarStore.timestamp > 0">
           <ul class="calendar-feature-group">
             <li class="feature-item" v-on:click="methods.createMission">
               <FontAwesomeIcon :icon="faPlus"/>
@@ -84,15 +79,9 @@
               <FontAwesomeIcon :icon="faRecycle"/>
               <span class="description">루틴추가</span>
             </li>
-            <li class="feature-item" v-show="calendarStore.startTimestamp > 0 && calendarStore.endTimestamp > 0"
-                v-on:click="methods.createAnniversary">
+            <li class="feature-item" v-on:click="methods.createAnniversary">
               <FontAwesomeIcon :icon="faCalendarDay"/>
               <span class="description">휴가/기념일 지정</span>
-            </li>
-            <li class="feature-item" v-show="calendarStore.startTimestamp > 0 && calendarStore.endTimestamp === 0"
-                v-on:click="methods.createAnniversary">
-              <FontAwesomeIcon :icon="faCalendarDays"/>
-              <span class="description">휴가/기념일 중복 지정</span>
             </li>
             <li class="feature-item" v-on:click="calendarStore.resetSelected">
               <FontAwesomeIcon :icon="faRectangleXmark"/>
@@ -120,15 +109,13 @@ import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
 import {faRecycle} from "@fortawesome/free-solid-svg-icons/faRecycle";
 import {faCalendarDay} from "@fortawesome/free-solid-svg-icons/faCalendarDay";
 import {faRectangleXmark} from "@fortawesome/free-regular-svg-icons/faRectangleXmark";
-import PeriodIndicator from "@/components/global/PeriodIndicator.vue";
-import {faCalendarDays} from "@fortawesome/free-solid-svg-icons";
 
 
 const emitter = inject("emitter");
 const calendarStore = useCalendarStore();
 const state = reactive({
   calendarTitle: '',
-  thisMonth: moment(),
+  timestamp: TemporalUtil.getEpochSecond(false),
   calendar: [] as Array<CalendarDay>,
   startDate: moment(),
   endDate: moment(),
@@ -138,38 +125,26 @@ const methods = {
   createAnniversary(event: MouseEvent) {
     PopupUtil.popupCreateAnniversary(emitter);
   },
-  createMission() {
-    const startDate = TemporalUtil.toMoment(calendarStore.startTimestamp, true).format(DateUtil.DEFAULT_DATE_FORMAT);
-    const diffDays = TemporalUtil.getDiffDays(calendarStore.startTimestamp, calendarStore.endTimestamp);
-    PopupUtil.popupCreateMission(emitter, startDate, diffDays);
+  createMission(day: CalendarDay) {
+    PopupUtil.popupCreateMission(emitter, day.timestamp);
   },
   setMonth(month: number) {
-    state.thisMonth.add(month, 'month');
+    const localMoment = TemporalUtil.toMoment(state.timestamp + TemporalUtil.getOffsetSecond(), true);
+    localMoment.add(month, 'month');
+    state.timestamp = localMoment.utc(false).unix();
     methods.drawCalendar();
   },
   drawCalendar() {
-    state.calendarTitle = state.thisMonth.get('year') + "년 " + (state.thisMonth.get('month') + 1) + "월"
+    const localMoment = TemporalUtil.toMoment(state.timestamp + TemporalUtil.getOffsetSecond(), true);
+    state.calendarTitle = localMoment.format("YY년 MM월");
 
-    const startOfThisMonth = moment(state.thisMonth).startOf('month');
-    const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
-    state.startDate = startOfCalendar.clone();
-    // print start of this month's day and days
-
-    const endOfThisMonth = moment(state.thisMonth).endOf('month');
-    const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
-    state.endDate = endOfCalendar.clone();
-    let interval = 0;
-    state.calendar = [];
-    const diffDays = endOfCalendar.diff(startOfCalendar, 'days') + 1;
-    while (interval < diffDays) {
-      const cloned = startOfCalendar.clone();
-      const date = cloned.add(interval, 'days');
-      state.calendar.push(new CalendarDay(date, true));
-      interval++;
-    }
+    state.calendar = DateUtil.getCalendarDays(localMoment, (calendarStart, monthStart, monthEnd, calendarEnd) => {
+      state.startDate = calendarStart;
+      state.endDate = calendarEnd;
+    });
 
     calendarStore.fetchOwnCalendar(state.startDate, state.endDate);
-    calendarStore.fetchOwnAnniversaries(state.thisMonth);
+    calendarStore.fetchOwnAnniversaries(localMoment);
 
   },
   clickSchedule(e: MouseEvent, mission: IMission) {
@@ -177,10 +152,7 @@ const methods = {
     PopupUtil.popupMissionDetail(mission);
   },
   selectDate(day: CalendarDay) {
-    calendarStore.selectDate(day.value);
-    // const start = TemporalUtil.toMoment(calendarStore.startTimestamp, true);
-    // const end = TemporalUtil.toMoment(calendarStore.endTimestamp, true);
-    // console.log(`start: "${start.format(DateUtil.DEFAULT_DATE_FORMAT)}"(${calendarStore.startTimestamp}), end: "${end.format(DateUtil.DEFAULT_DATE_FORMAT)}"(${calendarStore.endTimestamp})`);
+    calendarStore.selectDate(day);
   },
 }
 onMounted(() => {

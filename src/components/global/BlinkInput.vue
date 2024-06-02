@@ -101,8 +101,7 @@ onMounted(() => {
 <style scoped lang="scss">
 @import '@/assets/main.scss';
 .input-wrapper {
-  padding: 0;
-  margin: 20px auto;
+  padding: 5px 0;
   width: 100%;
   display: flex;
   justify-content: center;
