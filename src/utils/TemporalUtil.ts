@@ -61,6 +61,12 @@ function getDiffDays(startTimeStamp: number, endTimeStamp: number) {
     return ((endTimeStamp - startTimeStamp) / SECONDS_IN_DAY) + 1;
 }
 
+function getLocalDaysArray(startStamp: number, days: number) {
+    return [...Array(days).keys()].map((_, idx) => {
+        return toLocalMoment(startStamp).add(idx, "days");
+    });
+}
+
 export default {
     SECONDS_IN_MINUTE,
     SECONDS_IN_HOUR,
@@ -72,6 +78,6 @@ export default {
     isAfterNoon,
     toMoment,
     toLocalMoment,
-    getDiffDays
-
+    getDiffDays,
+    getLocalDaysArray
 }

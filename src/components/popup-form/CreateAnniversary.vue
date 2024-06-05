@@ -1,56 +1,49 @@
 <template>
   <div class="create-anniversary-container">
     <BlinkInput ref="anniversaryName" label="휴가/기념일 이름" id="anniversary-name" name="anniversaryName"
-                place-holder="여름 휴가"
-                :validate="methods.validateName" warning-message="이름을 입력해주세요."/>
+                place-holder="여름 휴가" :validate="methods.validateName" warning-message="이름을 입력해주세요."/>
     <DatePicker ref="multipleDatePicker" id="anniversary-date" label="날짜" name="anniversaryDate"
-                :timestamp="props.timestamp"/>
+                :timestamp="props.timestamp" :after-change-mode="methods.handleChangeScheduleMode"/>
   </div>
 </template>
 <script setup lang="ts">
 import BlinkInput from "@/components/global/BlinkInput.vue";
 import {inject, onMounted, reactive, ref} from "vue";
-import SelectOption from "@/classes/SelectOption";
 import DatePicker from "@/components/global/DatePicker.vue";
-import {useCalendarStore} from "@/stores/CalendarStore";
 import {useThrottleFn} from "@vueuse/core";
 import PopupUtil from "@/utils/PopupUtil";
 import {PopupType} from "@/stores/status/CurrentPopup";
 import {RequestBody, ResponseBody} from "@/classes/api-spec/CreateAnniversary";
+import ScheduleMode from "@/constant/ScheduleMode";
+import type {BlinkInputExpose, DatePickerExpose} from "@/types/ExposeType";
+import {ex} from "@/utils/Undefinable";
+import {useCalendarStore} from "@/stores/CalendarStore";
+import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {call} from "@/utils/NetworkUtil";
 import Anniversary from "@/constant/api-meta/Anniversary";
-import {useBackgroundStore} from "@/stores/BackgroundStore";
 
-
-const emitter = inject("emitter");
-const anniversaryName = ref(null);
-const multipleDatePicker = ref(null);
-
-const backgroundStore = useBackgroundStore();
 const calendarStore = useCalendarStore();
+const backgroundStore = useBackgroundStore();
+const emitter: any = inject("emitter");
+const anniversaryName = ref<BlinkInputExpose | null>(null);
+const multipleDatePicker = ref<DatePickerExpose | null>(null);
 const props = defineProps<{
   timestamp: number,
 }>();
 
 const state = reactive({
+  scheduleMode: ScheduleMode.SINGLE,
   anniversaryName: '',
   validName: false,
-  repeatOptions: [
-    SelectOption.of('0', '없음'),
-    SelectOption.of('1', '매년 (예: 매년 5월 9일~ 17일 반복)'),
-    SelectOption.of('2', '매월 (예: 매월 9일 ~ 17일 반복'),
-  ],
   isSubmittable: false
 });
 
 const methods = {
   validateName() {
-    const input = anniversaryName.value?.input as HTMLInputElement | null;
-    state.anniversaryName = input?.value ?? "";
+    state.anniversaryName = anniversaryName.value?.input.value ?? "";
     state.validName = state.anniversaryName.length > 0
     if (!state.validName) {
-      input?.focus();
-      return;
+      anniversaryName.value?.input?.focus();
     }
 
     return state.validName;
@@ -58,6 +51,18 @@ const methods = {
   checkAllInput() {
     methods.validateName();
     state.isSubmittable = state.validName;
+  },
+  getRequestBody(): RequestBody {
+    const scheduleMode = state.scheduleMode as ScheduleMode;
+    if (scheduleMode.value === ScheduleMode.SINGLE.value) {
+      return new RequestBody(state.anniversaryName);
+    }
+
+    const scheduleInfo = multipleDatePicker.value?.extractResult();
+    return new RequestBody(state.anniversaryName, scheduleInfo);
+  },
+  handleChangeScheduleMode(mode: ScheduleMode) {
+    state.scheduleMode = mode;
   }
 }
 
@@ -69,12 +74,15 @@ onMounted(() => {
       return;
     }
 
-    let requestBody: RequestBody = {} as RequestBody;
+    const requestBody = methods.getRequestBody();
+    if (ex(requestBody).no()) {
+      return;
+    }
 
     call<RequestBody, ResponseBody>(Anniversary.CreateAnniversary, requestBody, (response) => {
       const responseBody = ResponseBody.fromJson(response.data);
       const created = responseBody.created;
-      calendarStore.addAnniversary(created);
+      created.forEach(calendarStore.addAnniversary);
       calendarStore.resetSelected();
 
       emitter.off("validateCreateMissionForm");

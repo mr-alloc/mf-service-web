@@ -54,29 +54,29 @@ router.beforeEach(async (to, from, next) => {
 
     const onlyForGuest = ['/sign-in', '/sign-up'];
 
-    console.info(`${from.path} → ${to.path} [No Session: ${noAccessToken()} / No Member: ${memberInfoStore.needMemberInfo()}]`)
+    console.debug(`${from.path} → ${to.path} [No Session: ${noAccessToken()} / No Member: ${memberInfoStore.needMemberInfo()}]`)
 
     //로그인 정보가 없는 경우
     if (noAccessToken() && to.meta.role !== 0) {
-        console.log('no access token')
+        console.debug('no access token')
         return next({ path: '/sign-in' })
     }
 
     // 미로그인, 게스트일때만 들어갈수 있는 페이지 인경우
     if (!noAccessToken() && onlyForGuest.includes(to.path)) {
-      console.log('not allow for signed in user')
+        console.debug('not allow for signed in user')
       return next({ path: '/' })
     }
 
     //미로그인이지만, 접근이 가능한 페이지 인경우
     if (noAccessToken() && !onlyForGuest.includes(to.path) && to.meta.role === 0) {
-        console.log('no session but, accessible page')
+        console.debug('no session but, accessible page')
         return next()
     }
 
     //로그인은 했지만, 멤버 정보가 없는경우.
     if (!noAccessToken() && memberInfoStore.needMemberInfo()) {
-        console.log('call member info in router proxy')
+        console.debug('call member info in router proxy')
         await call<any, any>(MemberAPI.GetInfo, null,
             (response) => {
                 const {id, nickname, role, profileImageUrl} = response.data
@@ -109,7 +109,7 @@ router.beforeEach(async (to, from, next) => {
             return next({path: '/sign-in'})
         }
     }
-    console.log('All pass router guard')
+    console.debug('All pass router guard')
     return next()
 })
 

@@ -19,6 +19,7 @@ import CollectionUtil from "@/utils/CollectionUtil";
 import * as GetAnniversaries from "@/classes/api-spec/GetAnniversaries";
 import Anniversary from "@/constant/api-meta/Anniversary";
 import CalendarDay from "@/classes/CalendarDay";
+import TemporalUtil from "@/utils/TemporalUtil";
 
 export const useCalendarStore = defineStore('calendar', () => {
 
@@ -27,12 +28,23 @@ export const useCalendarStore = defineStore('calendar', () => {
     const holidaysMap = ref<Map<string, CalendarHoliday>>(new Map<string, CalendarHoliday>());
     const anniversaryMap = ref<Map<string, Array<CalendarAnniversary>>>(new Map<string, Array<CalendarAnniversary>>());
 
+    const calendar = ref<Array<CalendarDay>>([]);
+    const startOfCalendar = ref<number>(0);
+    const endOfCalendar = ref<number>(0);
+
     function resetSelected() {
         timestamp.value = 0;
     }
 
-    async function fetchOwnCalendar(startDate: Moment, endDate: Moment) {
-        await call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(startDate, endDate),
+    function initCalendar(localMonth: Moment) {
+        calendar.value = DateUtil.getCalendarDays(localMonth, (sc, sm, em, ec) => {
+            startOfCalendar.value = sc.unix() - TemporalUtil.getOffsetSecond();
+            endOfCalendar.value = ec.unix() - TemporalUtil.getOffsetSecond() + (TemporalUtil.SECONDS_IN_DAY - 1);
+        });
+    }
+
+    async function fetchOwnCalendar() {
+        await call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(startOfCalendar.value, endOfCalendar.value),
             (res) => {
                 const responseBody = ResponseBody.fromJson(res.data, (mission) => {
                     return hasSelectedFamilyId()
@@ -56,10 +68,9 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
 
 
-    async function fetchOwnAnniversaries(month: Moment) {
-        await call<any, GetAnniversaries.ResponseBody>(
-            Anniversary.GetAnniversaries,
-            {yearMonth: month.format(DateUtil.YYYYMM)},
+    async function fetchOwnAnniversaries() {
+        await call<RequestBody, GetAnniversaries.ResponseBody>(
+            Anniversary.GetAnniversaries, new RequestBody(startOfCalendar.value, endOfCalendar.value),
             (response) => {
                 const responseBody = GetAnniversaries.ResponseBody.fromJson(response.data);
 
@@ -80,7 +91,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
 
     function addAnniversary(value: AnniversaryValue) {
-        const anniversaries = CalendarAnniversary.of(value);
+        const anniversaries = CalendarAnniversary.of(value, startOfCalendar.value, endOfCalendar.value);
         anniversaries.forEach((anniversary) => {
             const date = anniversary.date;
             if (anniversaryMap.value.has(date)) {
@@ -98,6 +109,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         timestamp,
         selectDate,
         resetSelected,
+        initCalendar,
         fetchOwnCalendar,
         addAnniversary,
         memberCalendarMap,

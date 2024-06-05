@@ -143,7 +143,7 @@ const methods = {
       state.endDate = calendarEnd;
     });
 
-    calendarStore.fetchOwnCalendar(state.startDate, state.endDate);
+    calendarStore.fetchOwnCalendar();
     calendarStore.fetchOwnAnniversaries(localMoment);
 
   },
@@ -272,8 +272,8 @@ onMounted(() => {
         top: 0;
         left: 0;
 
-        &.this-month {
-          //background-color: white;
+        &:hover {
+          cursor: pointer;
         }
 
         &.range {

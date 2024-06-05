@@ -21,7 +21,7 @@
                v-on:focusout="methods.focusOut()"
                v-on:input="props.onInput && props.onInput($event)"
                v-model="state.value"
-               v-on:keyup="$event.code === 'Enter' && props.ifEnter && props.ifEnter($event)"
+               v-on:keyup="props.handleKeyEvent"
         />
         <Transition name="left-fade">
           <span class="show-origin" :class="{ active: state.isVisible }" v-show="state.isPassword" v-on:click="methods.visiblePassword()">
@@ -63,7 +63,7 @@ const props = defineProps({
   ifVisibleNeed: Function,
   noMark: Boolean,
   defaultValue: String,
-  ifEnter: Function,
+  handleKeyEvent: Function,
   onInput: Function
 });
 const methods =  {
@@ -89,8 +89,8 @@ const methods =  {
   }
 }
 defineExpose({
-  value: state.value
-})
+  input: input,
+});
 onMounted(() => {
   if (props.type === 'password') {
     state.isPassword = true;

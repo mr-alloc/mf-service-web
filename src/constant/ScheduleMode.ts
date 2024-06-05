@@ -1,4 +1,5 @@
 import SelectOption from "@/classes/SelectOption";
+import CollectionUtil from "@/utils/CollectionUtil";
 
 export default class ScheduleMode {
 
@@ -7,6 +8,7 @@ export default class ScheduleMode {
     static readonly PERIOD = new ScheduleMode(3, "기간");
     static readonly REPEAT = new ScheduleMode(4, "반복");
 
+    private static readonly CACHED = CollectionUtil.toMap(ScheduleMode.values(), mode => mode.value);
 
     private readonly _value: number;
     private readonly _alias: string;
@@ -34,6 +36,10 @@ export default class ScheduleMode {
 
     toSelectOption() {
         return new SelectOption(String(this._value), this._alias);
+    }
+
+    static fromValue(value: number): ScheduleMode | undefined {
+        return ScheduleMode.CACHED.get(value);
     }
 
     static values(): ScheduleMode[] {

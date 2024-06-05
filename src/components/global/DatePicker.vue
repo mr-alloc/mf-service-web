@@ -3,7 +3,7 @@
     <div class="collapse-controller">
       <button type="button" class="btn-primary" v-on:click="methods.toggleCollapse()">
         <FontAwesomeIcon v-show="!state.isSelectMode" class="fa-1x" :icon="faCalendarAlt"/>
-        <span class="btn-content">{{ state.isSelectMode ? '취소' : '다른날짜 선택' }}</span>
+        <span class="btn-content">{{ state.isSelectMode ? '취소' : '날짜옵션 선택' }}</span>
       </button>
     </div>
     <Transition name="down-fade">
@@ -44,8 +44,8 @@
           <div class="option-indicator">
             <div class="weeks-option-specification" v-show="state.repeatOption.is(RepeatOption.WEEK)">
               <GroupButton ref="weeksRepeatOptionButton" :options="DayOfWeek.selectOptions()"
-                           :default-selected="`${TemporalUtil.toLocalMoment(props.timestamp).day()}`"
-                           :after-change="(option: SelectOption) => console.log('weeks', option)"/>
+                           :default-selected="`${state.repeatValue}`"
+                           :after-change="(option: SelectOption) => methods.selectRepeatDay(option)"/>
             </div>
             <div class="months-option-specification" v-show="state.repeatOption.is(RepeatOption.MONTH)">
               <span class="month-option-key">매월</span>
@@ -92,12 +92,18 @@ import GroupButton from "@/components/global/GroupButton.vue";
 import StatelessButton from "@/components/global/StatelessButton.vue";
 import PopupUtil from "@/utils/PopupUtil";
 import {PopupType} from "@/stores/status/CurrentPopup";
+import type IDatePickerOutput from "@/classes/component-protocol/IDatePickerOuput";
+import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput";
+import PeriodModeOutput from "@/classes/component-protocol/PeriodModeOutput";
+import RepeatModeOutput from "@/classes/component-protocol/RepeatModeOutput";
+import type {GroupButtonExpose} from "@/types/ExposeType";
 
 
-const repeatOptionButton = ref(null);
-const weeksRepeatOptionButton = ref(null);
+const repeatOptionButton = ref<GroupButtonExpose | null>(null);
+const weeksRepeatOptionButton = ref<GroupButtonExpose | null>(null);
 const props = defineProps<{
-  timestamp: number
+  timestamp: number,
+  afterChangeMode: Function,
 }>();
 const state = reactive({
   scheduleMode: ScheduleMode.values()[0],
@@ -110,6 +116,7 @@ const state = reactive({
   secondStamp: 0,
   startTimestamp: 0,
   endTimestamp: 0,
+  repeatValue: TemporalUtil.toLocalMoment(props.timestamp).day(),
 
   isRepeatStartActive: false,
   isRepeatEndActive: false
@@ -128,11 +135,11 @@ const methods = {
     weeksRepeatOptionButton.value?.resetValues();
   },
   toggleCollapse() {
-    state.scheduleMode = ScheduleMode.MULTIPLE;
     state.isSelectMode = !state.isSelectMode;
 
     if (!state.isSelectMode) {
       methods.resetAllValues();
+      state.scheduleMode = ScheduleMode.SINGLE;
     }
   },
   selectRangeSchedule(calendarDay: CalendarDay) {
@@ -242,6 +249,8 @@ const methods = {
     }
 
     state.scheduleMode = scheduleMode;
+    console.log('scheduleMode', scheduleMode.value);
+    props.afterChangeMode && props.afterChangeMode(scheduleMode);
   },
   selectRepeatOption(selectOption: SelectOption) {
     state.repeatOption = RepeatOption.fromValue(parseInt(selectOption.value));
@@ -256,11 +265,29 @@ const methods = {
   cancelRepeatActive(event: MouseEvent) {
     state.isRepeatStartActive = false;
     state.isRepeatEndActive = false;
+  },
+  extractResult(): IDatePickerOutput {
+    switch (state.scheduleMode.value) {
+      case ScheduleMode.MULTIPLE.value:
+        return new MultipleModeOutput(state.selected);
+      case ScheduleMode.PERIOD.value:
+        return new PeriodModeOutput(state.startTimestamp, state.endTimestamp);
+      case ScheduleMode.REPEAT.value:
+        // eslint-disable-next-line no-case-declarations
+        const repeatValue = state.repeatOption.is(RepeatOption.WEEK) ? state.repeatValue : props.timestamp;
+        return RepeatModeOutput.of(state.repeatOption as RepeatOption, repeatValue, state.startTimestamp, state.endTimestamp);
+      default:
+        throw new Error("Invalid Schedule Mode");
+    }
+  },
+  selectRepeatDay(option: SelectOption) {
+    state.repeatValue = parseInt(option.value) ?? 0;
   }
 }
 
 defineExpose({
-  selected: state.selected
+  scheduleMode: state.scheduleMode,
+  extractResult: methods.extractResult
 })
 onMounted(() => {
   const momentValue = TemporalUtil.toMoment(props.timestamp, true);

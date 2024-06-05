@@ -1,3 +1,4 @@
+type force = {};
 export class Undefinable<T> {
 
     private static readonly UNDEFINED = new Undefinable<undefined>(undefined);
@@ -21,6 +22,14 @@ export class Undefinable<T> {
 
     str(): string {
         return this._value === undefined ? "" : this._value as string;
+    }
+
+    no(): boolean {
+        return this._value === undefined;
+    }
+
+    get(): force {
+        return this._value!;
     }
 }
 

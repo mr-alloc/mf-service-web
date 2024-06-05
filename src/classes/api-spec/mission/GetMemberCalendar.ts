@@ -1,4 +1,3 @@
-import type {Moment} from "moment-timezone";
 import DateUtil from "@/utils/DateUtil";
 
 export interface IMission {
@@ -151,12 +150,19 @@ export class CalendarHoliday {
 }
 
 export class RequestBody {
-    startDate: string;
-    endDate: string;
+    private readonly _startAt: number;
+    private readonly _endAt: number;
 
-    constructor(startDate: Moment, endDate: Moment) {
-        this.startDate = DateUtil.toString(startDate);
-        this.endDate = DateUtil.toString(endDate);
+    constructor(startAt: number, endAt: number) {
+        this._startAt = startAt;
+        this._endAt = endAt;
+    }
+
+    toJSON() {
+        return {
+            startAt: this._startAt,
+            endAt: this._endAt
+        }
     }
 }
 

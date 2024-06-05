@@ -22,7 +22,7 @@ const props = defineProps<{
 
 const state = reactive({
   selected: props.options.find(option => option.value === props.defaultSelected) ?? SelectOption.ofDefault()
-})
+});
 
 const methods = {
   selectOption(option: SelectOption) {
