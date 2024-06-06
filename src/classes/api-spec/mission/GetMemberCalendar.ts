@@ -150,18 +150,19 @@ export class CalendarHoliday {
 }
 
 export class RequestBody {
-    private readonly _startAt: number;
-    private readonly _endAt: number;
+
+    private readonly _startStamp: number;
+    private readonly _endStamp: number;
 
     constructor(startAt: number, endAt: number) {
-        this._startAt = startAt;
-        this._endAt = endAt;
+        this._startStamp = startAt;
+        this._endStamp = endAt;
     }
 
     toJSON() {
         return {
-            startAt: this._startAt,
-            endAt: this._endAt
+            startAt: this._startStamp,
+            endAt: this._endStamp
         }
     }
 }

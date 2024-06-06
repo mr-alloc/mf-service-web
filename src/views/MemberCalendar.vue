@@ -21,8 +21,9 @@
         <li>금</li>
         <li>토</li>
       </ul>
-      <ul class="calendar-row member-calendar" v-show="state.calendar">
-        <li class="each-day-item" v-for="(day, index) in state.calendar as Array<CalendarDay>" :key="index"
+      <ul class="calendar-row member-calendar" v-show="calendarStore.calendar"
+          v-on:scrollend="methods.scrollOnCalendar">
+        <li class="each-day-item" v-for="(day, index) in calendarStore.calendar as Array<CalendarDay>" :key="index"
             v-on:click="methods.selectDate(day)" :id="`calendar-${day.dateStr}`"
             :class="{
               holiday: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
@@ -31,11 +32,11 @@
             }">
           <div class="item-header">
             <span class="date" :class="{ today: DateUtil.toString(moment()) === day.dateStr }">
-              {{ day.day == 1 ? day.value.format('M/D') : day.value.format('D') }}
+              {{ day.date == 1 ? day.value.format('M/D') : day.value.format('D') }}
             </span>
-            <div class="day-description">
-              <span class="mission-count"
-                    v-show="calendarStore.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
+            <div class="day-description"
+                 v-on:click="($event) => methods.clickHolidayText($event, day.dateStr, DateUtil.to(day.value, 'MM-DD'))">
+              <span class="mission-count" v-show="calendarStore.memberCalendarMap.get(day.dateStr)?.length ?? 0 > 0">
                 {{ calendarStore.memberCalendarMap.get(day.dateStr)?.length }}
               </span>
               <span class="holiday-name" v-show="calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))">
@@ -45,7 +46,7 @@
                     :class="{ slash: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD'))}"
                     v-if="calendarStore.anniversaryMap.has(day.dateStr)">
                 {{
-                  `${calendarStore.anniversaryMap.get(day.dateStr)?.[0].name}` + (calendarStore.anniversaryMap.get(day.dateStr)!.length > 1 ? `${calendarStore.anniversaryMap.get(day.dateStr)!.length - 1}개` : ``)
+                  `${calendarStore.anniversaryMap.get(day.dateStr)?.map(anniversary => anniversary.name).join(', ')}`
                 }}
               </span>
             </div>
@@ -109,16 +110,14 @@ import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
 import {faRecycle} from "@fortawesome/free-solid-svg-icons/faRecycle";
 import {faCalendarDay} from "@fortawesome/free-solid-svg-icons/faCalendarDay";
 import {faRectangleXmark} from "@fortawesome/free-regular-svg-icons/faRectangleXmark";
+import {useThrottleFn} from "@vueuse/core";
 
 
-const emitter = inject("emitter");
+const emitter: any = inject("emitter");
 const calendarStore = useCalendarStore();
 const state = reactive({
   calendarTitle: '',
   timestamp: TemporalUtil.getEpochSecond(false),
-  calendar: [] as Array<CalendarDay>,
-  startDate: moment(),
-  endDate: moment(),
   selectedDate: ''
 })
 const methods = {
@@ -126,7 +125,7 @@ const methods = {
     PopupUtil.popupCreateAnniversary(emitter);
   },
   createMission(day: CalendarDay) {
-    PopupUtil.popupCreateMission(emitter, day.timestamp);
+    PopupUtil.popupCreateMission(emitter, calendarStore.timestamp);
   },
   setMonth(month: number) {
     const localMoment = TemporalUtil.toMoment(state.timestamp + TemporalUtil.getOffsetSecond(), true);
@@ -138,13 +137,10 @@ const methods = {
     const localMoment = TemporalUtil.toMoment(state.timestamp + TemporalUtil.getOffsetSecond(), true);
     state.calendarTitle = localMoment.format("YY년 MM월");
 
-    state.calendar = DateUtil.getCalendarDays(localMoment, (calendarStart, monthStart, monthEnd, calendarEnd) => {
-      state.startDate = calendarStart;
-      state.endDate = calendarEnd;
-    });
+    calendarStore.initCalendar(localMoment);
 
     calendarStore.fetchOwnCalendar();
-    calendarStore.fetchOwnAnniversaries(localMoment);
+    calendarStore.fetchOwnAnniversaries();
 
   },
   clickSchedule(e: MouseEvent, mission: IMission) {
@@ -154,6 +150,21 @@ const methods = {
   selectDate(day: CalendarDay) {
     calendarStore.selectDate(day);
   },
+  clickHolidayText(event: MouseEvent, anniversaryKey: string, holidayKey: string) {
+    const holidays = calendarStore.holidaysMap.get(holidayKey);
+    const anniversaries = calendarStore.anniversaryMap.get(anniversaryKey);
+
+    if (holidays || anniversaries) {
+      event.stopPropagation();
+    }
+
+  },
+  scrollOnCalendar(event: Event) {
+    console.log('scroll', event)
+    useThrottleFn(() => {
+      console.log(event);
+    }, 1000)
+  }
 }
 onMounted(() => {
   methods.drawCalendar();
@@ -308,6 +319,10 @@ onMounted(() => {
           content: '종료일';
         }
 
+        &.anniversary {
+          background-color: $soft-light-sky-blue;
+        }
+
         &.holiday {
           background-color: #f8dddd;
           color: crimson;
@@ -323,9 +338,6 @@ onMounted(() => {
           }
         }
 
-        &.anniversary {
-          background-color: $soft-light-sky-blue;
-        }
 
 
         .item-header {
@@ -335,21 +347,28 @@ onMounted(() => {
           user-select: none;
           height: 15px;
           flex-shrink: 0;
+          display: flex;
+          flex-direction: row;
 
           .date {
             font-weight: bold;
+            padding: 0 5px;
+            flex-shrink: 0;
 
             &.today {
               background-color: $signature-purple;
               border-radius: 5px;
               color: white;
-              padding: 2px 8px;
+              padding: 0 8px;
             }
           }
 
           .day-description {
             display: flex;
             flex-direction: row;
+            flex-grow: 1;
+            position: relative;
+            text-wrap: nowrap;
 
             .mission-count {
               border-radius: 15px;
@@ -358,6 +377,19 @@ onMounted(() => {
               font-weight: bold;
               padding: 1px 4px;
               margin: 0 5px;
+            }
+
+            .anniversary-name {
+
+              &.slash:before {
+                content: "/";
+                padding: 0 3px;
+              }
+            }
+
+            &:hover {
+              font-weight: bold;
+              text-decoration: underline;
             }
           }
         }

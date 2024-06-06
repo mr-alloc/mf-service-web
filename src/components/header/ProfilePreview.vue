@@ -11,14 +11,13 @@ const leftMenuStore = useLeftMenuStore();
 const profileMemberStore = useProfileMemberStore();
 const methods = {
   moveToUserInfo() {
-    console.log('role:', memberInfoStore.memberInfo);
     //GUEST
     if (memberInfoStore.needMemberInfo()) {
       router.push("/sign-in")
       return;
     }
-    switch (memberInfoStore.getCurrentMemberRole()) {
-      case AccountRole.MEMBER.level:
+    switch (memberInfoStore.getCurrentAccountRole()) {
+      case AccountRole.MEMBER:
         router.push("/profile");
         break;
       default:

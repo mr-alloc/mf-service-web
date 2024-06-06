@@ -19,10 +19,10 @@
         </div>
         <div class="response-buttons">
           <IconButton :icon="['fas', 'check']" color="green"
-                      v-if="MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                      v-if="familyMemberInfoStore.getCurrentMemberRole().isGrantedFrom(MemberRole.SUB_MASTER)"
                       :click-behavior="() => methods.acceptJoinRequest(request as JoinRequest)"/>
           <IconButton :icon="['fas', 'ban']" color="crimson"
-                      v-if="MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                      v-if="familyMemberInfoStore.getCurrentMemberRole().isGrantedFrom(MemberRole.SUB_MASTER)"
                       :click-behavior="() => methods.rejectJoinRequest(request as JoinRequest)"/>
         </div>
       </li>
@@ -36,9 +36,9 @@ import DateUtil from "../../utils/DateUtil";
 import PopupUtil from "@/utils/PopupUtil";
 import {JoinRequest} from "@/classes/api-spec/family/GetJoinRequests";
 import {MemberRole} from "@/constant/MemberRole";
-import {useMemberInfoStore} from "@/stores/MemberInfoStore";
+import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
 
-const memberInfoStore = useMemberInfoStore();
+const familyMemberInfoStore = useFamilyMemberInfoStore();
 const familiesViewStore = useFamiliesViewStore();
 const methods = {
   acceptJoinRequest(request: JoinRequest) {

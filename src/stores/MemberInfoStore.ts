@@ -6,6 +6,7 @@ import {removeAccessToken} from "@/utils/LocalCache";
 import {useRouter} from "vue-router";
 import {type IProfileMember, useProfileMemberStore} from "@/stores/ProfileMemberStore";
 import LocalAsset from "@/constant/LocalAsset";
+import {AccountRole} from "@/constant/AccountRole";
 
 export const useMemberInfoStore = defineStore('memberInfo', () => {
     const memberInfo = ref<ProfileMember>(ProfileMember.ofDefault());
@@ -51,8 +52,8 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         return !needMemberInfo() && memberInfo.value.role >= memberRole
     }
 
-    function getCurrentMemberRole() {
-        return memberInfo.value.role
+    function getCurrentAccountRole(): AccountRole {
+        return AccountRole.from(memberInfo.value.role);
     }
 
 
@@ -64,7 +65,7 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         updateMemberInfo,
         removeMemberInfo,
         fetchMemberInfo,
-        getCurrentMemberRole
+        getCurrentAccountRole
     }
 })
 

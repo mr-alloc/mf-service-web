@@ -10,7 +10,7 @@ import {noAccessToken, removeAccessToken, removeTokens} from "@/utils/LocalCache
 import {useAlertStore} from "@/stores/AlertStore";
 import MemberProfile from "@/views/authorized/MemberProfile.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
-import Main from "@/views/Main.vue";
+import Main from "@/views/MainIndex.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import Missions from "@/views/authorized/Missions.vue";
 import Families from "@/views/authorized/Families.vue";

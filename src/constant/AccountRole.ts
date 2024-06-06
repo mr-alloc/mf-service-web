@@ -29,8 +29,8 @@ export class AccountRole {
         return this._simpleName;
     }
 
-    isGrantedFrom(level: number): boolean {
-        return this._level <= level;
+    isGrantedFrom(role: AccountRole): boolean {
+        return this._level >= role._level;
     }
 
     static from(level: number): AccountRole {

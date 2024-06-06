@@ -36,7 +36,6 @@ export default class MissionType {
     }
 
     static fromValue(value: number): MissionType {
-        console.log('value', value);
         return MissionType.CACHED.get(value) ?? MissionType.NONE;
     }
 

@@ -64,9 +64,9 @@ function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar:
     // print start of this month's day and days
 
     const endOfThisMonth = moment(momentValue).endOf('month');
-    const endOfCalendar = endOfThisMonth.add(7 - endOfThisMonth.day(), 'days');
+    const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
     calculatedWith && calculatedWith(startOfCalendar, startOfThisMonth, endOfThisMonth, endOfCalendar);
-    return [...new Array(endOfCalendar.diff(startOfCalendar, 'days')).keys()]
+    return [...new Array(endOfCalendar.diff(startOfCalendar, 'days') + 1).keys()]
         .map((_, interval) => {
             const cloned = startOfCalendar.clone();
             const date = cloned.add(interval, 'days');

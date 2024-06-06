@@ -34,7 +34,7 @@
                 }"
                 v-for="(calendarDay, index) in state.calendarDays as Array<CalendarDay>"
                 :key="index" v-on:click="() => methods.selectDay(calendarDay)">
-              <span class="day-text">{{ calendarDay.day }}</span>
+              <span class="day-text">{{ calendarDay.date }}</span>
             </li>
           </ul>
         </div>
@@ -84,7 +84,6 @@ import {faCalendarAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import DayOfWeek from "@/constant/DayOfWeek";
 import ScheduleMode from "@/constant/ScheduleMode";
-import moment from "moment-timezone";
 import PeriodIndicator from "@/components/global/PeriodIndicator.vue";
 import RepeatOption from "@/constant/RepeatOption";
 import type SelectOption from "@/classes/SelectOption";
@@ -245,11 +244,13 @@ const methods = {
         state.startTimestamp = props.timestamp;
       } else if (scheduleMode.isIn(ScheduleMode.MULTIPLE)) {
         state.selected.add(props.timestamp);
+      } else if (scheduleMode.isIn(ScheduleMode.PERIOD)) {
+        state.startTimestamp = props.timestamp;
+        state.firstStamp = props.timestamp;
       }
     }
 
     state.scheduleMode = scheduleMode;
-    console.log('scheduleMode', scheduleMode.value);
     props.afterChangeMode && props.afterChangeMode(scheduleMode);
   },
   selectRepeatOption(selectOption: SelectOption) {
@@ -299,7 +300,7 @@ onMounted(() => {
 @import '@/assets/main';
 
 .datepicker-container {
-  margin: 10px 0;
+  margin: 10px auto;
   width: 270px;
 
   .collapse-controller {

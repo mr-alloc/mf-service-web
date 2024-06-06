@@ -21,6 +21,7 @@ import {useCalendarStore} from "@/stores/CalendarStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {call} from "@/utils/NetworkUtil";
 import Anniversary from "@/constant/api-meta/Anniversary";
+import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput";
 
 const calendarStore = useCalendarStore();
 const backgroundStore = useBackgroundStore();
@@ -55,7 +56,8 @@ const methods = {
   getRequestBody(): RequestBody {
     const scheduleMode = state.scheduleMode as ScheduleMode;
     if (scheduleMode.value === ScheduleMode.SINGLE.value) {
-      return new RequestBody(state.anniversaryName);
+      const singleModeSchedule = new MultipleModeOutput(new Set([props.timestamp]));
+      return new RequestBody(state.anniversaryName, singleModeSchedule);
     }
 
     const scheduleInfo = multipleDatePicker.value?.extractResult();

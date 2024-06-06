@@ -1,6 +1,6 @@
 <template>
   <header :class="{ collapsed: leftMenuStore.state.isCollapsed}">
-    <FamilySelector v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())" allow-collapse/>
+    <FamilySelector v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)" allow-collapse/>
     <ProfilePreview/>
     <CollapsibleMenu title="간소화" :icon="['far', 'square-caret-down']"
                      :rotate="leftMenuStore.state.isCollapsed ? 270 : 90"
@@ -8,22 +8,14 @@
     <CollapsibleMenu title="메인" :icon="['fas', 'house']" allocated-path="/"
                      :is-current-menu="leftMenuStore.state.activeHomeMenu"/>
     <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
-                     v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                     v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
     <CollapsibleMenu title="패밀리" :icon="['fas', 'users']" allocated-path="/families"
-                     v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                     v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeFamiliesMenu"/>
     <CollapsibleMenu title="미션" :icon="['fas', 'lightbulb']" allocated-path="/missions"
-                     v-if="AccountRole.MEMBER.isGrantedFrom(memberInfoStore.getCurrentMemberRole())"
+                     v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeMissionMenu"/>
-    <!--    <div class="feature-list-wrapper">-->
-    <!--      <nav>-->
-    <!--        <ul class="feature-list">-->
-    <!--          <CreateFamilyButton/>-->
-    <!--          <CreateMissionButton/>-->
-    <!--        </ul>-->
-    <!--      </nav>-->
-    <!--    </div>-->
     <SimpleNotifier/>
   </header>
 </template>

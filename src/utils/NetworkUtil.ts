@@ -88,12 +88,14 @@ export async function call<REQ, RES>(
     }
     let request;
     switch (targetSpec.method) {
-        case HttpMethod.GET:
+        case HttpMethod.GET: {
+            const getParams = body as { toJSON?: () => any };
             request = axios.get(bindPath, {
-                params: body ?? {},
+                params: (getParams?.toJSON ? getParams.toJSON() : body) ?? {},
                 headers: getHeader(),
             });
             break;
+        }
         case HttpMethod.POST:
             request = axios.post(bindPath, body ?? {}, {
                 headers: getHeader()
@@ -106,7 +108,7 @@ export async function call<REQ, RES>(
             break;
         case HttpMethod.DELETE:
             request = axios.delete(bindPath, {
-                data: body ?? {},
+                data: body ?? body ?? {},
                 headers: getHeader()
             })
             break;

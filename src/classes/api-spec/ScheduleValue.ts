@@ -2,6 +2,7 @@ import ScheduleMode from "@/constant/ScheduleMode";
 import TemporalUtil from "@/utils/TemporalUtil";
 import DateUtil from "@/utils/DateUtil";
 import RepeatOption from "@/constant/RepeatOption";
+import CalendarDay from "@/classes/CalendarDay";
 
 export default class ScheduleValue {
     private readonly _id: number;
@@ -61,25 +62,28 @@ export default class ScheduleValue {
             case ScheduleMode.MULTIPLE:
                 return [TemporalUtil.toLocalMoment(this._startAt).format(DateUtil.DEFAULT_DATE_FORMAT)];
             case ScheduleMode.PERIOD: {
-                const days = TemporalUtil.getDiffDays(this._startAt, this._endAt);
-                return TemporalUtil.getLocalDaysArray(this._startAt, days).map(date => date.format(DateUtil.DEFAULT_DATE_FORMAT));
+                const days = TemporalUtil.getDiffDays(this._startAt, this._endAt) + 1;
+                return TemporalUtil.getLocalDaysArray(this._startAt, days)
+                    .map(date => date.value.format(DateUtil.DEFAULT_DATE_FORMAT));
             }
             case ScheduleMode.REPEAT: {
                 const repeatOption = RepeatOption.fromValue(this._repeatOption)
-                const repeatDay = TemporalUtil.toLocalMoment(this._repeatValue);
+                const repeatDay = new CalendarDay(this._repeatValue);
                 const days = TemporalUtil.getDiffDays(calendarStartAt, calendarEndAt);
-                return TemporalUtil.getLocalDaysArray(calendarStartAt, days).filter(date => {
+
+                return TemporalUtil.getLocalDaysArray(calendarStartAt, days).filter(calendarDay => {
                     switch (repeatOption) {
                         case RepeatOption.WEEK:
-                            return date.day() === repeatDay.day();
-                        case RepeatOption.MONTH:
-                            return date.date() === repeatDay.date();
+                            return calendarDay.dayOfWeek.value === this._repeatValue;
+                        case RepeatOption.MONTH: {
+                            return calendarDay.date === repeatDay.date;
+                        }
                         case RepeatOption.YEAR:
-                            return date.month() === repeatDay.month() && date.date() === repeatDay.date();
+                            return calendarDay.month === repeatDay.month && calendarDay.date === repeatDay.date;
                         default:
                             throw new Error(`Invalid repeat option: ${repeatOption}`);
                     }
-                }).map(date => date.format(DateUtil.DEFAULT_DATE_FORMAT));
+                }).map(date => date.value.format(DateUtil.DEFAULT_DATE_FORMAT));
             }
             default:
                 throw new Error(`Invalid schedule mode: ${this._mode}`);

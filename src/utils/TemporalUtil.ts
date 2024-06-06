@@ -1,5 +1,6 @@
 import DateUtil from "@/utils/DateUtil";
 import moment, {tz} from "moment-timezone";
+import CalendarDay from "@/classes/CalendarDay";
 
 const SECONDS_IN_MINUTE = 60;
 const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * 60;
@@ -51,20 +52,28 @@ function toMoment(timestamp: number, isLocalTime: boolean) {
 }
 
 function toLocalMoment(timestamp: number) {
-    return toMoment(timestamp + getOffsetSecond(), true);
+    return toMoment(timestamp, true);
 }
 
 function getDiffDays(startTimeStamp: number, endTimeStamp: number) {
     if (!endTimeStamp) {
         return 0;
     }
-    return ((endTimeStamp - startTimeStamp) / SECONDS_IN_DAY) + 1;
+    const diffSecond = endTimeStamp - startTimeStamp;
+    const divided = diffSecond / SECONDS_IN_DAY;
+
+    return Math.round(divided);
 }
 
 function getLocalDaysArray(startStamp: number, days: number) {
     return [...Array(days).keys()].map((_, idx) => {
-        return toLocalMoment(startStamp).add(idx, "days");
+        const addSecondOfDays = idx * SECONDS_IN_DAY;
+        return new CalendarDay(startStamp + addSecondOfDays);
     });
+}
+
+function toUnix(timestamp: number) {
+    return timestamp - getOffsetSecond();
 }
 
 export default {
@@ -79,5 +88,6 @@ export default {
     toMoment,
     toLocalMoment,
     getDiffDays,
-    getLocalDaysArray
+    getLocalDaysArray,
+    toUnix
 }

@@ -9,3 +9,10 @@ export function validate(target: string, pattern: RegExp): boolean {
     return pattern.test(target)
 }
 
+export function divide(a: number, b: number) {
+    return (a / b);
+}
+
+export function percentage(a: number, b: number) {
+    return (a / b) * 100;
+}

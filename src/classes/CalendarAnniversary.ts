@@ -33,7 +33,6 @@ export default class CalendarAnniversary {
 
     static of(anniversary: AnniversaryValue, startAt: number, endAt: number): Array<CalendarAnniversary> {
         const scheduleInfo = anniversary.scheduleInfo;
-        console.log('anniversary', Array.isArray(anniversary));
         return scheduleInfo.consist(startAt, endAt)
             .map(date => new CalendarAnniversary(
                 anniversary.id,

@@ -16,6 +16,8 @@
                     placeHolder="설명을 입력해주세요."
                     :is-hold="state.inputHold" :no-mark="true"
         />
+        <DatePicker ref="multipleDatePicker" id="anniversary-date" label="날짜" name="anniversaryDate"
+                    :timestamp="props.timestamp" :after-change-mode="methods.handleChangeScheduleMode"/>
         <OptionalTimePicker ref="scheduleTimeInput" id="schedule-time" name="scheduleTime" label="일정"
                             v-if="state.missionType.isIn(MissionType.SCHEDULE)"/>
         <SimpleRadio ref="missionDeadlineInput" id="mission-deadline" :options="state.deadlineOptions"
@@ -49,10 +51,11 @@ import OptionalTimePicker from "@/components/global/OptionalTimePicker.vue";
 import TemporalUtil from "@/utils/TemporalUtil";
 import type StringValueComponent from "@/classes/StringValueComponent";
 import {ex} from "@/utils/Undefinable";
-import * as CreateMission from "@/classes/api-spec/mission/CreateMission";
 import {RequestBody} from "@/classes/api-spec/mission/CreateMission";
 import PopupUtil from "@/utils/PopupUtil";
 import {PopupType} from "@/stores/status/CurrentPopup";
+import DatePicker from "@/components/global/DatePicker.vue";
+import ScheduleMode from "@/constant/ScheduleMode";
 
 const missionAssigneeInput = ref<StringValueComponent | null>(null);
 const missionTypeInput = ref<StringValueComponent | null>(null);
@@ -63,7 +66,7 @@ const scheduleTimeInput = ref<StringValueComponent | null>(null);
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
-const emitter = inject("emitter");
+const emitter: any = inject("emitter");
 
 onMounted(() => {
   methods.setMembers()
@@ -109,7 +112,7 @@ onMounted(() => {
 
 
 const props = defineProps<{
-  startDate: string,
+  timestamp: string,
   days?: number
 }>();
 
@@ -123,6 +126,7 @@ const inputValues = reactive({
   days: 0
 });
 const state = reactive({
+  scheduleMode: ScheduleMode.SINGLE,
   missionType: MissionType.SCHEDULE,
 
   inputHold: false,
@@ -157,10 +161,10 @@ const methods = {
   },
   checkAllInput() {
     inputValues.assignee = parseInt(ex(missionAssigneeInput.value?.value).str());
-    inputValues.missionType = MissionType.fromValue(parseInt(ex(missionTypeInput.value?.value).str()));
+    state.missionType = MissionType.fromValue(parseInt(ex(missionTypeInput.value?.value).str()));
     inputValues.missionTitle = ex(missionTitleInput.value?.value).str();
     inputValues.missionContent = ex(missionContentInput.value?.value).str();
-    inputValues.startDueStamp = DateUtil.toUtc(props.startDate ?? DateUtil.getTodayStr(DateUtil.DEFAULT_DATE_FORMAT), DateUtil.DEFAULT_DATE_FORMAT);
+    inputValues.startDueStamp = DateUtil.toUtc(props.timestamp ?? DateUtil.getTodayStr(DateUtil.DEFAULT_DATE_FORMAT), DateUtil.DEFAULT_DATE_FORMAT);
     inputValues.missionDeadline = parseInt(ex(missionDeadlineInput.value?.value).str());
     inputValues.scheduleTime = ex(scheduleTimeInput.value?.value).num();
     inputValues.days = ex(props.days).num();
@@ -184,37 +188,8 @@ const methods = {
     afterChange();
     //화면상태 변경
   },
-  getRequestBody(): CreateMission.RequestBody {
-    //하루 선택
-    if (inputValues.days === 0) {
-      const deadline = state.missionType === MissionType.SCHEDULE
-          ? 0 : inputValues.missionDeadline;
-      const startDueStamp = state.missionType === MissionType.SCHEDULE
-          ? (inputValues.scheduleTime + inputValues.startDueStamp) : inputValues.startDueStamp;
-      return CreateMission.RequestBody.forSingleDay(
-          state.missionType.value,
-          inputValues.assignee,
-          inputValues.missionTitle,
-          inputValues.missionContent,
-          startDueStamp,
-          deadline,
-      )
-    }
-    //기간 선택
-    else {
-      const isSchedule = state.missionType === MissionType.SCHEDULE;
-      const startDueStamp = isSchedule
-          ? (inputValues.scheduleTime + inputValues.startDueStamp) : inputValues.startDueStamp;
-      const deadline = inputValues.days * TemporalUtil.SECONDS_IN_DAY;
-      return CreateMission.RequestBody.forPeriod(
-          state.missionType.value,
-          inputValues.assignee,
-          inputValues.missionTitle,
-          inputValues.missionContent,
-          startDueStamp,
-          deadline,
-      )
-    }
+  handleChangeScheduleMode(mode: ScheduleMode) {
+    state.scheduleMode = mode;
   }
 }
 </script>

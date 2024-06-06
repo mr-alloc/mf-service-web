@@ -51,9 +51,6 @@ onMounted(() => {
     const input = DocumentUtil.getHtmlElementById<HTMLInputElement>('invite-code');
     const textarea = DocumentUtil.getHtmlElementById<HTMLTextAreaElement>('introduce');
 
-    console.log('input', input.value);
-    console.log('textarea', textarea.value);
-
     call<RequestBody, ResponseBody>(Member.RequestJoinFamily, RequestBody.of(input.value, textarea.value), (response) => {
       const responseBody = ResponseBody.fromJson(response.data);
       alertStore.success("가입신청 완료", `요청된 패밀리로 가입신청 완료 되었어요.`);

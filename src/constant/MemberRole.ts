@@ -31,8 +31,8 @@ export class MemberRole implements IEnum<MemberRole> {
         return this._simpleName;
     }
 
-    isGrantedFrom(level: number): boolean {
-        return this._level <= level;
+    isGrantedFrom(role: MemberRole): boolean {
+        return this._level >= role._level;
     }
 
 

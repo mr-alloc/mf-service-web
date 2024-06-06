@@ -129,6 +129,7 @@ defineExpose({
     .etc-input-area {
       border-bottom: 1px $signature-purple solid;
       width: 100px;
+      margin: 3px 5px;
 
       input {
 

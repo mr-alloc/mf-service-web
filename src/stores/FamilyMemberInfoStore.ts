@@ -7,6 +7,7 @@ import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
+import {MemberRole} from "@/constant/MemberRole";
 
 export const useFamilyMemberInfoStore = defineStore('familyMemberInfo', () => {
     const familyMemberInfo = ref<FamilyProfileMember>(FamilyProfileMember.ofDefault());
@@ -30,7 +31,7 @@ export const useFamilyMemberInfoStore = defineStore('familyMemberInfo', () => {
     }
 
     function getCurrentMemberRole() {
-        return familyMemberInfo.value.role;
+        return MemberRole.from(familyMemberInfo.value.role);
     }
 
     return {

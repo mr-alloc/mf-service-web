@@ -38,8 +38,8 @@ export const useCalendarStore = defineStore('calendar', () => {
 
     function initCalendar(localMonth: Moment) {
         calendar.value = DateUtil.getCalendarDays(localMonth, (sc, sm, em, ec) => {
-            startOfCalendar.value = sc.unix() - TemporalUtil.getOffsetSecond();
-            endOfCalendar.value = ec.unix() - TemporalUtil.getOffsetSecond() + (TemporalUtil.SECONDS_IN_DAY - 1);
+            startOfCalendar.value = TemporalUtil.toUnix(sc.unix());
+            endOfCalendar.value = TemporalUtil.toUnix(ec.unix());
         });
     }
 
@@ -61,9 +61,6 @@ export const useCalendarStore = defineStore('calendar', () => {
                     responseBody.holidays.filter(h => !h.isLunar),
                     (holiday) => holiday.date,
                 );
-            },
-            (spec, error) => {
-                console.log(error);
             });
     }
 
@@ -76,7 +73,9 @@ export const useCalendarStore = defineStore('calendar', () => {
 
                 //기념일
                 anniversaryMap.value = new Map();
-                responseBody.anniversaries.forEach(addAnniversary);
+                responseBody.anniversaries.forEach((anniversary) => {
+                    addAnniversary(anniversary);
+                });
             });
     }
 
@@ -115,6 +114,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         memberCalendarMap,
         holidaysMap,
         anniversaryMap,
-        fetchOwnAnniversaries
+        fetchOwnAnniversaries,
+        calendar
     }
 })
