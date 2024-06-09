@@ -16,15 +16,11 @@
                     placeHolder="설명을 입력해주세요."
                     :is-hold="state.inputHold" :no-mark="true"
         />
-        <DatePicker ref="multipleDatePicker" id="anniversary-date" label="날짜" name="anniversaryDate"
-                    :timestamp="props.timestamp" :after-change-mode="methods.handleChangeScheduleMode"/>
+        <DatePicker ref="datePicker" :timestamp="props.timestamp"
+                    :after-change-mode="methods.handleChangeScheduleMode"/>
+        <TimePicker ref="timePicker" :default-value="0" v-if="state.missionType.isNotIn(MissionType.SCHEDULE)"/>
         <OptionalTimePicker ref="scheduleTimeInput" id="schedule-time" name="scheduleTime" label="일정"
                             v-if="state.missionType.isIn(MissionType.SCHEDULE)"/>
-        <SimpleRadio ref="missionDeadlineInput" id="mission-deadline" :options="state.deadlineOptions"
-                     label="기한 (미션 시작시 적용)"
-                     :etc-option="new SelectOption('0', '기타(일)')"
-                     v-if="state.missionType.isNotIn(MissionType.SCHEDULE)" :default-etc-value="state.defaultDeadline"
-                     etc-placeholder="일단위 입력" :etc-value-function="(day: string) => methods.dayToSecond(day)"/>
       </div>
     </div>
   </div>
@@ -32,7 +28,6 @@
 <script setup lang="ts">
 import {inject, onMounted, reactive, ref} from "vue";
 import SelectOption from "@/classes/SelectOption";
-import SimpleRadio from "@/components/global/SimpleRadio.vue";
 import {AlertType, useAlertStore} from "@/stores/AlertStore";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import Mission from "@/constant/api-meta/Mission";
@@ -44,25 +39,28 @@ import {ResponseBody} from "@/classes/api-spec/family/GetFamilyMember";
 import SelectImageOption from "@/classes/api-spec/SelectImageOption";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {hasSelectedFamilyId} from "@/utils/LocalCache";
-import DateUtil from "@/utils/DateUtil";
 import LocalAsset from "@/constant/LocalAsset";
 import MissionType from "@/constant/MissionType";
 import OptionalTimePicker from "@/components/global/OptionalTimePicker.vue";
-import TemporalUtil from "@/utils/TemporalUtil";
-import type StringValueComponent from "@/classes/StringValueComponent";
 import {ex} from "@/utils/Undefinable";
 import {RequestBody} from "@/classes/api-spec/mission/CreateMission";
 import PopupUtil from "@/utils/PopupUtil";
 import {PopupType} from "@/stores/status/CurrentPopup";
 import DatePicker from "@/components/global/DatePicker.vue";
 import ScheduleMode from "@/constant/ScheduleMode";
+import TimePicker from "@/components/global/TimePicker.vue";
+import type {DatePickerExpose, TimePickerExpose} from "@/types/ExposeType";
+import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput";
+import type InputComponent from "@/classes/InputComponent";
+import type NumberValueComponent from "@/classes/NumberValueComponent";
 
-const missionAssigneeInput = ref<StringValueComponent | null>(null);
-const missionTypeInput = ref<StringValueComponent | null>(null);
-const missionTitleInput = ref<StringValueComponent | null>(null);
-const missionContentInput = ref<StringValueComponent | null>(null);
-const missionDeadlineInput = ref<StringValueComponent | null>(null);
-const scheduleTimeInput = ref<StringValueComponent | null>(null);
+const missionAssigneeInput = ref<NumberValueComponent | null>(null);
+const missionTypeInput = ref<NumberValueComponent | null>(null);
+const missionTitleInput = ref<InputComponent | null>(null);
+const missionContentInput = ref<InputComponent | null>(null);
+const scheduleTimeInput = ref<NumberValueComponent | null>(null);
+const datePicker = ref<DatePickerExpose | null>(null);
+const timePicker = ref<TimePickerExpose | null>(null);
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
@@ -75,20 +73,16 @@ onMounted(() => {
     methods.checkAllInput();
 
     if (!state.isSubmittable) {
-      alertStore.alert(AlertType.INFO, "생성 가이드", "입력되지 않은 값이 있는것 같아요! 한번 더 확인후 생성해주세요!")
+      PopupUtil.innerAlert(PopupType.INFO, "생성 실패", "입력값을 확인해주세요.");
       return;
     }
 
-    methods.getRequestBody();
-    if (ownFamiliesStore.hasSelectFamily && assignee === 0) {
-      PopupUtil.innerAlert(PopupType.INFO, "수행자 미지정", "수행자를 선택해 주세요.");
+    const requestBody = methods.getRequestBody();
+    if (ex(requestBody).no()) {
       return;
     }
 
-    if (state.missionType !== MissionType.SCHEDULE && missionDeadline === 0) {
-      alertStore.alert(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
-      return;
-    }
+    console.log('Create mission request body:', requestBody.toString());
 
     call<RequestBody, any>(Mission.CreateMission, requestBody, (response) => {
           const missionName = missionTitleInput.value;
@@ -97,22 +91,14 @@ onMounted(() => {
           //이벤트 발행 취소
           emitter.off("validateCreateMissionForm")
           backgroundStore.returnGlobalPopup();
-        },
-        (spec, error) => {
-          const body = error.response.data;
-          const message = spec.getMessage(body.code);
-          alertStore.alert(AlertType.WARNING, "미션 생성 오류", message);
-        }
-    )
-    if (props.days) {
-      state.defaultDeadline = `${props.days * TemporalUtil.SECONDS_IN_DAY}`
-    }
+    });
+
   }, 2000))
 });
 
 
 const props = defineProps<{
-  timestamp: string,
+  timestamp: number,
   days?: number
 }>();
 
@@ -120,10 +106,8 @@ const inputValues = reactive({
   assignee: 0,
   missionTitle: "",
   missionContent: "",
-  startDueStamp: 0,
   missionDeadline: 0,
   scheduleTime: 0,
-  days: 0
 });
 const state = reactive({
   scheduleMode: ScheduleMode.SINGLE,
@@ -133,8 +117,10 @@ const state = reactive({
   isSubmittable: false,
 
   //인풋 상태
-  missionNameInputValidate: false,
-  missionContentInputValidate: false,
+  isValidTitle: false,
+  isValidAssignee: false,
+  isValidDeadline: false,
+  isValidSchedule: false,
 
   //미션 종류
   missionOptions: MissionType.values().map(MissionType.toSelectOption),
@@ -152,24 +138,39 @@ const state = reactive({
 const methods = {
   validateMissionTitle() {
     const input: HTMLInputElement = document.getElementById("mission-title") as HTMLInputElement;
-    state.missionNameInputValidate = input.value.length !== 0;
+    state.isValidTitle = input.value.length !== 0;
 
-    if (!state.missionNameInputValidate) {
+    if (!state.isValidTitle) {
       input.focus();
     }
-    return state.missionNameInputValidate;
+    return state.isValidTitle;
+  },
+  validateAssignee() {
+    state.isValidAssignee = !ownFamiliesStore.hasSelectFamily || inputValues.assignee !== 0;
+    if (!state.isValidAssignee) {
+      PopupUtil.innerAlert(PopupType.INFO, "수행자 미지정", "수행자를 선택해 주세요.");
+    }
+    return state.isValidAssignee;
+  },
+  validateDeadline() {
+    state.isValidDeadline = state.missionType !== MissionType.SCHEDULE || inputValues.missionDeadline > 0;
+    if (!state.isValidDeadline) {
+      alertStore.alert(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
+    }
+
+    return state.isValidDeadline;
+  },
+  validateSchedule() {
+
   },
   checkAllInput() {
-    inputValues.assignee = parseInt(ex(missionAssigneeInput.value?.value).str());
-    state.missionType = MissionType.fromValue(parseInt(ex(missionTypeInput.value?.value).str()));
-    inputValues.missionTitle = ex(missionTitleInput.value?.value).str();
-    inputValues.missionContent = ex(missionContentInput.value?.value).str();
-    inputValues.startDueStamp = DateUtil.toUtc(props.timestamp ?? DateUtil.getTodayStr(DateUtil.DEFAULT_DATE_FORMAT), DateUtil.DEFAULT_DATE_FORMAT);
-    inputValues.missionDeadline = parseInt(ex(missionDeadlineInput.value?.value).str());
-    inputValues.scheduleTime = ex(scheduleTimeInput.value?.value).num();
-    inputValues.days = ex(props.days).num();
-    methods.validateMissionTitle();
-    state.isSubmittable = state.missionNameInputValidate
+    inputValues.assignee = ex(missionAssigneeInput.value?.getValue()).num();
+    inputValues.missionTitle = ex(missionTitleInput.value?.input.value).str();
+    inputValues.missionContent = ex(missionContentInput.value?.input.value).str();
+    inputValues.missionDeadline = ex(timePicker.value?.getValue()).num();
+    inputValues.scheduleTime = ex(scheduleTimeInput.value?.getValue()).num();
+
+    state.isSubmittable = methods.validateMissionTitle() && methods.validateAssignee() && methods.validateDeadline()
   },
   dayToSecond(day: string) {
     return day ? (parseInt(day) * 24 * 60 * 60).toString() : '';
@@ -183,13 +184,31 @@ const methods = {
     }
   },
   changeType(option: SelectOption, afterChange: () => void) {
-    state.missionType = MissionType.fromValue(parseInt(option.value));
     //셀렉터 상태변경
     afterChange();
     //화면상태 변경
+    state.missionType = MissionType.fromValue(parseInt(ex(missionTypeInput?.value?.getValue()).str()));
   },
   handleChangeScheduleMode(mode: ScheduleMode) {
     state.scheduleMode = mode;
+  },
+  getRequestBody(): RequestBody {
+    const deadline = state.missionType.value === MissionType.SCHEDULE.value ? 0 : timePicker.value?.getValue();
+    const isSingleSchedule = datePicker.value?.getScheduleMode().value === ScheduleMode.SINGLE.value;
+    const scheduleInfo = isSingleSchedule
+        ? new MultipleModeOutput(new Set([props.timestamp]))
+        : datePicker.value?.extractResult()!;
+
+    scheduleInfo?.applyToEachSelected((selected) => selected + inputValues.scheduleTime)
+
+    return new RequestBody(
+        inputValues.missionTitle,
+        inputValues.missionContent,
+        inputValues.assignee,
+        state.missionType.value,
+        scheduleInfo,
+        deadline
+    )
   }
 }
 </script>
@@ -199,11 +218,15 @@ const methods = {
 .create-mission-container {
   display: flex;
   justify-content: center;
-  align-items: center;
   padding: 20px;
+  max-height: 50vh;
+  overflow-y: scroll;
 
   .container-body {
     min-width: 400px;
+
+    .mission-from {
+    }
   }
 }
 </style>

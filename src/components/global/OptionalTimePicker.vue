@@ -42,9 +42,6 @@
             </ul>
           </Transition>
           <ul class="quick-times-group">
-            <li class="quick-time-item" v-on:click="() => methods.addSeconds(-60)">- 1분</li>
-            <li class="quick-time-item" v-on:click="() => methods.addSeconds(-300)">- 5분</li>
-            <li class="quick-time-item" v-on:click="() => methods.addSeconds(-600)">- 10분</li>
             <li class="quick-time-item" v-on:click="() => methods.addSeconds(600)">+ 10분</li>
             <li class="quick-time-item" v-on:click="() => methods.addSeconds(300)">+ 5분</li>
             <li class="quick-time-item" v-on:click="() => methods.addSeconds(60)">+ 1분</li>
@@ -88,7 +85,6 @@ const methods = {
     } else {
       state.selectedSeconds += seconds;
     }
-    console.log(state.selectedSeconds)
   },
   activatePicker() {
     state.isActive = !state.isActive;
@@ -111,7 +107,7 @@ const methods = {
 }
 
 defineExpose({
-  value: state.resultSeconds
+  getValue: () => state.resultSeconds
 })
 onMounted(() => {
   state.times = [...Array((TemporalUtil.SECONDS_IN_DAY / 2) / state.divideMinuteCriteria).keys()]
@@ -181,6 +177,10 @@ onMounted(() => {
 
         .am-pm-status {
           position: relative;
+          margin: 0 3px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
 
           .current-value {
             padding: 3px 8px;
@@ -219,7 +219,7 @@ onMounted(() => {
 
           .status-group {
             position: absolute;
-            top: 35px;
+            top: 40px;
             background-color: white;
             border-radius: 5px;
             border: 1px solid $standard-light-gray-in-white;
@@ -268,6 +268,7 @@ onMounted(() => {
           transition: $duration;
           border-radius: 5px;
           z-index: 1;
+          margin: 0 3px;
 
           .time-text {
             font-weight: bold;

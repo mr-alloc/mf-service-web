@@ -4,7 +4,7 @@ import ScheduleMode from "@/constant/ScheduleMode";
 export default class PeriodModeOutput implements IDatePickerOutput {
 
     private readonly _scheduleMode: ScheduleMode = ScheduleMode.PERIOD
-    private readonly _startTimestamp: number;
+    private _startTimestamp: number;
     private readonly _endTimestamp: number;
 
     constructor(startTimestamp: number, endTimestamp: number) {
@@ -22,6 +22,10 @@ export default class PeriodModeOutput implements IDatePickerOutput {
 
     get scheduleMode(): ScheduleMode {
         return this._scheduleMode;
+    }
+
+    applyToEachSelected(callback: (each: number) => number): void {
+        this._startTimestamp = callback(this._startTimestamp);
     }
 
     toJSON() {

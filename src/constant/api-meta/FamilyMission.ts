@@ -7,7 +7,7 @@ const getFamilyCalendarSpec = Spec.of(HttpMethod.GET, "/v1/family/mission/calend
 
 export default {
     GetFamilyCalendar: getFamilyCalendarSpec,
-    CreateFamilyMission: Spec.of(HttpMethod.POST, "/v1/family/mission/create")
+    CreateFamilyMission: Spec.of(HttpMethod.POST, "/v1/family/mission")
         .andDefaultMessage("패밀리 미션 생성에 실패 하였습니다.")
         .andPairs([
             [-8, "존재하지 않는 멤버 입니다."]

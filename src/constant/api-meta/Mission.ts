@@ -2,7 +2,7 @@ import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
 import FamilyMission from "@/constant/api-meta/FamilyMission";
 
-const createMissionSpec = Spec.of(HttpMethod.POST, "/v1/mission/create")
+const createMissionSpec = Spec.of(HttpMethod.POST, "/v1/mission")
     .andDefaultMessage("미션 생성에 실패 하였습니다.")
     .andPairs([])
     .whenFamily(FamilyMission.CreateFamilyMission);

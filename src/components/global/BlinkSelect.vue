@@ -27,10 +27,6 @@ import SelectOption from "@/classes/SelectOption";
 import {onMounted, reactive, ref} from "vue";
 
 const select = ref<HTMLSelectElement | null>(null);
-const state = reactive({
-  selectMode: false,
-  selectOption: SelectOption.ofDefault(),
-})
 
 const props = defineProps({
   title: String,
@@ -39,7 +35,11 @@ const props = defineProps({
   id: String,
   currentIndex: Number,
   beforeChange: Function
-})
+});
+const state = reactive({
+  selectMode: false,
+  selectOption: props.options?.[0] as SelectOption,
+});
 
 const methods = {
   clickSelector() {
@@ -63,7 +63,7 @@ const methods = {
   }
 }
 defineExpose({
-  value: state.selectOption.value === SelectOption.ofDefault().value ? props.options?.[0].value : state.selectOption.value
+  getValue: () => state.selectOption.value
 })
 onMounted(() => {
   state.selectOption = props.options?.[0] as SelectOption;
@@ -86,6 +86,7 @@ $option-height: 25px;
     border-radius: 10px;
     border: 1px $standard-gray-in-white solid;
     transition: all .2s ease-in-out;
+    position: relative;
 
     &:hover {
       cursor: pointer;

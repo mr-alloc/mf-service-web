@@ -16,7 +16,10 @@ export class Undefinable<T> {
         return this._value !== undefined && condition(this._value);
     }
 
-    num(): number {
+    num(defaultValue?: number): number {
+        if (defaultValue && this.no()) {
+            return defaultValue;
+        }
         return this._value === undefined ? 0 : this._value as number;
     }
 

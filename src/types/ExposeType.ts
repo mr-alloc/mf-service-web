@@ -8,11 +8,19 @@ export type BlinkInputExpose = {
 }
 
 export type DatePickerExpose = {
-    scheduleMode: ScheduleMode,
+    getScheduleMode: () => ScheduleMode,
     extractResult: () => IDatePickerOutput
 }
 
 export type GroupButtonExpose = {
     resetValues: () => void,
     selected: SelectOption
+}
+
+export type TemporalUnitIndicatorExpose = {
+    calculate: (value: number) => void
+}
+
+export type TimePickerExpose = {
+    getValue: () => number,
 }

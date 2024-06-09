@@ -42,10 +42,10 @@
           <GroupButton ref="repeatOptionButton" :options="RepeatOption.selectOptions()"
                        :after-change="methods.selectRepeatOption"/>
           <div class="option-indicator">
-            <div class="weeks-option-specification" v-show="state.repeatOption.is(RepeatOption.WEEK)">
+            <div class="weeks-option-specification" v-show="state.repeatOption.value === RepeatOption.WEEK.value">
               <GroupButton ref="weeksRepeatOptionButton" :options="DayOfWeek.selectOptions()"
-                           :default-selected="`${state.repeatValue}`"
-                           :after-change="(option: SelectOption) => methods.selectRepeatDay(option)"/>
+                           :default-selected="`${state.repeatValues}`" is-multi-select
+                           :after-change="methods.selectRepeatDay"/>
             </div>
             <div class="months-option-specification" v-show="state.repeatOption.is(RepeatOption.MONTH)">
               <span class="month-option-key">매월</span>
@@ -86,7 +86,6 @@ import DayOfWeek from "@/constant/DayOfWeek";
 import ScheduleMode from "@/constant/ScheduleMode";
 import PeriodIndicator from "@/components/global/PeriodIndicator.vue";
 import RepeatOption from "@/constant/RepeatOption";
-import type SelectOption from "@/classes/SelectOption";
 import GroupButton from "@/components/global/GroupButton.vue";
 import StatelessButton from "@/components/global/StatelessButton.vue";
 import PopupUtil from "@/utils/PopupUtil";
@@ -96,7 +95,8 @@ import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput"
 import PeriodModeOutput from "@/classes/component-protocol/PeriodModeOutput";
 import RepeatModeOutput from "@/classes/component-protocol/RepeatModeOutput";
 import type {GroupButtonExpose} from "@/types/ExposeType";
-
+import moment from "moment-timezone";
+import {parseInt} from "lodash";
 
 const repeatOptionButton = ref<GroupButtonExpose | null>(null);
 const weeksRepeatOptionButton = ref<GroupButtonExpose | null>(null);
@@ -115,7 +115,7 @@ const state = reactive({
   secondStamp: 0,
   startTimestamp: 0,
   endTimestamp: 0,
-  repeatValue: TemporalUtil.toLocalMoment(props.timestamp).day(),
+  repeatValues: new Set<number>(),
 
   isRepeatStartActive: false,
   isRepeatEndActive: false
@@ -253,8 +253,9 @@ const methods = {
     state.scheduleMode = scheduleMode;
     props.afterChangeMode && props.afterChangeMode(scheduleMode);
   },
-  selectRepeatOption(selectOption: SelectOption) {
-    state.repeatOption = RepeatOption.fromValue(parseInt(selectOption.value));
+  selectRepeatOption(options: Set<string>) {
+    const selected = Array.from(options);
+    state.repeatOption = RepeatOption.fromValue(parseInt(selected[0]));
     state.startTimestamp = props.timestamp;
   },
   clickRepeatStart(event: MouseEvent) {
@@ -273,21 +274,22 @@ const methods = {
         return new MultipleModeOutput(state.selected);
       case ScheduleMode.PERIOD.value:
         return new PeriodModeOutput(state.startTimestamp, state.endTimestamp);
-      case ScheduleMode.REPEAT.value:
-        // eslint-disable-next-line no-case-declarations
-        const repeatValue = state.repeatOption.is(RepeatOption.WEEK) ? state.repeatValue : props.timestamp;
+      case ScheduleMode.REPEAT.value: {
+        const repeatValue = state.repeatOption.is(RepeatOption.WEEK) ? Array.from(state.repeatValues) : [props.timestamp];
         return RepeatModeOutput.of(state.repeatOption as RepeatOption, repeatValue, state.startTimestamp, state.endTimestamp);
+      }
       default:
         throw new Error("Invalid Schedule Mode");
     }
   },
-  selectRepeatDay(option: SelectOption) {
-    state.repeatValue = parseInt(option.value) ?? 0;
+  selectRepeatDay(options: Set<string>) {
+    const selected = Array.from(options).map(value => parseInt(value));
+    state.repeatValues = new Set<number>([...selected]);
   }
 }
 
 defineExpose({
-  scheduleMode: state.scheduleMode,
+  getScheduleMode: () => state.scheduleMode,
   extractResult: methods.extractResult
 })
 onMounted(() => {

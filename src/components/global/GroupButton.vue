@@ -2,7 +2,7 @@
   <div class="group-button-container">
     <ul class="option-button-group">
       <li class="option-item-wrapper"
-          :class="{ selected: state.selected.value === option.value }"
+          :class="{ selected: state.selected.has(option.value) }"
           v-on:click="methods.selectOption(option)"
           v-for="option in props.options" :key="option.value">
         <span class="option-item">{{ option.text }}</span>
@@ -17,31 +17,38 @@ import {reactive} from "vue";
 const props = defineProps<{
   options: Array<SelectOption>,
   defaultSelected?: String,
-  afterChange: (option: SelectOption) => void
+  afterChange: (options: Set<string>) => void,
+  isMultiSelect?: boolean
 }>();
 
 const state = reactive({
-  selected: props.options.find(option => option.value === props.defaultSelected) ?? SelectOption.ofDefault()
+  selected: new Set<string>()
 });
 
 const methods = {
   selectOption(option: SelectOption) {
-
-    if (state.selected.value !== SelectOption.ofDefault().value && state.selected.value === option.value) {
-      state.selected = SelectOption.ofDefault();
-      return;
+    if (props.isMultiSelect) {
+      if (state.selected.has(option.value)) {
+        state.selected.delete(option.value);
+      } else {
+        state.selected.add(option.value);
+      }
+    } else {
+      if (state.selected.has(option.value)) {
+        state.selected = new Set<string>();
+      } else {
+        state.selected = new Set<string>([option.value]);
+      }
     }
-    state.selected = option;
-    props.afterChange(option);
+    props.afterChange(state.selected);
   },
   resetValues() {
-    state.selected = props.options.find(option => option.value === props.defaultSelected) ?? SelectOption.ofDefault();
+    state.selected = new Set<string>();
   }
 }
 
 defineExpose({
-  resetValues: methods.resetValues,
-  selected: state.selected
+  resetValues: () => methods.resetValues
 });
 </script>
 <style scoped lang="scss">

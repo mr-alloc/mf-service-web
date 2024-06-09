@@ -107,7 +107,6 @@ const props = defineProps({
 .global-popup-area {
   position: relative;
 
-
   .global-popup-wrapper, .inner-background > .inner-popup-wrapper {
     background-color: white;
     border: 1px $standard-gray-in-white solid;

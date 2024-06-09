@@ -4,7 +4,7 @@ import ScheduleMode from "@/constant/ScheduleMode";
 export default class MultipleModeOutput implements IDatePickerOutput {
 
     private readonly _scheduleMode = ScheduleMode.MULTIPLE;
-    private readonly _selectedTimestamps: Set<number>;
+    private _selectedTimestamps: Set<number>;
 
     constructor(selectedTimestamps: Set<number>) {
         this._selectedTimestamps = selectedTimestamps;
@@ -16,6 +16,10 @@ export default class MultipleModeOutput implements IDatePickerOutput {
 
     get scheduleMode(): ScheduleMode {
         return this._scheduleMode;
+    }
+
+    applyToEachSelected(callback: (each: number) => number): void {
+        this._selectedTimestamps = new Set(Array.from(this._selectedTimestamps).map(callback));
     }
 
     toJSON() {

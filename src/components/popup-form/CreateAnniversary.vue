@@ -55,16 +55,16 @@ const methods = {
   },
   getRequestBody(): RequestBody {
     const scheduleMode = state.scheduleMode as ScheduleMode;
-    if (scheduleMode.value === ScheduleMode.SINGLE.value) {
-      const singleModeSchedule = new MultipleModeOutput(new Set([props.timestamp]));
-      return new RequestBody(state.anniversaryName, singleModeSchedule);
-    }
+    const isSingle = scheduleMode.value === ScheduleMode.SINGLE.value;
+    const scheduleInfo = isSingle
+        ? new MultipleModeOutput(new Set([props.timestamp]))
+        : multipleDatePicker.value?.extractResult();
 
-    const scheduleInfo = multipleDatePicker.value?.extractResult();
     return new RequestBody(state.anniversaryName, scheduleInfo);
   },
   handleChangeScheduleMode(mode: ScheduleMode) {
     state.scheduleMode = mode;
+    4
   }
 }
 

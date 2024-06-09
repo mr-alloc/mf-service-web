@@ -6,13 +6,13 @@ export default class RepeatModeOutput implements IDatePickerOutput {
 
     private readonly _scheduleMode: ScheduleMode = ScheduleMode.REPEAT;
     private readonly _repeatOption: RepeatOption;
-    private readonly _repeatValue: number;
+    private _repeatValues: Array<number>;
     private readonly _startTimestamp: number;
     private readonly _endTimestamp: number;
 
-    constructor(repeatOption: RepeatOption, repeatValue: number, startTimestamp: number, endTimestamp: number) {
+    constructor(repeatOption: RepeatOption, repeatValue: Array<number>, startTimestamp: number, endTimestamp: number) {
         this._repeatOption = repeatOption;
-        this._repeatValue = repeatValue;
+        this._repeatValues = repeatValue;
         this._startTimestamp = startTimestamp;
         this._endTimestamp = endTimestamp;
     }
@@ -21,28 +21,25 @@ export default class RepeatModeOutput implements IDatePickerOutput {
         return this._scheduleMode;
     }
 
-    static of(repeatOption: RepeatOption, repeatValue: number, startTimestamp: number, endTimestamp: number): RepeatModeOutput {
+
+    applyToEachSelected(callback: (each: number) => number): void {
+        if (this._repeatOption.value !== RepeatOption.WEEK.value) {
+            this._repeatValues = this._repeatValues.map(callback);
+        }
+    }
+
+
+    static of(repeatOption: RepeatOption, repeatValue: Array<number>, startTimestamp: number, endTimestamp: number): RepeatModeOutput {
         return new RepeatModeOutput(repeatOption, repeatValue, startTimestamp, endTimestamp);
     }
 
     toJSON() {
-        const body = {
+        return {
             scheduleMode: this._scheduleMode.value,
             repeatOption: this._repeatOption.value,
-            repeatValue: this._repeatValue,
+            repeatValues: this._repeatValues,
             startAt: this._startTimestamp,
             endAt: this._endTimestamp
-        } as {
-            repeatOption: number,
-            repeatValue?: number,
-            startAt: number,
-            endAt: number
-        }
-
-        if (this._repeatOption.value === RepeatOption.WEEK.value) {
-            body.repeatValue = this._repeatValue;
-        }
-
-        return body;
+        };
     }
 }
