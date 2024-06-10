@@ -43,7 +43,7 @@ import LocalAsset from "@/constant/LocalAsset";
 import MissionType from "@/constant/MissionType";
 import OptionalTimePicker from "@/components/global/OptionalTimePicker.vue";
 import {ex} from "@/utils/Undefinable";
-import {RequestBody} from "@/classes/api-spec/mission/CreateMission";
+import * as CreateMission from "@/classes/api-spec/mission/CreateMission";
 import PopupUtil from "@/utils/PopupUtil";
 import {PopupType} from "@/stores/status/CurrentPopup";
 import DatePicker from "@/components/global/DatePicker.vue";
@@ -53,6 +53,7 @@ import type {DatePickerExpose, TimePickerExpose} from "@/types/ExposeType";
 import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput";
 import type InputComponent from "@/classes/InputComponent";
 import type NumberValueComponent from "@/classes/NumberValueComponent";
+import {useCalendarStore} from "@/stores/CalendarStore";
 
 const missionAssigneeInput = ref<NumberValueComponent | null>(null);
 const missionTypeInput = ref<NumberValueComponent | null>(null);
@@ -61,6 +62,8 @@ const missionContentInput = ref<InputComponent | null>(null);
 const scheduleTimeInput = ref<NumberValueComponent | null>(null);
 const datePicker = ref<DatePickerExpose | null>(null);
 const timePicker = ref<TimePickerExpose | null>(null);
+
+const calendarStore = useCalendarStore();
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
@@ -82,15 +85,14 @@ onMounted(() => {
       return;
     }
 
-    console.log('Create mission request body:', requestBody.toString());
-
-    call<RequestBody, any>(Mission.CreateMission, requestBody, (response) => {
-          const missionName = missionTitleInput.value;
-          alertStore.alert(AlertType.SUCCESS, "미션 생성 완료!", `"${missionName}" 미션을 생성하였습니다.`);
-          emitter.emit("drawMemberCalendar")
-          //이벤트 발행 취소
-          emitter.off("validateCreateMissionForm")
-          backgroundStore.returnGlobalPopup();
+    call<CreateMission.RequestBody, CreateMission.ResponseBody>(Mission.CreateMission, requestBody, (response) => {
+      const responseBody = CreateMission.ResponseBody.fromJson(response.data);
+      calendarStore.addMissions(responseBody.created);
+      alertStore.success("미션 생성 완료!", `"${requestBody.name}" 미션을 생성하였습니다.`);
+      emitter.emit("drawMemberCalendar")
+      //이벤트 발행 취소
+      emitter.off("validateCreateMissionForm")
+      backgroundStore.returnGlobalPopup();
     });
 
   }, 2000))
@@ -192,7 +194,7 @@ const methods = {
   handleChangeScheduleMode(mode: ScheduleMode) {
     state.scheduleMode = mode;
   },
-  getRequestBody(): RequestBody {
+  getRequestBody(): CreateMission.RequestBody {
     const deadline = state.missionType.value === MissionType.SCHEDULE.value ? 0 : timePicker.value?.getValue();
     const isSingleSchedule = datePicker.value?.getScheduleMode().value === ScheduleMode.SINGLE.value;
     const scheduleInfo = isSingleSchedule
@@ -201,7 +203,7 @@ const methods = {
 
     scheduleInfo?.applyToEachSelected((selected) => selected + inputValues.scheduleTime)
 
-    return new RequestBody(
+    return new CreateMission.RequestBody(
         inputValues.missionTitle,
         inputValues.missionContent,
         inputValues.assignee,

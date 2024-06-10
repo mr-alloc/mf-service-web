@@ -18,8 +18,9 @@ import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import CollectionUtil from "@/utils/CollectionUtil";
 import * as GetAnniversaries from "@/classes/api-spec/GetAnniversaries";
 import Anniversary from "@/constant/api-meta/Anniversary";
-import CalendarDay from "@/classes/CalendarDay";
+import CalendarDate from "@/classes/CalendarDate";
 import TemporalUtil from "@/utils/TemporalUtil";
+import type MissionDetail from "@/classes/MissionDetail";
 
 export const useCalendarStore = defineStore('calendar', () => {
 
@@ -28,7 +29,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     const holidaysMap = ref<Map<string, CalendarHoliday>>(new Map<string, CalendarHoliday>());
     const anniversaryMap = ref<Map<string, Array<CalendarAnniversary>>>(new Map<string, Array<CalendarAnniversary>>());
 
-    const calendar = ref<Array<CalendarDay>>([]);
+    const calendar = ref<Array<CalendarDate>>([]);
     const startOfCalendar = ref<number>(0);
     const endOfCalendar = ref<number>(0);
 
@@ -52,7 +53,7 @@ export const useCalendarStore = defineStore('calendar', () => {
                         : CalendarMission.fromJson(mission)
                 });
                 //일정
-                memberCalendarMap.value = CollectionUtil.groupBy<string, IMission>(
+                memberCalendarMap.value = CollectionUtil.grouping<string, IMission>(
                     responseBody.calendar,
                     (mission) => mission.groupingDate
                 );
@@ -80,7 +81,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
 
 
-    function selectDate(selectedDay: CalendarDay) {
+    function selectDate(selectedDay: CalendarDate) {
         //재클릭시 초기화
         if (selectedDay.timestamp === timestamp.value) {
             resetSelected();
@@ -104,6 +105,10 @@ export const useCalendarStore = defineStore('calendar', () => {
         });
     }
 
+    function addMissions(details: Array<MissionDetail>) {
+        // const missions = CalendarMission.of(details, startOfCalendar.value, endOfCalendar.value);
+    }
+
     return {
         timestamp,
         selectDate,
@@ -115,6 +120,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         holidaysMap,
         anniversaryMap,
         fetchOwnAnniversaries,
-        calendar
+        calendar,
+        addMissions
     }
 })

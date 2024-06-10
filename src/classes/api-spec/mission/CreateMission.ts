@@ -1,4 +1,5 @@
 import type IDatePickerOutput from "@/classes/component-protocol/IDatePickerOuput";
+import MissionDetail from "@/classes/MissionDetail";
 
 export class RequestBody {
 
@@ -16,6 +17,10 @@ export class RequestBody {
         this._type = type;
         this._deadline = deadline;
         this._scheduleInfo = scheduleInfo;
+    }
+
+    get name(): string {
+        return this._name;
     }
 
     toJSON() {
@@ -41,5 +46,21 @@ export class RequestBody {
 
     public toString() {
         return JSON.stringify(this, null, 2);
+    }
+}
+
+export class ResponseBody {
+    private readonly _created: Array<MissionDetail>;
+
+    constructor(created: Array<MissionDetail>) {
+        this._created = created;
+    }
+
+    get created(): Array<MissionDetail> {
+        return this._created;
+    }
+
+    static fromJson(json: any): ResponseBody {
+        return new ResponseBody(json.created.map(MissionDetail.fromJson));
     }
 }

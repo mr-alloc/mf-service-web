@@ -32,7 +32,7 @@
                   start: state.scheduleMode.isNotIn(ScheduleMode.REPEAT) ? state.startTimestamp === calendarDay.timestamp : state.isRepeatStartActive && state.startTimestamp === calendarDay.timestamp,
                   end: state.scheduleMode.isNotIn(ScheduleMode.REPEAT) ? state.endTimestamp === calendarDay.timestamp : state.isRepeatEndActive && state.endTimestamp === calendarDay.timestamp
                 }"
-                v-for="(calendarDay, index) in state.calendarDays as Array<CalendarDay>"
+                v-for="(calendarDay, index) in state.calendarDays as Array<CalendarDate>"
                 :key="index" v-on:click="() => methods.selectDay(calendarDay)">
               <span class="day-text">{{ calendarDay.date }}</span>
             </li>
@@ -77,7 +77,7 @@
 </template>
 <script setup lang="ts">
 import {onMounted, reactive, ref} from "vue";
-import type CalendarDay from "@/classes/CalendarDay";
+import type CalendarDate from "@/classes/CalendarDate";
 import TemporalUtil from "@/utils/TemporalUtil";
 import DateUtil from "@/utils/DateUtil";
 import {faCalendarAlt} from "@fortawesome/free-solid-svg-icons";
@@ -109,7 +109,7 @@ const state = reactive({
   repeatOption: RepeatOption.NONE,
   thisMonth: TemporalUtil.toMoment(props.timestamp, true).month() + 1,
   isSelectMode: false,
-  calendarDays: [] as Array<CalendarDay>,
+  calendarDays: [] as Array<CalendarDate>,
   selected: new Set<number>(),
   firstStamp: 0,
   secondStamp: 0,
@@ -141,7 +141,7 @@ const methods = {
       state.scheduleMode = ScheduleMode.SINGLE;
     }
   },
-  selectRangeSchedule(calendarDay: CalendarDay) {
+  selectRangeSchedule(calendarDay: CalendarDate) {
     //이미 번위가 정해져 있지만, 다른 날짜를 선택할 경우 모두 초기화
     if (
         state.startTimestamp > 0 && state.endTimestamp > 0 &&
@@ -199,7 +199,7 @@ const methods = {
     }
   }
   ,
-  selectDay(calendarDay: CalendarDay) {
+  selectDay(calendarDay: CalendarDate) {
     switch (state.scheduleMode.value) {
       case ScheduleMode.MULTIPLE.value:
         if (state.selected.has(calendarDay.timestamp)) {

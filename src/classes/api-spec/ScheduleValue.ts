@@ -2,7 +2,7 @@ import ScheduleMode from "@/constant/ScheduleMode";
 import TemporalUtil from "@/utils/TemporalUtil";
 import DateUtil from "@/utils/DateUtil";
 import RepeatOption from "@/constant/RepeatOption";
-import CalendarDay from "@/classes/CalendarDay";
+import CalendarDate from "@/classes/CalendarDate";
 
 export default class ScheduleValue {
     private readonly _id: number;
@@ -68,7 +68,7 @@ export default class ScheduleValue {
             }
             case ScheduleMode.REPEAT: {
                 const repeatOption = RepeatOption.fromValue(this._repeatOption)
-                const repeatDay = new CalendarDay(this._repeatValue);
+                const repeatDay = new CalendarDate(this._repeatValue);
                 const days = TemporalUtil.getDiffDays(calendarStartAt, calendarEndAt);
 
                 return TemporalUtil.getLocalDaysArray(calendarStartAt, days).filter(calendarDay => {

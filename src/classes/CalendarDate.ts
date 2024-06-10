@@ -3,7 +3,7 @@ import TemporalUtil from "@/utils/TemporalUtil";
 import DateUtil from "@/utils/DateUtil";
 import DayOfWeek from "@/constant/DayOfWeek";
 
-export default class CalendarDay {
+export default class CalendarDate {
 
     private readonly _value: Moment;
     private readonly _timestamp: number;
@@ -11,11 +11,12 @@ export default class CalendarDay {
     private readonly _dateStr: string;
     private readonly _year: number;
     private readonly _month: number;
+    private readonly _weekOfCalendar: number;
     private readonly _date: number;
     private readonly _dayOfWeek: DayOfWeek;
 
 
-    constructor(timestamp: number) {
+    constructor(timestamp: number, weekOfCalendar?: number) {
         const current = TemporalUtil.toMoment(timestamp, true);
         this._value = current;
         this._timestamp = timestamp;
@@ -23,6 +24,7 @@ export default class CalendarDay {
         this._dateStr = current.format(DateUtil.DEFAULT_DATE_FORMAT);
         this._year = current.year();
         this._month = current.month() + 1;
+        this._weekOfCalendar = weekOfCalendar ?? 0;
         this._date = current.date();
         this._dayOfWeek = DayOfWeek.fromSundayStartValue(current.day())!;
     }
@@ -49,6 +51,10 @@ export default class CalendarDay {
 
     get month(): number {
         return this._month;
+    }
+
+    get weekOfCalendar(): number {
+        return this._weekOfCalendar;
     }
 
     get date(): number {

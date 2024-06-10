@@ -1,6 +1,7 @@
 import moment, {type Moment} from "moment-timezone";
 import TempralUtil from "@/utils/TemporalUtil";
-import CalendarDay from "@/classes/CalendarDay";
+import CalendarDate from "@/classes/CalendarDate";
+import CollectionUtil from "@/utils/CollectionUtil";
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 const DEFAULT_DATE_TIME_FORMAT = 'YYYY년 MM월 DD일 HH:mm:ss';
@@ -58,7 +59,7 @@ function toUtc(date: string, format: string): number {
     return moment(date, format).utc(false).unix();
 }
 
-function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar: Moment, startOfThisMonth: Moment, endOfThisMonth: Moment, endOfCalendar: Moment) => void): Array<CalendarDay> {
+function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar: Moment, startOfThisMonth: Moment, endOfThisMonth: Moment, endOfCalendar: Moment) => void): Array<CalendarDate> {
     const startOfThisMonth = moment(momentValue).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     // print start of this month's day and days
@@ -70,8 +71,24 @@ function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar:
         .map((_, interval) => {
             const cloned = startOfCalendar.clone();
             const date = cloned.add(interval, 'days');
-            return new CalendarDay(date.unix() - TempralUtil.getOffsetSecond());
+            return new CalendarDate(date.unix() - TempralUtil.getOffsetSecond());
         });
+}
+
+function getCalendarWeeks(momentValue: Moment): Map<number, Array<CalendarDate>> {
+    const startOfThisMonth = moment(momentValue).startOf('month');
+    const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
+    const endOfThisMonth = moment(momentValue).endOf('month');
+    const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
+
+    const totalDays = [...new Array(endOfCalendar.diff(startOfCalendar, 'days') + 1).keys()]
+        .map((_, interval) => {
+            const cloned = startOfCalendar.clone();
+            const date = cloned.add(interval, 'days');
+            return new CalendarDate(date.unix(), Math.floor(interval / 7) + 1);
+        });
+
+    return CollectionUtil.grouping(totalDays, (day) => day.weekOfCalendar);
 }
 
 export default {
@@ -84,6 +101,7 @@ export default {
     toKoreanString,
     YYYYMM,
     YYYYMMDD,
+    getCalendarWeeks,
 
 
     isSameMonth(m1: Moment, m2: Moment): boolean {

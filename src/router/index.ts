@@ -14,6 +14,7 @@ import Main from "@/views/MainIndex.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import Missions from "@/views/authorized/Missions.vue";
 import Families from "@/views/authorized/Families.vue";
+import Calendar from "@/views/Calendar.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,7 +25,8 @@ const router = createRouter({
       {path: '/sign-up', name: 'sign-up', component: SignUp, meta: {role: 0}},
       {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}},
       {path: '/missions', name: 'missions', component: Missions, meta: {role: 1}},
-      {path: '/families', name: 'families', component: Families, meta: {role: 1}}
+      {path: '/families', name: 'families', component: Families, meta: {role: 1}},
+      {path: '/new-calendar', name: 'new-calendar', component: Calendar, meta: {role: 0}}
   ]
 });
 
@@ -43,6 +45,9 @@ router.afterEach((to, from) => {
             break;
         case '/missions':
             leftMenuStore.state.activeMissionMenu = true;
+            break;
+        case '/new-calendar':
+            leftMenuStore.state.activeNewCalendarMenu = true;
             break;
     }
 });

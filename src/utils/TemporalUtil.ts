@@ -1,6 +1,6 @@
 import DateUtil from "@/utils/DateUtil";
 import moment, {tz} from "moment-timezone";
-import CalendarDay from "@/classes/CalendarDay";
+import CalendarDate from "@/classes/CalendarDate";
 
 const SECONDS_IN_MINUTE = 60;
 const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * 60;
@@ -68,7 +68,7 @@ function getDiffDays(startTimeStamp: number, endTimeStamp: number) {
 function getLocalDaysArray(startStamp: number, days: number) {
     return [...Array(days).keys()].map((_, idx) => {
         const addSecondOfDays = idx * SECONDS_IN_DAY;
-        return new CalendarDay(startStamp + addSecondOfDays);
+        return new CalendarDate(startStamp + addSecondOfDays);
     });
 }
 

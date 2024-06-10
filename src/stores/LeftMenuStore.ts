@@ -9,6 +9,7 @@ export const useLeftMenuStore = defineStore("leftMenu", () => {
         activeCalendarMenu: false,
         activeFamiliesMenu: false,
         activeMissionMenu: false,
+        activeNewCalendarMenu: false,
     });
 
     function collapseMenu() {
@@ -21,6 +22,7 @@ export const useLeftMenuStore = defineStore("leftMenu", () => {
         state.activeCalendarMenu = false;
         state.activeFamiliesMenu = false;
         state.activeMissionMenu = false;
+        state.activeNewCalendarMenu = false;
     }
 
     return {

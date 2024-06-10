@@ -23,7 +23,7 @@
       </ul>
       <ul class="calendar-row member-calendar" v-show="calendarStore.calendar"
           v-on:scrollend="methods.scrollOnCalendar">
-        <li class="each-day-item" v-for="(day, index) in calendarStore.calendar as Array<CalendarDay>" :key="index"
+        <li class="each-day-item" v-for="(day, index) in calendarStore.calendar as Array<CalendarDate>" :key="index"
             v-on:click="methods.selectDate(day)" :id="`calendar-${day.dateStr}`"
             :class="{
               holiday: calendarStore.holidaysMap.has(DateUtil.to(day.value, 'MM-DD')),
@@ -105,7 +105,7 @@ import PopupUtil from "@/utils/PopupUtil";
 import TemporalUtil from "@/utils/TemporalUtil";
 import MissionStatus from "@/constant/MissionStatus";
 import {useCalendarStore} from "@/stores/CalendarStore";
-import CalendarDay from "@/classes/CalendarDay";
+import CalendarDate from "@/classes/CalendarDate";
 import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
 import {faRecycle} from "@fortawesome/free-solid-svg-icons/faRecycle";
 import {faCalendarDay} from "@fortawesome/free-solid-svg-icons/faCalendarDay";
@@ -124,7 +124,7 @@ const methods = {
   createAnniversary(event: MouseEvent) {
     PopupUtil.popupCreateAnniversary(emitter);
   },
-  createMission(day: CalendarDay) {
+  createMission(day: CalendarDate) {
     PopupUtil.popupCreateMission(emitter, calendarStore.timestamp);
   },
   setMonth(month: number) {
@@ -147,7 +147,7 @@ const methods = {
     e.stopPropagation();
     PopupUtil.popupMissionDetail(mission);
   },
-  selectDate(day: CalendarDay) {
+  selectDate(day: CalendarDate) {
     calendarStore.selectDate(day);
   },
   clickHolidayText(event: MouseEvent, anniversaryKey: string, holidayKey: string) {

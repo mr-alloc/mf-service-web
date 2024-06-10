@@ -7,7 +7,7 @@ export default {
         });
         return map;
     },
-    groupBy<K, T>(list: Array<T>, keyMapper: (t: T) => K): Map<K, Array<T>> {
+    grouping<K, T>(list: Array<T>, keyMapper: (t: T) => K): Map<K, Array<T>> {
         const map = new Map<K, Array<T>>();
         list.forEach(item => {
             const keyValue = keyMapper(item);
