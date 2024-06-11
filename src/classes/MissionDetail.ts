@@ -60,7 +60,7 @@ export default class MissionDetail {
             json.name,
             json.type,
             ScheduleValue.fromJson(json.schedule),
-            json.states.map(MissionState.fromJson),
+            json.states?.map(MissionState.fromJson),
             json.deadline,
             json.reporter,
             json.assignee

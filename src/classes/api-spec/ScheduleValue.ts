@@ -1,8 +1,8 @@
 import ScheduleMode from "@/constant/ScheduleMode";
 import TemporalUtil from "@/utils/TemporalUtil";
-import DateUtil from "@/utils/DateUtil";
 import RepeatOption from "@/constant/RepeatOption";
 import CalendarDate from "@/classes/CalendarDate";
+import Period from "@/classes/Period";
 
 export default class ScheduleValue {
     private readonly _id: number;
@@ -10,15 +10,15 @@ export default class ScheduleValue {
     private readonly _startAt: number;
     private readonly _endAt: number;
     private readonly _repeatOption: number;
-    private readonly _repeatValue: number;
+    private readonly _repeatValues: Array<number>;
 
-    constructor(id: number, mode: number, startAt: number, endAt: number, repeatOption: number, repeatValue: number) {
+    constructor(id: number, mode: number, startAt: number, endAt: number, repeatOption: number, repeatValues: Array<number>) {
         this._id = id;
         this._mode = ScheduleMode.fromValue(mode)!;
         this._startAt = startAt;
         this._endAt = endAt;
         this._repeatOption = repeatOption;
-        this._repeatValue = repeatValue;
+        this._repeatValues = repeatValues;
     }
 
     get id(): number {
@@ -41,8 +41,8 @@ export default class ScheduleValue {
         return this._repeatOption;
     }
 
-    get repeatValue(): number {
-        return this._repeatValue;
+    get repeatValues(): Array<number> {
+        return this._repeatValues;
     }
 
     static fromJson(json: any): ScheduleValue {
@@ -52,29 +52,25 @@ export default class ScheduleValue {
             json.startAt,
             json.endAt,
             json.repeatOption,
-            json.repeatValue
+            json.repeatValues
         );
     }
 
-    consist(calendarStartAt: number, calendarEndAt: number): Array<string> {
+    consist(calendarStartAt: number, calendarEndAt: number): Array<Period> {
         switch (this._mode) {
             case ScheduleMode.SINGLE:
             case ScheduleMode.MULTIPLE:
-                return [TemporalUtil.toLocalMoment(this._startAt).format(DateUtil.DEFAULT_DATE_FORMAT)];
-            case ScheduleMode.PERIOD: {
-                const days = TemporalUtil.getDiffDays(this._startAt, this._endAt) + 1;
-                return TemporalUtil.getLocalDaysArray(this._startAt, days)
-                    .map(date => date.value.format(DateUtil.DEFAULT_DATE_FORMAT));
-            }
+                return [Period.of(this._startAt, this._endAt)];
+            case ScheduleMode.PERIOD:
+                return [Period.of(this._startAt, this.endAt)];
             case ScheduleMode.REPEAT: {
                 const repeatOption = RepeatOption.fromValue(this._repeatOption)
-                const repeatDay = new CalendarDate(this._repeatValue);
+                const repeatDay = new CalendarDate(this._repeatValues[0]);
                 const days = TemporalUtil.getDiffDays(calendarStartAt, calendarEndAt);
-
                 return TemporalUtil.getLocalDaysArray(calendarStartAt, days).filter(calendarDay => {
                     switch (repeatOption) {
                         case RepeatOption.WEEK:
-                            return calendarDay.dayOfWeek.value === this._repeatValue;
+                            return this._repeatValues.includes(calendarDay.dayOfWeek.value);
                         case RepeatOption.MONTH: {
                             return calendarDay.date === repeatDay.date;
                         }
@@ -83,7 +79,9 @@ export default class ScheduleValue {
                         default:
                             throw new Error(`Invalid repeat option: ${repeatOption}`);
                     }
-                }).map(date => date.value.format(DateUtil.DEFAULT_DATE_FORMAT));
+                })
+                    .filter(date => this._startAt <= date.timestamp && date.timestamp <= this._endAt)
+                    .map(date => Period.of(date.timestamp, date.timestamp + (TemporalUtil.SECONDS_IN_DAY - 1)));
             }
             default:
                 throw new Error(`Invalid schedule mode: ${this._mode}`);

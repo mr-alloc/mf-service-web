@@ -2,25 +2,18 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import type {Moment} from "moment-timezone";
 import DateUtil from "@/utils/DateUtil";
-import {
-    CalendarHoliday,
-    CalendarMission,
-    FamilyMission,
-    type IMission,
-    RequestBody,
-    ResponseBody
-} from "@/classes/api-spec/mission/GetMemberCalendar";
+import {CalendarHoliday, type IMission, RequestBody, ResponseBody} from "@/classes/api-spec/mission/GetMemberCalendar";
 import AnniversaryValue from "@/classes/api-spec/AnniversaryValue";
 import CalendarAnniversary from "@/classes/CalendarAnniversary";
 import {call} from "@/utils/NetworkUtil";
 import Mission from "@/constant/api-meta/Mission";
-import {hasSelectedFamilyId} from "@/utils/LocalCache";
 import CollectionUtil from "@/utils/CollectionUtil";
 import * as GetAnniversaries from "@/classes/api-spec/GetAnniversaries";
 import Anniversary from "@/constant/api-meta/Anniversary";
 import CalendarDate from "@/classes/CalendarDate";
 import TemporalUtil from "@/utils/TemporalUtil";
 import type MissionDetail from "@/classes/MissionDetail";
+import CalendarMission from "@/classes/CalendarMission";
 
 export const useCalendarStore = defineStore('calendar', () => {
 
@@ -44,19 +37,16 @@ export const useCalendarStore = defineStore('calendar', () => {
         });
     }
 
-    async function fetchOwnCalendar() {
-        await call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(startOfCalendar.value, endOfCalendar.value),
+    async function fetchOwnCalendar(soc?: number, eoc?: number) {
+        startOfCalendar.value = soc ?? startOfCalendar.value;
+        endOfCalendar.value = eoc ?? endOfCalendar.value;
+
+        await call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(soc ?? startOfCalendar.value, eoc ?? endOfCalendar.value),
             (res) => {
-                const responseBody = ResponseBody.fromJson(res.data, (mission) => {
-                    return hasSelectedFamilyId()
-                        ? FamilyMission.fromJson(mission)
-                        : CalendarMission.fromJson(mission)
-                });
+                const responseBody = ResponseBody.fromJson(res.data);
                 //일정
-                memberCalendarMap.value = CollectionUtil.grouping<string, IMission>(
-                    responseBody.calendar,
-                    (mission) => mission.groupingDate
-                );
+                addMissions(responseBody.calendar);
+
                 //공휴일
                 holidaysMap.value = CollectionUtil.toMap<string, CalendarHoliday>(
                     responseBody.holidays.filter(h => !h.isLunar),
@@ -106,7 +96,41 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
 
     function addMissions(details: Array<MissionDetail>) {
-        // const missions = CalendarMission.of(details, startOfCalendar.value, endOfCalendar.value);
+        const missions = details.flatMap((detail) => CalendarMission.of(
+            detail,
+            startOfCalendar.value,
+            endOfCalendar.value
+        ));
+
+        // missions.forEach((mission) => {
+        //     console.log(mission.toString());
+        // });
+
+        // missions.forEach((mission) => {
+        //     console.log(mission.toString());
+        // });
+        const weeksMap = new Map<number, Array<CalendarMission>>();
+        DateUtil.forEachWeek(startOfCalendar.value, endOfCalendar.value, (week, start, end) => {
+            missions.forEach((mission) => {
+                if (mission.startAt <= end && mission.endAt >= start) {
+                    if (weeksMap.has(week)) {
+                        const missions = weeksMap.get(week);
+                        if (missions) {
+                            missions.push(mission);
+                        }
+                    } else {
+                        weeksMap.set(week, [mission]);
+                    }
+                }
+            })
+        });
+
+        weeksMap.forEach((missions, week) => {
+            console.log(`week: ${week}`);
+            missions.forEach((mission) => {
+                console.log(mission.toString());
+            });
+        });
     }
 
     return {

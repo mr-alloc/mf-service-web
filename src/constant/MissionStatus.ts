@@ -72,4 +72,8 @@ export default class MissionStatus {
     static NOT_DELETED_FILTER(status: MissionStatus): boolean {
         return status !== MissionStatus.DELETED;
     }
+
+    static fromValue(status: number): MissionStatus {
+        return MissionStatus.CACHED.get(status) ?? MissionStatus.CREATED;
+    }
 }

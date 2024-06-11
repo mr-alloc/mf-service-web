@@ -3,13 +3,17 @@
     <div class="background-area">
       <CalendarDay v-for="day in props.days" :key="day.timestamp" :timestamp="day.timestamp"/>
     </div>
-    <div class="schedule-area"></div>
+    <div class="schedule-area" ref="scheduleArea">
+
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import CalendarDay from "@/components/main/CalendarDay.vue";
 import CalendarDate from "@/classes/CalendarDate";
+import {ref} from "vue";
 
+const scheduleArea = ref<HTMLDivElement | null>(null);
 const props = defineProps<{
   days: Array<CalendarDate>
 }>();
@@ -35,13 +39,15 @@ const props = defineProps<{
   }
 
   .schedule-area {
-    pointer-events: none;
+    //pointer-events: none;
     z-index: 3;
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
+    height: calc(100% - 20px);
+    margin-top: 20px;
   }
 }
 </style>

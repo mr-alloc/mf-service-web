@@ -76,6 +76,14 @@ function toUnix(timestamp: number) {
     return timestamp - getOffsetSecond();
 }
 
+function toDateTimeStr(timestamp: number) {
+    return toLocalMoment(timestamp).format(DateUtil.DEFAULT_DATE_TIME_FORMAT);
+}
+
+function toDateStr(timestamp: number) {
+    return toLocalMoment(timestamp).format(DateUtil.DEFAULT_DATE_FORMAT);
+}
+
 export default {
     SECONDS_IN_MINUTE,
     SECONDS_IN_HOUR,
@@ -89,5 +97,7 @@ export default {
     toLocalMoment,
     getDiffDays,
     getLocalDaysArray,
-    toUnix
+    toUnix,
+    toDateTimeStr,
+    toDateStr
 }

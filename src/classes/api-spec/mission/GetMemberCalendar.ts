@@ -1,4 +1,5 @@
 import DateUtil from "@/utils/DateUtil";
+import MissionDetail from "@/classes/MissionDetail";
 
 export interface IMission {
     id: number;
@@ -71,55 +72,6 @@ export class FamilyMission implements IMission {
 
 }
 
-export class CalendarMission implements IMission {
-    private readonly _id: number;
-    private readonly _status: number;
-    private readonly _type: number;
-    private readonly _name: string;
-    private readonly _deadline: number;
-    private readonly _startDate: number;
-
-    constructor(id: number, status: number, type: number, name: string, deadline: number, startDate: number) {
-        this._id = id;
-        this._status = status;
-        this._type = type;
-        this._name = name;
-        this._deadline = deadline;
-        this._startDate = startDate;
-    }
-
-    get id(): number {
-        return this._id;
-    }
-
-    get status(): number {
-        return this._status;
-    }
-
-    get type(): number {
-        return this._type;
-    }
-
-    get name(): string {
-        return this._name;
-    }
-
-    get deadline(): number {
-        return this._deadline;
-    }
-
-    get startDate(): number {
-        return this._startDate;
-    }
-
-    get groupingDate(): string {
-        return DateUtil.secondToDateString(this._startDate);
-    }
-
-    static fromJson(json: any): CalendarMission {
-        return new CalendarMission(json.id, json.status, json.type, json.name, json.deadline ?? 0, json.startDate);
-    }
-}
 
 export class CalendarHoliday {
     private readonly _isLunar: boolean;
@@ -168,15 +120,15 @@ export class RequestBody {
 }
 
 export class ResponseBody {
-    private readonly _calendar: IMission [];
+    private readonly _calendar: Array<MissionDetail>;
     private readonly _holidays: CalendarHoliday []
 
-    constructor(calendar: CalendarMission [], holidays: CalendarHoliday []) {
+    constructor(calendar: Array<MissionDetail>, holidays: CalendarHoliday []) {
         this._calendar = calendar;
         this._holidays = holidays;
     }
 
-    get calendar(): IMission [] {
+    get calendar(): Array<MissionDetail> {
         return this._calendar;
     }
 
@@ -184,9 +136,9 @@ export class ResponseBody {
         return this._holidays;
     }
 
-    static fromJson(json: any, missionMapper: (mission: IMission) => IMission): ResponseBody {
-        const calendar = json.calendar.map(missionMapper);
-        const holidays = json.holidays.map((holiday: any) => CalendarHoliday.fromJson(holiday));
+    static fromJson(json: any): ResponseBody {
+        const calendar = json.calendar.map(MissionDetail.fromJson);
+        const holidays = json.holidays.map(CalendarHoliday.fromJson);
         return new ResponseBody(calendar, holidays);
     }
 }

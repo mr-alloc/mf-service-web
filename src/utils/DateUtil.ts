@@ -1,5 +1,6 @@
 import moment, {type Moment} from "moment-timezone";
 import TempralUtil from "@/utils/TemporalUtil";
+import TemporalUtil from "@/utils/TemporalUtil";
 import CalendarDate from "@/classes/CalendarDate";
 import CollectionUtil from "@/utils/CollectionUtil";
 
@@ -75,12 +76,13 @@ function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar:
         });
 }
 
-function getCalendarWeeks(momentValue: Moment): Map<number, Array<CalendarDate>> {
+function getCalendarWeeks(momentValue: Moment, calculatedWith?: (startOfCalendar: Moment, startOfThisMonth: Moment, endOfThisMonth: Moment, endOfCalendar: Moment) => void): Map<number, Array<CalendarDate>> {
     const startOfThisMonth = moment(momentValue).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     const endOfThisMonth = moment(momentValue).endOf('month');
     const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
 
+    calculatedWith && calculatedWith(startOfCalendar, startOfThisMonth, endOfThisMonth, endOfCalendar);
     const totalDays = [...new Array(endOfCalendar.diff(startOfCalendar, 'days') + 1).keys()]
         .map((_, interval) => {
             const cloned = startOfCalendar.clone();
@@ -89,6 +91,27 @@ function getCalendarWeeks(momentValue: Moment): Map<number, Array<CalendarDate>>
         });
 
     return CollectionUtil.grouping(totalDays, (day) => day.weekOfCalendar);
+}
+
+function forEachWeek(startStamp: number, endStamp: number, callback: (week: number, start: number, end: number) => void) {
+    if (startStamp > endStamp) throw new Error('startStamp should be less than endStamp');
+    const start = TemporalUtil.toLocalMoment(startStamp);
+    const end = TemporalUtil.toLocalMoment(endStamp);
+
+    const startOfWeek = start.clone().startOf('week');
+    const endOfWeek = end.clone().endOf('week');
+
+    let week = 1;
+    const current = startOfWeek.clone();
+    while (current.isBefore(endOfWeek)) {
+        const start = current.clone().unix() - TempralUtil.getOffsetSecond()
+        const end = current.clone().endOf('week').unix() - TempralUtil.getOffsetSecond();
+        callback(week, start, end);
+        week++;
+        current.add(1, 'week');
+    }
+
+
 }
 
 export default {
@@ -117,5 +140,6 @@ export default {
     getTodayStr(format: string): string {
         return moment().format(format);
     },
-    getCalendarDays
+    getCalendarDays,
+    forEachWeek
 }
