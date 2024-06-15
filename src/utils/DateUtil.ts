@@ -63,8 +63,6 @@ function toUtc(date: string, format: string): number {
 function getCalendarDays(momentValue: Moment, calculatedWith?: (startOfCalendar: Moment, startOfThisMonth: Moment, endOfThisMonth: Moment, endOfCalendar: Moment) => void): Array<CalendarDate> {
     const startOfThisMonth = moment(momentValue).startOf('month');
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
-    // print start of this month's day and days
-
     const endOfThisMonth = moment(momentValue).endOf('month');
     const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
     calculatedWith && calculatedWith(startOfCalendar, startOfThisMonth, endOfThisMonth, endOfCalendar);
@@ -81,6 +79,7 @@ function getCalendarWeeks(momentValue: Moment, calculatedWith?: (startOfCalendar
     const startOfCalendar = startOfThisMonth.subtract(startOfThisMonth.day(), 'days');
     const endOfThisMonth = moment(momentValue).endOf('month');
     const endOfCalendar = endOfThisMonth.add(7 - (endOfThisMonth.day() + 1), 'days');
+    console.log(`달력 ${startOfCalendar.format(DEFAULT_DATE_FORMAT)} ~ ${endOfCalendar.format(DEFAULT_DATE_FORMAT)}`);
 
     calculatedWith && calculatedWith(startOfCalendar, startOfThisMonth, endOfThisMonth, endOfCalendar);
     const totalDays = [...new Array(endOfCalendar.diff(startOfCalendar, 'days') + 1).keys()]
@@ -103,15 +102,28 @@ function forEachWeek(startStamp: number, endStamp: number, callback: (week: numb
 
     let week = 1;
     const current = startOfWeek.clone();
+    const weekMap = new Map<number, Array<CalendarDate>>();
     while (current.isBefore(endOfWeek)) {
-        const start = current.clone().unix() - TempralUtil.getOffsetSecond()
-        const end = current.clone().endOf('week').unix() - TempralUtil.getOffsetSecond();
-        callback(week, start, end);
+        const startStamp = current.clone().unix() - TempralUtil.getOffsetSecond()
+        const endStamp = current.clone().endOf('week').unix() - TempralUtil.getOffsetSecond();
+        callback(week, startStamp, endStamp);
+        //주별 요일정보
+        new Array<number>(7).fill(0).forEach((_, idx) => {
+            const date = current.clone().startOf('week').add(idx, 'days');
+            const calendarDate = new CalendarDate(date.unix() - TempralUtil.getOffsetSecond(), week);
+            if (weekMap.has(week)) {
+                const days = weekMap.get(week);
+                if (days) {
+                    days.push(calendarDate);
+                }
+            } else {
+                weekMap.set(week, [calendarDate]);
+            }
+        });
         week++;
         current.add(1, 'week');
     }
-
-
+    return weekMap;
 }
 
 export default {

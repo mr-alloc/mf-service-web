@@ -69,7 +69,6 @@ const state = reactive({
   divideMinuteCriteria: 60 * TemporalUtil.SECONDS_IN_MINUTE,
   times: [] as Array<number>,
   selectedSeconds: 0,
-  resultSeconds: 0,
 });
 const methods = {
   selectTime(seconds: number) {
@@ -97,17 +96,15 @@ const methods = {
   toAm() {
     state.isAfterNoon = false;
     state.isAmPmSelectMode = false;
-    state.resultSeconds = state.selectedSeconds;
   },
   toPm() {
     state.isAfterNoon = true;
     state.isAmPmSelectMode = false;
-    state.resultSeconds = state.selectedSeconds + TemporalUtil.SECONDS_IN_HALF_DAY;
   }
 }
 
 defineExpose({
-  getValue: () => state.resultSeconds
+  getValue: () => state.selectedSeconds + (state.isAfterNoon ? TemporalUtil.SECONDS_IN_HALF_DAY : 0)
 })
 onMounted(() => {
   state.times = [...Array((TemporalUtil.SECONDS_IN_DAY / 2) / state.divideMinuteCriteria).keys()]

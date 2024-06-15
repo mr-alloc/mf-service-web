@@ -1,7 +1,7 @@
 <template>
   <div class="each-day-item">
     <div class="item-header">
-      <span class="date" :class="{ today: state.today.isSame(state.now, 'date') }">
+      <span class="date" :class="{ today: state.today.format('MMD') === state.now.format('MMD') }">
         {{ methods.getCalendarDate() }}
       </span>
     </div>
@@ -13,9 +13,11 @@
 import TemporalUtil from "@/utils/TemporalUtil";
 import {reactive} from "vue";
 import moment from "moment-timezone";
+import type CalendarDate from "@/classes/CalendarDate";
 
 const props = defineProps<{
-  timestamp: number;
+  timestamp: number,
+  day: CalendarDate
 }>();
 
 const state = reactive({

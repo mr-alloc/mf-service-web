@@ -5,6 +5,8 @@ import DayOfWeek from "@/constant/DayOfWeek";
 
 export default class CalendarDate {
 
+    public static readonly TIMESTAMP_ASCENDING_CONDITION = (a: CalendarDate, b: CalendarDate) => a.timestamp - b.timestamp;
+
     private readonly _value: Moment;
     private readonly _timestamp: number;
     private readonly _localTimestamp: number;
@@ -67,5 +69,9 @@ export default class CalendarDate {
 
     isSameMonth(month: number): boolean {
         return this._month === month;
+    }
+
+    public toString() {
+        return `${this._dateStr} ${this._dayOfWeek.name}`;
     }
 }

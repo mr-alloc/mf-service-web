@@ -95,7 +95,6 @@ import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput"
 import PeriodModeOutput from "@/classes/component-protocol/PeriodModeOutput";
 import RepeatModeOutput from "@/classes/component-protocol/RepeatModeOutput";
 import type {GroupButtonExpose} from "@/types/ExposeType";
-import moment from "moment-timezone";
 import {parseInt} from "lodash";
 
 const repeatOptionButton = ref<GroupButtonExpose | null>(null);
@@ -273,7 +272,7 @@ const methods = {
       case ScheduleMode.MULTIPLE.value:
         return new MultipleModeOutput(state.selected);
       case ScheduleMode.PERIOD.value:
-        return new PeriodModeOutput(state.startTimestamp, state.endTimestamp);
+        return new PeriodModeOutput(state.startTimestamp, state.endTimestamp + (TemporalUtil.SECONDS_IN_DAY - 1));
       case ScheduleMode.REPEAT.value: {
         const repeatValue = state.repeatOption.is(RepeatOption.WEEK) ? Array.from(state.repeatValues) : [props.timestamp];
         return RepeatModeOutput.of(state.repeatOption as RepeatOption, repeatValue, state.startTimestamp, state.endTimestamp);

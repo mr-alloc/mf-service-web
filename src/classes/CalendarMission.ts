@@ -5,6 +5,8 @@ import TemporalUtil from "@/utils/TemporalUtil";
 import DateUtil from "@/utils/DateUtil";
 
 export default class CalendarMission {
+    public static readonly START_AT_ASCENDING_CONDITION = (a: CalendarMission, b: CalendarMission) => a.startAt - b.startAt;
+
     private readonly _id: number;
     private readonly _status: MissionStatus;
     private readonly _type: number;

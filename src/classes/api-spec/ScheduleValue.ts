@@ -62,7 +62,7 @@ export default class ScheduleValue {
             case ScheduleMode.MULTIPLE:
                 return [Period.of(this._startAt, this._endAt)];
             case ScheduleMode.PERIOD:
-                return [Period.of(this._startAt, this.endAt)];
+                return [Period.of(this._startAt, this._endAt)];
             case ScheduleMode.REPEAT: {
                 const repeatOption = RepeatOption.fromValue(this._repeatOption)
                 const repeatDay = new CalendarDate(this._repeatValues[0]);

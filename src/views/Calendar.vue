@@ -4,7 +4,11 @@
       <div class="day" v-for="day in DayOfWeek.values()" :key="day.value">{{ day.alias }}</div>
     </div>
     <div class="week-wrapper">
-      <CalendarWeek :days="days" v-for="([week, days]) in state.calendarWeeks.entries()" :key="week"/>
+      <CalendarWeek :days="days" :key="week"
+                    v-for="([week, days]) in state.calendarWeeks.entries()"
+                    :week="week"
+                    :geometries="calendarStore.calendarScheduleMap.get(state.thisMonthKey)?.get(week) ?? []"
+      />
     </div>
   </div>
 </template>
@@ -14,7 +18,6 @@ import DateUtil from "@/utils/DateUtil";
 import moment from "moment-timezone";
 import {onMounted, reactive} from "vue";
 import DayOfWeek from "@/constant/DayOfWeek";
-import TemporalUtil from "@/utils/TemporalUtil";
 import {useCalendarStore} from "@/stores/CalendarStore";
 import type CalendarDate from "@/classes/CalendarDate";
 
@@ -23,18 +26,19 @@ const state = reactive({
   calendarWeeks: new Map<number, Array<CalendarDate>>(),
   startOfCalendar: 0,
   endOfCalendar: 0,
+  thisMonthKey: '',
 });
 
 onMounted(() => {
   state.calendarWeeks = DateUtil.getCalendarWeeks(moment(), (soc, som, eom, eoc) => {
-    state.startOfCalendar = TemporalUtil.toUnix(soc.unix());
-    state.endOfCalendar = TemporalUtil.toUnix(eoc.unix());
+    state.startOfCalendar = soc.unix();
+    state.endOfCalendar = eoc.unix();
   })
-
   //미션,공휴일
   calendarStore.fetchOwnCalendar(state.startOfCalendar, state.endOfCalendar);
   //기념일
   calendarStore.fetchOwnAnniversaries();
+  state.thisMonthKey = calendarStore.thisMonthKey;
 })
 </script>
 <style scoped lang="scss">

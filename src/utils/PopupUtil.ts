@@ -71,7 +71,6 @@ function popupRequestJoinFamily(emitter: any) {
 
 function popupMissionDetail(mission: IMission) {
     const backgroundStore = useBackgroundStore();
-    console.log('mission', mission);
 
     const missionDetailPopup = new CurrentPopup(PopupType.NORMAL, `${MissionType.fromValue(mission.type).name} 상세정보`)
         .addBodyComponent("MissionDetail", {missionId: mission.id})
