@@ -11,10 +11,13 @@
 </template>
 <script setup lang="ts">
 import TemporalUtil from "@/utils/TemporalUtil";
-import {reactive} from "vue";
+import {inject, reactive} from "vue";
 import moment from "moment-timezone";
 import type CalendarDate from "@/classes/CalendarDate";
+import {useCalendarStore} from "@/stores/CalendarStore";
 
+const emitter: any = inject('emitter');
+const calendarStore = useCalendarStore();
 const props = defineProps<{
   timestamp: number,
   day: CalendarDate
@@ -37,7 +40,6 @@ const methods = {
 <style scoped lang="scss">
 @import "@/assets/main";
 
-
 .each-day-item {
   user-select: none;
   border: 0.5px solid $standard-light-gray-in-white;
@@ -46,6 +48,10 @@ const methods = {
   flex-direction: column;
   overflow: hidden;
   flex: 1 1 0%;
+
+  &.selected {
+    background-color: $super-light-signature-purple;
+  }
 
   &:hover {
     cursor: pointer;

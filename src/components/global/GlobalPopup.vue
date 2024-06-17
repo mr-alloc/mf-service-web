@@ -25,11 +25,11 @@ const methods = {
     event.stopPropagation();
   },
   clickPopupArea(event: MouseEvent) {
-    backgroundStore.doIfHasPopup(popup => {
-      if (!popup.hasButtonProxy()) {
-        event.stopPropagation();
-      }
-    })
+    // backgroundStore.doIfHasPopup(popup => {
+    //   if (!popup.hasButtonProxy()) {
+    //     event.stopPropagation();
+    //   }
+    // })
   }
 }
 const props = defineProps({

@@ -10,8 +10,6 @@
     <CollapsibleMenu title="일정" :icon="['fas', 'calendar-days']" allocated-path="/calendar"
                      v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeCalendarMenu"/>
-    <CollapsibleMenu title="일정" :icon="['fas', 'calendar-day']" allocated-path="/new-calendar"
-                     :is-current-menu="leftMenuStore.state.activeNewCalendarMenu"/>
     <CollapsibleMenu title="패밀리" :icon="['fas', 'users']" allocated-path="/families"
                      v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeFamiliesMenu"/>

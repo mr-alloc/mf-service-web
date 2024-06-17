@@ -62,7 +62,7 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         //패밀리 선택시 갱신정보
         setSelectedFamilyId(item.id);
         //캘린더 갱신
-        emitter.emit("drawMemberCalendar")
+        emitter.emit("drawCalendar")
         emitter.emit("fetchFamiliesView")
         if (hasSelectedFamilyId()) {
             await familiesViewStore.fetchFamilyMembersAsync();

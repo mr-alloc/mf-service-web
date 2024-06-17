@@ -1,5 +1,4 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import MemberCalendar from '../views/MemberCalendar.vue'
 import SignIn from '../views/SignIn.vue'
 import SignUp from '../views/SignUp.vue'
 import {ProfileMember, useMemberInfoStore} from "@/stores/MemberInfoStore";
@@ -14,19 +13,18 @@ import Main from "@/views/MainIndex.vue";
 import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import Missions from "@/views/authorized/Missions.vue";
 import Families from "@/views/authorized/Families.vue";
-import Calendar from "@/views/Calendar.vue";
+import MainCalendar from "@/views/MainCalendar.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
       {path: '/', name: 'home', component: Main, meta: {role: 0}},
-      {path: '/calendar', name: 'calendar', component: MemberCalendar, meta: {role: 1}},
+      {path: '/calendar', name: 'calendar', component: MainCalendar, meta: {role: 1}},
       {path: '/sign-in', name: 'sign-in', component: SignIn, meta: {role: 0}},
       {path: '/sign-up', name: 'sign-up', component: SignUp, meta: {role: 0}},
       {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}},
       {path: '/missions', name: 'missions', component: Missions, meta: {role: 1}},
       {path: '/families', name: 'families', component: Families, meta: {role: 1}},
-      {path: '/new-calendar', name: 'new-calendar', component: Calendar, meta: {role: 0}}
   ]
 });
 

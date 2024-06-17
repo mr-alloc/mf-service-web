@@ -25,16 +25,15 @@ import InitNickname from "@/components/global/NicknameInitializer.vue";
 import LeftHeader from "@/components/global/LeftHeader.vue";
 import LoadingSpinner from "@/components/global/LoadingSpinner.vue";
 import GlobalPopup from "@/components/global/GlobalPopup.vue";
-import {CurrentPopup} from "@/stores/status/CurrentPopup";
 
 const backgroundStore = useBackgroundStore();
 const methods = {
   clickBackground(event: MouseEvent) {
-    backgroundStore.doIfHasPopup((popup: CurrentPopup) => {
-      if (!popup.hasButtonProxy()) {
-        backgroundStore.returnGlobalPopup();
-      }
-    })
+    // backgroundStore.doIfHasPopup((popup: CurrentPopup) => {
+    //   if (!popup.hasButtonProxy()) {
+    //     backgroundStore.returnGlobalPopup();
+    //   }
+    // })
   }
 }
 

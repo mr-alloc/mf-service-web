@@ -4,7 +4,8 @@
       <div class="mission-form" id="create-mission-form">
         <SimpleSelector ref="missionAssigneeInput" id="mission-assignee" name="assignee" title="수행자"
                         default-option-name="멤버 선택"
-                        :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"/>
+                        :options="state.members"
+                        v-if="ownFamiliesStore.hasSelectFamily && state.missionType.isNotIn(MissionType.SCHEDULE)"/>
         <BlinkSelect ref="missionTypeInput" id="mission-type" title="미션종류" :options="state.missionOptions"
                      name="missionType"
                      :before-change="methods.changeType"/>
@@ -87,9 +88,8 @@ onMounted(() => {
 
     call<CreateMission.RequestBody, CreateMission.ResponseBody>(Mission.CreateMission, requestBody, (response) => {
       const responseBody = CreateMission.ResponseBody.fromJson(response.data);
-      calendarStore.addMissions(responseBody.created);
       alertStore.success("미션 생성 완료!", `"${requestBody.name}" 미션을 생성하였습니다.`);
-      emitter.emit("drawMemberCalendar")
+      emitter.emit("drawCalendar")
       //이벤트 발행 취소
       emitter.off("validateCreateMissionForm")
       backgroundStore.returnGlobalPopup();
@@ -139,23 +139,26 @@ const state = reactive({
 
 const methods = {
   validateMissionTitle() {
-    const input: HTMLInputElement = document.getElementById("mission-title") as HTMLInputElement;
-    state.isValidTitle = input.value.length !== 0;
-
+    inputValues.missionTitle = ex(missionTitleInput.value?.input?.value).str();
+    state.isValidTitle = inputValues.missionTitle.length !== 0;
     if (!state.isValidTitle) {
-      input.focus();
+      missionTitleInput?.value?.input.focus();
     }
     return state.isValidTitle;
   },
   validateAssignee() {
-    state.isValidAssignee = !ownFamiliesStore.hasSelectFamily || inputValues.assignee !== 0;
+    if (ownFamiliesStore.hasSelectFamily) {
+      inputValues.assignee = ex(missionAssigneeInput.value?.getValue()).num();
+    }
+    state.isValidAssignee = !ownFamiliesStore.hasSelectFamily || inputValues.assignee !== 0 || state.missionType.value === MissionType.SCHEDULE.value;
     if (!state.isValidAssignee) {
       PopupUtil.innerAlert(PopupType.INFO, "수행자 미지정", "수행자를 선택해 주세요.");
     }
     return state.isValidAssignee;
   },
   validateDeadline() {
-    state.isValidDeadline = state.missionType !== MissionType.SCHEDULE || inputValues.missionDeadline > 0;
+    inputValues.missionDeadline = ex(timePicker.value?.getValue()).num();
+    state.isValidDeadline = state.missionType.value === MissionType.SCHEDULE.value || inputValues.missionDeadline > 0;
     if (!state.isValidDeadline) {
       alertStore.alert(AlertType.INFO, "생성 가이드", "기한을 선택해 주세요.")
     }
@@ -166,10 +169,7 @@ const methods = {
 
   },
   checkAllInput() {
-    inputValues.assignee = ex(missionAssigneeInput.value?.getValue()).num();
-    inputValues.missionTitle = ex(missionTitleInput.value?.input.value).str();
     inputValues.missionContent = ex(missionContentInput.value?.input.value).str();
-    inputValues.missionDeadline = ex(timePicker.value?.getValue()).num();
     inputValues.scheduleTime = ex(scheduleTimeInput.value?.getValue()).num();
 
     state.isSubmittable = methods.validateMissionTitle() && methods.validateAssignee() && methods.validateDeadline()

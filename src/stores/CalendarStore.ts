@@ -31,6 +31,8 @@ export const useCalendarStore = defineStore('calendar', () => {
     const calendar = ref<Array<CalendarDate>>([]);
     const thisMonthKey = ref<string>('');
     const startOfCalendar = ref<number>(0);
+    const startOfMonth = ref<number>(0);
+    const endOfMonth = ref<number>(0);
     const endOfCalendar = ref<number>(0);
 
     function resetSelected() {
@@ -45,16 +47,18 @@ export const useCalendarStore = defineStore('calendar', () => {
         });
     }
 
-    async function fetchOwnCalendar(soc?: number, eoc?: number) {
+    async function fetchOwnCalendar(soc?: number, som?: number, eom?: number, eoc?: number) {
         startOfCalendar.value = soc ?? startOfCalendar.value;
+        startOfMonth.value = som ?? startOfMonth.value;
+        endOfMonth.value = eom ?? endOfMonth.value;
         endOfCalendar.value = eoc ?? endOfCalendar.value;
-        thisMonthKey.value = DateUtil.to(TemporalUtil.toMoment(startOfCalendar.value, true), DateUtil.YYYYMM);
+        thisMonthKey.value = DateUtil.to(TemporalUtil.toMoment(startOfMonth.value, true), DateUtil.YYYYMM);
 
         await call<RequestBody, ResponseBody>(Mission.GetMemberCalendar, new RequestBody(soc ?? startOfCalendar.value, eoc ?? endOfCalendar.value),
             (res) => {
                 const responseBody = ResponseBody.fromJson(res.data);
                 //일정
-                addMissions(responseBody.calendar, true);
+                addMissions(responseBody.calendar);
 
                 //공휴일
                 holidaysMap.value = CollectionUtil.toMap<string, CalendarHoliday>(
@@ -104,7 +108,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         });
     }
 
-    function addMissions(details: Array<MissionDetail>, needSetting = false) {
+    function addMissions(details: Array<MissionDetail>) {
         const missions = details.flatMap((detail) => CalendarMission.of(
             detail,
             startOfCalendar.value,
@@ -178,24 +182,9 @@ export const useCalendarStore = defineStore('calendar', () => {
                     });
             });
             scheduleMap.set(week, thisWeekSchedules);
-            if (calendarScheduleMap.value.has(thisMonthKey.value)) {
-                const weekSchedules = calendarScheduleMap.value.get(thisMonthKey.value);
-                if (weekSchedules?.has(week)) {
-                    const schedules = weekSchedules.get(week);
-                    if (schedules) {
-                        schedules.push(...thisWeekSchedules);
-                    }
-                } else {
-                    weekSchedules?.set(week, thisWeekSchedules);
-                }
-            } else {
-                calendarScheduleMap.value.set(thisMonthKey.value, new Map<number, Array<WeekScheduleGeometry>>());
-            }
         });
 
-        if (needSetting) {
-            calendarScheduleMap.value.set(thisMonthKey.value, scheduleMap);
-        }
+        calendarScheduleMap.value.set(thisMonthKey.value, scheduleMap);
     }
 
     return {

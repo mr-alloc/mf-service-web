@@ -21,12 +21,14 @@ import JoinRequests from "@/components/main/JoinRequests.vue";
 import FamilyInviteCode from "@/components/global/FamilyInviteCode.vue";
 import MissionDetail from "@/components/popup-form/MissionDetail.vue";
 import CreateAnniversary from "@/components/popup-form/CreateAnniversary.vue";
+import {GesturePlugin} from "@vueuse/gesture";
 
 const emitter = mitt();
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+app.use(GesturePlugin)
 //fontawesome regular icons
 library.add(far)
 library.add(fas)
@@ -45,6 +47,8 @@ app.component("JoinRequests", JoinRequests)
 app.component("FamilyInviteCode", FamilyInviteCode)
 app.component("MissionDetail", MissionDetail)
 app.component("CreateAnniversary", CreateAnniversary)
+
+
 app.provide("emitter", emitter)
 
 

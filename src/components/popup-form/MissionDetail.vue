@@ -71,7 +71,6 @@ import {useAlertStore} from "@/stores/AlertStore";
 import {call} from "@/utils/NetworkUtil";
 import * as ChangeFamilyMissionAttribute from "@/classes/api-spec/mission/ChangeFamilyMissionAttribute";
 import * as GetMissionDetail from "@/classes/api-spec/mission/GetMissionDetail";
-import {MissionDetail} from "@/classes/api-spec/mission/GetMissionDetail";
 import * as DeleteMission from "@/classes/api-spec/mission/DeleteMission";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
 import LocalAsset from "@/constant/LocalAsset";
@@ -82,9 +81,10 @@ import TemporalUtil from "../../utils/TemporalUtil";
 import ExpandableFeatureMenuButton from "@/components/global/ExpandableFeatureMenuButton.vue";
 import ExecutableFeature from "@/classes/api-spec/ExecutableFeature";
 import MissionType from "@/constant/MissionType";
+import type MissionDetail from "@/classes/MissionDetail";
 
 
-const emitter = inject("emitter");
+const emitter: any = inject("emitter");
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
 const alertStore = useAlertStore();
@@ -158,11 +158,11 @@ const methods = {
               case MissionStatus.IN_PROGRESS:
                 alertStore.guide("상태 변경", `미션이 시작되었습니다. 남은 시간 안에 완료할 수 있도록 노력하세요!`);
                 methods.fetchMissionDetail();
-                emitter.emit("drawMemberCalendar")
+                emitter.emit("drawCalendar")
                 break;
               case MissionStatus.COMPLETED:
                 alertStore.success("미션 클리어!", `"${state.detail.name}" 미션을 완료하였습니다.`);
-                emitter.emit("drawMemberCalendar")
+                emitter.emit("drawCalendar")
                 backgroundStore.returnGlobalPopup();
                 break;
               default:
@@ -179,7 +179,7 @@ const methods = {
             if (props.missionId === responseBody.missionId) {
               alertStore.success("미션 삭제", "미션을 삭제하였습니다.");
               backgroundStore.returnGlobalPopup();
-              emitter.emit("drawMemberCalendar");
+              emitter.emit("drawCalendar");
             } else {
               alertStore.warning("미션 삭제", "미션을 삭제하지 못했습니다.");
             }
@@ -195,7 +195,8 @@ const methods = {
     state.remainTimeStr = TemporalUtil.secondsToTimeStr(state.remainSeconds--);
   },
   countRemainTime() {
-    state.remainSeconds = state.detail.remainSeconds;
+    // state.remainSeconds = state.detail.remainSeconds;
+    state.remainSeconds = 0;
     const currentStatus = MissionStatus.fromCode(state.detail.status);
     methods.calcRemainTime(currentStatus);
     if (currentStatus === MissionStatus.IN_PROGRESS) {
