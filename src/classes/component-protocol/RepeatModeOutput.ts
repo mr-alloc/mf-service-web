@@ -8,12 +8,14 @@ export default class RepeatModeOutput implements IDatePickerOutput {
     private readonly _repeatOption: RepeatOption;
     private _repeatValues: Array<number>;
     private readonly _startTimestamp: number;
+    private _scheduleTime: number;
     private readonly _endTimestamp: number;
 
     constructor(repeatOption: RepeatOption, repeatValue: Array<number>, startTimestamp: number, endTimestamp: number) {
         this._repeatOption = repeatOption;
         this._repeatValues = repeatValue;
         this._startTimestamp = startTimestamp;
+        this._scheduleTime = 0;
         this._endTimestamp = endTimestamp;
     }
 
@@ -21,11 +23,8 @@ export default class RepeatModeOutput implements IDatePickerOutput {
         return this._scheduleMode;
     }
 
-
-    applyToEachSelected(callback: (each: number) => number): void {
-        if (this._repeatOption.value !== RepeatOption.WEEK.value) {
-            this._repeatValues = this._repeatValues.map(callback);
-        }
+    setScheduleTime(scheduleTime: number): void {
+        this._scheduleTime = scheduleTime;
     }
 
 
@@ -39,6 +38,7 @@ export default class RepeatModeOutput implements IDatePickerOutput {
             repeatOption: this._repeatOption.value,
             repeatValues: this._repeatValues,
             startAt: this._startTimestamp,
+            scheduleTime: this._scheduleTime,
             endAt: this._endTimestamp
         };
     }

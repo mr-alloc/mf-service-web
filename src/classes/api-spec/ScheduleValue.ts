@@ -8,14 +8,16 @@ export default class ScheduleValue {
     private readonly _id: number;
     private readonly _mode: ScheduleMode;
     private readonly _startAt: number;
+    private readonly _scheduleTime: number;
     private readonly _endAt: number;
     private readonly _repeatOption: number;
     private readonly _repeatValues: Array<number>;
 
-    constructor(id: number, mode: number, startAt: number, endAt: number, repeatOption: number, repeatValues: Array<number>) {
+    constructor(id: number, mode: number, startAt: number, scheduleTime: number, endAt: number, repeatOption: number, repeatValues: Array<number>) {
         this._id = id;
         this._mode = ScheduleMode.fromValue(mode)!;
         this._startAt = startAt;
+        this._scheduleTime = scheduleTime;
         this._endAt = endAt;
         this._repeatOption = repeatOption;
         this._repeatValues = repeatValues;
@@ -31,6 +33,10 @@ export default class ScheduleValue {
 
     get startAt(): number {
         return this._startAt;
+    }
+
+    get scheduleTime(): number {
+        return this._scheduleTime;
     }
 
     get endAt(): number {
@@ -50,6 +56,7 @@ export default class ScheduleValue {
             json.id,
             json.mode,
             json.startAt,
+            json.scheduleTime,
             json.endAt,
             json.repeatOption,
             json.repeatValues

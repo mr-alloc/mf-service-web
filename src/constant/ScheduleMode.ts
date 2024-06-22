@@ -34,6 +34,10 @@ export default class ScheduleMode {
         return others.every(other => other.value !== this.value);
     }
 
+    isRepeat() {
+        return this._value === ScheduleMode.REPEAT.value;
+    }
+
     toSelectOption() {
         return new SelectOption(String(this._value), this._alias);
     }
@@ -50,4 +54,5 @@ export default class ScheduleMode {
             ScheduleMode.REPEAT
         ];
     }
+
 }

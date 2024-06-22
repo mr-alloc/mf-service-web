@@ -14,7 +14,7 @@ $standard-dark-gray-in-white: #848383;
 $standard-clean-black: #151515;
 
 $soft-light-sky-blue: #f9feff;
-$soft-green: #3d9c3d;
+$soft-green: #207920;
 $soft-orange: #f5a623;
 $soft-red: #ce3737;
 
@@ -309,13 +309,33 @@ textarea.blink-input {
   0% {
     opacity: 0;
     transform: translateY(-10px);
-    height: 0;
   }
 
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.down-fade-smooth-enter-active {
+  animation: down-fade-smooth-in .2s;
+}
+
+.down-fade-smooth-leave-active {
+  animation: down-fade-smooth-in .2s reverse;
+}
+
+@keyframes down-fade-smooth-in {
+  0% {
+    opacity: 0;
+    height: 0;
+    transform: translateY(-10px);
+  }
+
+  100% {
+    opacity: 1;
     height: max-content;
+    transform: translateY(0);
   }
 }
 

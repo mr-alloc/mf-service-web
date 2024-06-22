@@ -1,31 +1,42 @@
 <script setup lang="ts">
 
+import {reactive, ref} from "vue";
+
+const textarea = ref<HTMLTextAreaElement | null>(null);
 const props = defineProps({
   label: String,
   id: String,
   name: String,
   placeHolder: String,
   isHold: Boolean,
-  defaultValue: String
+  defaultValue: String,
+  onInput: Function
+});
+
+const state = reactive({
+  value: props.defaultValue ?? ""
+});
+defineExpose({
+  getValue: () => state.value,
+  getInput: () => textarea.value
 });
 </script>
 
 <template>
   <div class="blink-textarea-container">
-    <label :for="props.id">{{ props.label }}</label>
+    <label v-if="props.label" :for="props.id">{{ props.label }}</label>
     <div class="text-area-wrapper">
-      <textarea class="blink-input" :id="props.id" :name="props.name" :placeholder="props.placeHolder"
+      <textarea class="blink-input" ref="textarea" :id="props.id" :name="props.name" :placeholder="props.placeHolder"
+                v-on:input="props.onInput" v-model="state.value"
                 :class="{ hold: props.isHold }"></textarea>
     </div>
   </div>
 </template>
-
 <style scoped lang="scss">
 @import "@/assets/main";
 
 .blink-textarea-container {
-  padding: 0 20px;
-  margin: 20px auto;
+  padding: 5px 8px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -35,15 +46,13 @@ const props = defineProps({
 
     textarea {
       width: 100%;
-      height: 150px;
-      padding: 12px 20px;
-      box-sizing: border-box;
-      border: 2px solid #ccc;
+      padding: 5px 8px;
+      border: 1px solid #ccc;
       outline: none !important;
       border-radius: 4px;
-      background-color: #f8f8f8;
-      font-size: 16px;
-      resize: none;
+      font-size: .92rem;
+      resize: vertical;
+      background-color: white;
     }
   }
 }

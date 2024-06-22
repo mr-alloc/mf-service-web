@@ -8,7 +8,7 @@
         <div class="day-position" v-for="day in props.days" :key="day.timestamp"
              v-on:click="() => calendarStore.selectDate(day)"
              :class="{ selected: calendarStore.timestamp === day.timestamp }">
-          <span class="specify-day-description"></span>
+          <span class="specify-day-description">{{ methods.getAnniversaryName(day.timestamp) }}</span>
         </div>
       </div>
       <TransitionGroup name="fade">
@@ -31,12 +31,13 @@
 <script setup lang="ts">
 import CalendarDay from "@/components/main/CalendarDay.vue";
 import CalendarDate from "@/classes/CalendarDate";
-import {ref} from "vue";
+import {inject, ref} from "vue";
 import {WeekScheduleGeometry} from "@/classes/WeekScheduleGeometry";
 import {UseElementSize} from "@vueuse/components";
 import {useCalendarStore} from "@/stores/CalendarStore";
-import PopupUtil from "@/utils/PopupUtil";
+import type CalendarAnniversary from "@/classes/CalendarAnniversary";
 
+const emitter: any = inject('emitter');
 const calendarStore = useCalendarStore();
 const scheduleArea = ref<HTMLDivElement | null>(null);
 const props = defineProps<{
@@ -47,11 +48,17 @@ const props = defineProps<{
 const methods = {
   clickSchedule(geometry: WeekScheduleGeometry, event: MouseEvent) {
     event.stopPropagation();
-    const mission = geometry.mission.mission;
-    PopupUtil.popupMissionDetail(mission);
+    const mission = geometry.mission;
 
+    emitter.emit('openMissionDetail', mission)
+
+  },
+  getAnniversaryName(timestamp: number) {
+    const anniversaries = calendarStore.anniversaryMap.get(timestamp) as CalendarAnniversary [] ?? [];
+    return anniversaries.map(anniversary => anniversary.name).join(' · ');
   }
 }
+
 </script>
 <style scoped lang="scss">
 @import "@/assets/main";
@@ -103,9 +110,14 @@ const methods = {
         }
 
         .specify-day-description {
+          text-wrap: no-wrap;
+          overflow: hidden;
           padding-left: 30px;
           width: 100%;
           height: 20px;
+          font-size: .84rem;
+          font-weight: bold;
+          color: black;
         }
       }
     }
@@ -118,6 +130,10 @@ const methods = {
 
       &:hover {
         cursor: pointer;
+
+        .schedule-item-title {
+          background-color: #4c4c4c;
+        }
       }
 
       .schedule-item-title {

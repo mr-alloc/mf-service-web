@@ -1,5 +1,7 @@
 <template>
-  <div class="each-day-item">
+  <div class="each-day-item" :class="{
+    anniversary: calendarStore.anniversaryMap.has(day.timestamp),
+  }">
     <div class="item-header">
       <span class="date" :class="{ today: state.today.format('MMD') === state.now.format('MMD') }">
         {{ methods.getCalendarDate() }}
@@ -11,12 +13,12 @@
 </template>
 <script setup lang="ts">
 import TemporalUtil from "@/utils/TemporalUtil";
-import {inject, reactive} from "vue";
+import {onMounted, reactive} from "vue";
 import moment from "moment-timezone";
 import type CalendarDate from "@/classes/CalendarDate";
 import {useCalendarStore} from "@/stores/CalendarStore";
+import type CalendarAnniversary from "@/classes/CalendarAnniversary";
 
-const emitter: any = inject('emitter');
 const calendarStore = useCalendarStore();
 const props = defineProps<{
   timestamp: number,
@@ -26,16 +28,19 @@ const props = defineProps<{
 const state = reactive({
   today: TemporalUtil.toMoment(props.timestamp, true),
   now: moment(),
+  anniversary: [] as CalendarAnniversary [],
 });
 
 const methods = {
   getCalendarDate() {
-    return state.today.day() === 1
+    return state.today.date() === 1
         ? state.today.format('M/D')
         : state.today.format('D');
 
   }
 }
+onMounted(() => {
+})
 </script>
 <style scoped lang="scss">
 @import "@/assets/main";
@@ -55,6 +60,10 @@ const methods = {
 
   &:hover {
     cursor: pointer;
+  }
+
+  &.anniversary {
+    background-color: #D8F4D7;
   }
 
   .item-header {

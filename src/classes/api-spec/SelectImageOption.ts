@@ -1,4 +1,5 @@
 import LocalAsset from "@/constant/LocalAsset";
+import type {IProfileMember} from "@/stores/ProfileMemberStore";
 
 export default class SelectImageOption {
 
@@ -28,8 +29,12 @@ export default class SelectImageOption {
         return new SelectImageOption(0, "", LocalAsset.DEFAULT_NO_IMAGE);
     }
 
-    static of(id: number, name: string, image: string) {
+    static of(id: number, name: string, image: string): SelectImageOption {
         return new SelectImageOption(id, name, image);
+    }
+
+    static ofProfileMember(profileMember: IProfileMember) {
+        return new SelectImageOption(0, profileMember.nickname, profileMember.profile);
     }
 }
 

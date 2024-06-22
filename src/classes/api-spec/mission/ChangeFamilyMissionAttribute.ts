@@ -1,3 +1,5 @@
+import MissionDetail from "@/classes/MissionDetail";
+
 export class RequestBody {
     readonly missionId: number;
     readonly type: number | null;
@@ -36,41 +38,17 @@ export class RequestBody {
 
 export class ResponseBody {
 
-    private readonly _type: number;
-    private readonly _assignee?: number;
-    private readonly _title: string;
-    private readonly _status: number;
-    private readonly _deadline?: number;
+    private readonly _changed: MissionDetail;
 
-    constructor(type: number, assignee: number, title: string, status: number, deadline: number) {
-        this._type = type;
-        this._assignee = assignee;
-        this._title = title;
-        this._status = status
-        this._deadline = deadline;
+    constructor(changed: MissionDetail) {
+        this._changed = changed;
     }
 
-    get type(): number {
-        return this._type;
-    }
-
-    get assignee(): number | undefined {
-        return this._assignee;
-    }
-
-    get title(): string {
-        return this._title;
-    }
-
-    get status(): number {
-        return this._status;
-    }
-
-    get deadline(): number | undefined {
-        return this._deadline;
+    get changed(): MissionDetail {
+        return this._changed;
     }
 
     static fromJson(json: any): ResponseBody {
-        return new ResponseBody(json.type, json.assignee, json.title, json.status, json.deadline);
+        return new ResponseBody(MissionDetail.fromJson(json.changed));
     }
 }

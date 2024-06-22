@@ -80,7 +80,7 @@ function popupMissionDetail(mission: CalendarMission) {
     backgroundStore.useGlobalPopup(missionDetailPopup);
 }
 
-function confirm(title: string, message: string, ifConfirm: () => void) {
+function confirm(title: string, message: string, ifConfirm: () => void, ifCancel?: () => void) {
     const backgroundStore = useBackgroundStore();
 
     const confirmPopup = new CurrentPopup(PopupType.NORMAL, title, message)
@@ -89,6 +89,7 @@ function confirm(title: string, message: string, ifConfirm: () => void) {
             backgroundStore.returnGlobalPopup()
         })
         .addButton("취소", () => {
+            ifCancel && ifCancel();
             backgroundStore.returnGlobalPopup()
         });
 

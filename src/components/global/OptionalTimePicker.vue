@@ -221,6 +221,7 @@ onMounted(() => {
             border-radius: 5px;
             border: 1px solid $standard-light-gray-in-white;
             width: max-content;
+            transition: height 0s;
 
 
             .status-item {

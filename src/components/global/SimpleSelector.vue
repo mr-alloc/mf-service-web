@@ -110,6 +110,7 @@ onMounted(() => {
     width: max-content;
     padding: 3px 8px;
     border-radius: 5px;
+    border: 1px solid transparent;
   }
 
   .select-item-area {

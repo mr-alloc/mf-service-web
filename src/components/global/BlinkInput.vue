@@ -1,6 +1,10 @@
 <template>
   <div class="input-wrapper"
-       :class="[{ hold: props.isHold }, { warning: state.isWarning }, { correct: !props.noMark && state.isCorrect }]">
+       :class="{
+          hold: props.isHold,
+          warning: state.isWarning,
+          correct: !props.noMark && state.isCorrect
+       }">
     <div class="input-area">
       <label v-show="props.label" :for="props.id">{{ props.label }}</label>
       <div class="blink-input-pair">

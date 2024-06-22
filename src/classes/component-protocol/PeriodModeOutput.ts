@@ -4,12 +4,14 @@ import ScheduleMode from "@/constant/ScheduleMode";
 export default class PeriodModeOutput implements IDatePickerOutput {
 
     private readonly _scheduleMode: ScheduleMode = ScheduleMode.PERIOD
-    private _startTimestamp: number;
+    private readonly _startTimestamp: number;
+    private _scheduleTime: number;
     private readonly _endTimestamp: number;
 
     constructor(startTimestamp: number, endTimestamp: number) {
         this._startTimestamp = startTimestamp;
         this._endTimestamp = endTimestamp;
+        this._scheduleTime = 0;
     }
 
     get startTimestamp(): number {
@@ -24,14 +26,16 @@ export default class PeriodModeOutput implements IDatePickerOutput {
         return this._scheduleMode;
     }
 
-    applyToEachSelected(callback: (each: number) => number): void {
-        this._startTimestamp = callback(this._startTimestamp);
+    setScheduleTime(scheduleTime: number): void {
+        this._scheduleTime = scheduleTime;
     }
+
 
     toJSON() {
         return {
             scheduleMode: this._scheduleMode.value,
             startAt: this._startTimestamp,
+            scheduleTime: this._scheduleTime,
             endAt: this._endTimestamp
         };
     }

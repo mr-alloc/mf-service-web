@@ -4,7 +4,7 @@ export default interface IDatePickerOutput {
 
     get scheduleMode(): ScheduleMode
 
-    applyToEachSelected(callback: (each: number) => number): void;
+    setScheduleTime(scheduleTime: number): void;
 }
 
 

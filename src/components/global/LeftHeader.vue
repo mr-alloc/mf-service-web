@@ -13,9 +13,6 @@
     <CollapsibleMenu title="패밀리" :icon="['fas', 'users']" allocated-path="/families"
                      v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
                      :is-current-menu="leftMenuStore.state.activeFamiliesMenu"/>
-    <CollapsibleMenu title="미션" :icon="['fas', 'lightbulb']" allocated-path="/missions"
-                     v-if="memberInfoStore.getCurrentAccountRole().isGrantedFrom(AccountRole.MEMBER)"
-                     :is-current-menu="leftMenuStore.state.activeMissionMenu"/>
     <SimpleNotifier/>
   </header>
 </template>

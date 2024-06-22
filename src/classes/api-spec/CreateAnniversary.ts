@@ -11,6 +11,10 @@ export class RequestBody {
         this._scheduleInfo = scheduleInfo;
     }
 
+    get name(): string {
+        return this._name;
+    }
+
     toJSON() {
         return {
             name: this._name,

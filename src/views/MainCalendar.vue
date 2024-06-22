@@ -1,26 +1,34 @@
 <template>
   <div class="calendar-container">
-    <div class="calendar-title">
-      <span class="title-text">{{ `${state.localMonth.format("YYYY년 MM월")} 달력` }}</span>
-      <div class="calendar-control">
-        <button class="control-button" type="button" v-on:click="methods.setMonth(-1)">
-          <FontAwesomeIcon icon="caret-left"/>
-        </button>
-        <button class="control-button" type="button" v-on:click="methods.setMonth(+1)">
-          <FontAwesomeIcon icon="caret-right"/>
-        </button>
+    <div class="calendar-wrapper">
+      <div class="calendar-title">
+        <span class="title-text">{{ `${state.localMonth.format("YYYY년 MM월")} 달력` }}</span>
+        <div class="calendar-control">
+          <button class="control-button" type="button" v-on:click="methods.setMonth(-1)">
+            <FontAwesomeIcon icon="caret-left"/>
+          </button>
+          <button class="control-button" type="button" v-on:click="methods.setMonth(+1)">
+            <FontAwesomeIcon icon="caret-right"/>
+          </button>
+        </div>
+      </div>
+      <div class="day-of-weeks">
+        <div class="day" v-for="day in DayOfWeek.values()" :key="day.value">{{ day.alias }}</div>
+      </div>
+      <div class="week-wrapper">
+        <CalendarWeek :days="days" :key="week"
+                      v-for="([week, days]) in state.calendarWeeks.entries()"
+                      :week="week"
+                      :geometries="calendarStore.calendarScheduleMap.get(state.thisMonthKey)?.get(week) ?? []"
+        />
       </div>
     </div>
-    <div class="day-of-weeks">
-      <div class="day" v-for="day in DayOfWeek.values()" :key="day.value">{{ day.alias }}</div>
-    </div>
-    <div class="week-wrapper">
-      <CalendarWeek :days="days" :key="week"
-                    v-for="([week, days]) in state.calendarWeeks.entries()"
-                    :week="week"
-                    :geometries="calendarStore.calendarScheduleMap.get(state.thisMonthKey)?.get(week) ?? []"
-      />
-    </div>
+    <Transition name="fade">
+      <div class="component-control-panel" v-show="currentComponent">
+        <Component v-if="currentComponent" :is="currentComponent?.componentName"
+                   v-bind="currentComponent?.componentProps"/>
+      </div>
+    </Transition>
     <Transition name="fade">
       <div class="calendar-controller" v-show="calendarStore.timestamp > 0">
         <ul class="calendar-feature-group">
@@ -28,15 +36,15 @@
             <FontAwesomeIcon :icon="faPlus"/>
             <span class="description">미션추가</span>
           </li>
-          <li class="feature-item">
-            <FontAwesomeIcon :icon="faRecycle"/>
-            <span class="description">루틴추가</span>
-          </li>
+          <!--          <li class="feature-item">-->
+          <!--            <FontAwesomeIcon :icon="faRecycle"/>-->
+          <!--            <span class="description">루틴추가</span>-->
+          <!--          </li>-->
           <li class="feature-item" v-on:click="methods.createAnniversary">
             <FontAwesomeIcon :icon="faCalendarDay"/>
             <span class="description">휴가/기념일 지정</span>
           </li>
-          <li class="feature-item" v-on:click="calendarStore.resetSelected">
+          <li class="feature-item" v-on:click="methods.resetComponent">
             <FontAwesomeIcon :icon="faRectangleXmark"/>
             <span class="description">선택취소</span>
           </li>
@@ -49,23 +57,23 @@
 import CalendarWeek from "@/components/main/CalendarWeek.vue";
 import DateUtil from "@/utils/DateUtil";
 import moment from "moment-timezone";
-import {inject, onMounted, reactive} from "vue";
+import {inject, onMounted, reactive, ref} from "vue";
 import DayOfWeek from "@/constant/DayOfWeek";
 import {useCalendarStore} from "@/stores/CalendarStore";
 import CalendarDate from "@/classes/CalendarDate";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
-import {faRecycle} from "@fortawesome/free-solid-svg-icons/faRecycle";
 import {faCalendarDay} from "@fortawesome/free-solid-svg-icons/faCalendarDay";
 import {faRectangleXmark} from "@fortawesome/free-regular-svg-icons/faRectangleXmark";
-import PopupUtil from "@/utils/PopupUtil";
+import ComponentInfo from "@/classes/ComponentInfo";
+import type CalendarWeekMission from "@/classes/CalendarWeekMission";
 
 
 const emitter: any = inject('emitter');
 const calendarStore = useCalendarStore();
+const currentComponent = ref<ComponentInfo | null>(null);
 const state = reactive({
   calendarWeeks: new Map<number, Array<CalendarDate>>(),
-  selected: 0,
   startOfCalendar: 0,
   startOfMonth: 0,
   endOfMonth: 0,
@@ -76,10 +84,18 @@ const state = reactive({
 });
 const methods = {
   createAnniversary(event: MouseEvent) {
-    PopupUtil.popupCreateAnniversary(emitter);
+    if (currentComponent.value?.componentName === 'CreateAnniversary') {
+      currentComponent.value = null;
+      return;
+    }
+    currentComponent.value = new ComponentInfo('CreateAnniversary', {timestamp: calendarStore.timestamp})
   },
-  createMission(day: CalendarDate) {
-    PopupUtil.popupCreateMission(emitter, calendarStore.timestamp);
+  createMission(event: PointerEvent) {
+    if (currentComponent.value?.componentName === 'CreateMission') {
+      currentComponent.value = null;
+      return;
+    }
+    currentComponent.value = new ComponentInfo('CreateMission', {timestamp: calendarStore.timestamp})
   },
   setMonth(month: number) {
     state.localMonth.add(month, 'month');
@@ -100,27 +116,33 @@ const methods = {
     calendarStore.fetchOwnCalendar(state.startOfCalendar, state.startOfMonth, state.endOfMonth, state.endOfCalendar);
     //기념일
     calendarStore.fetchOwnAnniversaries();
+    currentComponent.value = null;
   },
   fetchCalenderSchedules() {
     this.fetchCalendar();
     this.fetchMissionAndAnniversary();
+  },
+  resetComponent() {
+    currentComponent.value = null;
+    calendarStore.resetSelected();
   }
 }
 onMounted(() => {
   methods.fetchCalendar();
   methods.fetchMissionAndAnniversary();
 
-  emitter.on('selectDate', (selectedDate: CalendarDate) => {
-    //재클릭시 초기화
-    if (selectedDate.timestamp === state.selected) {
-      state.selected = 0;
-      return;
-    }
-    state.selected = selectedDate.timestamp;
-  });
-
   emitter.on('drawCalendar', () => {
     methods.fetchMissionAndAnniversary();
+  });
+
+  emitter.on('resetComponent', () => {
+    currentComponent.value = null;
+  });
+
+  emitter.on('openMissionDetail', (mission: CalendarWeekMission) => {
+    currentComponent.value = new ComponentInfo('MissionDetail', {
+      mission: mission,
+    });
   });
 })
 </script>
@@ -128,75 +150,87 @@ onMounted(() => {
 @import "@/assets/main";
 
 .calendar-container {
-  display: flex;
   height: 100%;
-  background-color: #fff;
-  flex-direction: column;
-  user-select: none;
+  display: flex;
+  flex-direction: row;
 
-  .calendar-title {
-    margin: 10px 0 0;
-    height: 60px;
-    flex-shrink: 0;
-    padding: 0 20px;
+  .calendar-wrapper {
+    flex-grow: 1;
+    height: 100%;
     display: flex;
-    flex-direction: row;
+    background-color: #fff;
+    flex-direction: column;
+    user-select: none;
 
-    .title-text {
-      font-size: 2rem;
-      font-weight: bold;
+    .calendar-title {
+      margin: 10px 0 0;
+      height: 60px;
       flex-shrink: 0;
-    }
-
-    .calendar-control {
+      padding: 0 20px;
       display: flex;
       flex-direction: row;
-      justify-content: flex-end;
-      margin-top: 10px;
-      flex-grow: 1;
-      align-items: center;
 
-      .control-button {
-        margin-left: 10px;
-        padding: 3px 10px;
-        border-radius: 5px;
-        transition: $duration;
-        cursor: pointer;
-        height: 30px;
+      .title-text {
+        font-size: 2rem;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
 
-        &:hover {
-          background-color: rgb(0, 0, 0, .2);
+      .calendar-control {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        margin-top: 10px;
+        flex-grow: 1;
+        align-items: center;
+
+        .control-button {
+          margin-left: 10px;
+          padding: 3px 10px;
+          border-radius: 5px;
+          transition: $duration;
+          cursor: pointer;
+          height: 30px;
+
+          &:hover {
+            background-color: rgb(0, 0, 0, .2);
+          }
         }
       }
     }
-  }
 
-  .day-of-weeks {
-    display: flex;
-    flex-direction: row;
-    padding: 5px 0;
+    .day-of-weeks {
+      display: flex;
+      flex-direction: row;
+      padding: 5px 0;
 
-    .day {
-      flex: 1 1 0%;
-      font-weight: bold;
-      text-align: center;
+      .day {
+        width: 100%;
+        font-weight: bold;
+        text-align: center;
+      }
+    }
+
+    .week-wrapper {
+      margin: 0;
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      flex-direction: column;
+
     }
   }
 
-  .week-wrapper {
-    margin: 0;
-    overflow: hidden;
-    -webkit-box-flex: 1;
-    -webkit-flex: 1 1 0%;
-    flex: 1 1 0%;
+  .component-control-panel {
+    flex-shrink: 0;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    flex-direction: column;
-
   }
 
+
   .calendar-controller {
+    user-select: none;
     position: fixed;
     display: flex;
     flex-direction: column;

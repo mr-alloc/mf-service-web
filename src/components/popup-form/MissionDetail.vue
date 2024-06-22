@@ -1,51 +1,13 @@
 <template>
   <div class="mission-detail-container">
-    <div class="detail-header-wrapper">
+    <div class="detail-header-wrapper" v-if="state.detail">
       <ModifiableTitle :title="state.detail.name" :before-change="methods.modifyTitle"/>
       <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features"/>
     </div>
-    <ul class="detail-specifications-group">
-      <li class="detail-pair" v-if="MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
-        <div class="detail-title">
-          <span>미션 종류</span>
-        </div>
-        <div class="detail-content">
-          <BlinkSelect id="mission-type" :options="state.typeOptions" :before-change="methods.selectType"
-                       :current-index="state.typeOptions.findIndex(option => option.value === `${state.detail?.type}`)"/>
-        </div>
-      </li>
-      <li class="detail-pair" v-if="MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
-        <div class="detail-title">
-          <span>미션 상태</span>
-        </div>
-        <div class="detail-content">
-          <SimpleRadio id="mission-status" :options="state.statusOptions" :before-change="methods.selectStatus"
-                       :current-index="state.statusOptions.findIndex(option => option.value === `${state.detail?.status ?? 0}`)"/>
-        </div>
-      </li>
-      <li class="detail-pair"
-          v-if="ownFamiliesStore.hasSelectFamily && MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
-        <div class="detail-title">
-          <span>미션 수행자</span>
-        </div>
-        <div class="detail-content">
-          <SimpleSelector default-option-name="멤버 선택" :before-change="methods.selectMember" id="assignee"
-                          :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"
-                          :current-index="state.members.findIndex(member => member.id === state.detail.assignee)"/>
-        </div>
-      </li>
-      <li class="detail-pair"
-          v-if="ownFamiliesStore.hasSelectFamily && MissionStatus.fromCode(state.detail.status).isNotIn(MissionStatus.ALWAYS)">
-        <div class="detail-title">
-          <span>미션 생성자</span>
-        </div>
-        <div class="detail-content">
-          <ImageNicknamePair
-              :option="state.members.find(member => member.id === state.detail.reporter) ?? SelectImageOption.of(0, '', LocalAsset.DEFAULT_USER_PROFILE)"/>
-        </div>
-      </li>
-    </ul>
-    <div class="deadline-timer" v-if="MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
+    <MissionState v-if="state.detail" :detail="state.detail" :status="state.status" :members="state.members"/>
+    <MissionComments v-if="state.detail" :mission="props.mission" :detail="state.detail"/>
+    <div class="deadline-timer"
+         v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
       <div class="timer-count-wrapper">
         <span class="guide-text signature-shiny">남은 시간</span>
         <span class="remain-time">{{ state.remainTimeStr }}</span>
@@ -54,18 +16,11 @@
         <span class="progress-fuse-wire"></span>
       </div>
     </div>
-    <BlinkTextArea id="description" name="description" label="설명" default-value="무슨일을 하든 돕기"/>
   </div>
 </template>
 <script setup lang="ts">
-import {inject, onMounted, reactive} from "vue";
+import {inject, onBeforeMount, reactive} from "vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
-import SimpleSelector from "@/components/global/SimpleSelector.vue";
-import SelectImageOption from "@/classes/api-spec/SelectImageOption";
-import ImageNicknamePair from "@/components/global/ImageNicknamePair.vue";
-import SelectOption from "@/classes/SelectOption";
-import SimpleRadio from "@/components/global/SimpleRadio.vue";
-import BlinkTextArea from "@/components/global/BlinkTextArea.vue";
 import PopupUtil from "@/utils/PopupUtil";
 import {useAlertStore} from "@/stores/AlertStore";
 import {call} from "@/utils/NetworkUtil";
@@ -73,7 +28,6 @@ import * as ChangeFamilyMissionAttribute from "@/classes/api-spec/mission/Change
 import * as GetMissionDetail from "@/classes/api-spec/mission/GetMissionDetail";
 import * as DeleteMission from "@/classes/api-spec/mission/DeleteMission";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import LocalAsset from "@/constant/LocalAsset";
 import Mission from "@/constant/api-meta/Mission";
 import MissionStatus from "@/constant/MissionStatus";
 import ModifiableTitle from "@/components/global/ModifiableTitle.vue";
@@ -82,43 +36,35 @@ import ExpandableFeatureMenuButton from "@/components/global/ExpandableFeatureMe
 import ExecutableFeature from "@/classes/api-spec/ExecutableFeature";
 import MissionType from "@/constant/MissionType";
 import type MissionDetail from "@/classes/MissionDetail";
+import MissionState from "@/components/mission/MissionState.vue";
+import MissionComments from "@/components/mission/MissionComments.vue";
+import CalendarWeekMission from "@/classes/CalendarWeekMission";
 
 
 const emitter: any = inject("emitter");
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
 const alertStore = useAlertStore();
-const props = defineProps({
-  missionId: Number
-});
+const props = defineProps<{
+  mission: CalendarWeekMission
+}>();
 
 const methods = {
-  selectType(option: SelectOption, afterChange: () => void) {
-    PopupUtil.innerConfirm("미션종류 변경", `${option.text}(으)로 변경 하시겠습니까?`, () => {
-      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forType(props.missionId!, parseInt(option.value));
-      call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody, (response) => {
-        const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
-        if (responseBody.type === parseInt(option.value)) {
-          alertStore.success("미션 종류 변경", `미션 종류가 변경 되었어요.`);
-          afterChange();
-        } else {
-          alertStore.warning("미션 종류 변경", `미션 종류 변경에 실패했어요.`);
-        }
-      });
-    });
-
-  },
   modifyTitle(title: string, afterChange: (isRollback: boolean) => void) {
-    if (state.detail.name === title) {
+    if (state.detail?.name === title) {
       afterChange(false);
       return;
     }
-    PopupUtil.innerConfirm("미션명 변경", `미션 이름을 변경하시겠습니까?`, () => {
-      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forName(props.missionId!, title);
+    PopupUtil.confirm("미션명 변경", `미션 이름을 "${title}"으로 변경하시겠습니까?`, () => {
+      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forName(props.mission.mission.id, title);
       call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody, (response) => {
         const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
-        if (responseBody.title === title) {
+        const changed = responseBody.changed;
+        console.log(`changed: ${changed.name}, title: ${title} = ${changed.name === title}`);
+        if (changed.name === title) {
           alertStore.success("이름 변경", '미션명이 변경 되었어요.');
+          state.detail = responseBody.changed;
+          emitter.emit("drawCalendar");
           afterChange(false);
         } else {
           alertStore.warning("이름 변경", `미션명 변경에 실패했어요.`);
@@ -127,59 +73,15 @@ const methods = {
       })
     }, () => afterChange(true));
   },
-  selectMember(member: SelectImageOption, afterChange: () => void) {
-    PopupUtil.innerConfirm("미션 수행자 변경", `${member.name}님을 미션 수행자로 지정하시겠습니까?`, () => {
-      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forAssignee(props.missionId!, member.id);
-
-      call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody, (response) => {
-        const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
-        if (responseBody.assignee === member.id) {
-          alertStore.success("수행자 변경", `${member.name}님을 미션 수행자로 지정하였습니다.`);
-          afterChange();
-        } else {
-          alertStore.warning("수행자 변경", `${member.name}님을 미션 수행자로 지정하지 못했습니다.`);
-        }
-      });
-    });
-  },
-  selectStatus(option: SelectOption, afterChange: () => void) {
-    PopupUtil.innerConfirm("미션 상태 변경", `${option.text}(으)로 변경하시겠습니까?`, () => {
-      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forStatus(props.missionId!, Number(option.value));
-      call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody,
-          (response) => {
-            const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
-            const statusCode = responseBody.status;
-            const status = MissionStatus.fromCode(statusCode);
-            switch (status) {
-              case MissionStatus.CREATED:
-                alertStore.info("미션 초기화", "미션이 사직 전 상태로 변경되었어요.")
-                methods.fetchMissionDetail();
-                break;
-              case MissionStatus.IN_PROGRESS:
-                alertStore.guide("상태 변경", `미션이 시작되었습니다. 남은 시간 안에 완료할 수 있도록 노력하세요!`);
-                methods.fetchMissionDetail();
-                emitter.emit("drawCalendar")
-                break;
-              case MissionStatus.COMPLETED:
-                alertStore.success("미션 클리어!", `"${state.detail.name}" 미션을 완료하였습니다.`);
-                emitter.emit("drawCalendar")
-                backgroundStore.returnGlobalPopup();
-                break;
-              default:
-                break;
-            }
-          });
-    });
-  },
   deleteMission(event?: Event) {
     PopupUtil.innerConfirm("미션 삭제", "미션을 삭제하시겠습니까?", () => {
-      call<any, DeleteMission.ResponseBody>(Mission.DeleteMission, {missionId: props.missionId},
+      call<any, DeleteMission.ResponseBody>(Mission.DeleteMission, {missionId: props.mission.mission.id},
           (response) => {
             const responseBody = DeleteMission.ResponseBody.fromJson(response.data);
-            if (props.missionId === responseBody.missionId) {
+            if (props.mission.mission.id === responseBody.missionId) {
               alertStore.success("미션 삭제", "미션을 삭제하였습니다.");
-              backgroundStore.returnGlobalPopup();
               emitter.emit("drawCalendar");
+              emitter.emit("resetComponent");
             } else {
               alertStore.warning("미션 삭제", "미션을 삭제하지 못했습니다.");
             }
@@ -197,21 +99,25 @@ const methods = {
   countRemainTime() {
     // state.remainSeconds = state.detail.remainSeconds;
     state.remainSeconds = 0;
-    const currentStatus = MissionStatus.fromCode(state.detail.status);
+    const currentStatus = MissionStatus.fromCode(state.status);
     methods.calcRemainTime(currentStatus);
     if (currentStatus === MissionStatus.IN_PROGRESS) {
       setInterval(methods.calcRemainTime, 1000);
     }
   },
-  fetchMissionDetail() {
-    call<any, GetMissionDetail.ResponseBody>(Mission.GetMissionDetail, {missionId: props.missionId}, (response) => {
+  async fetchMissionDetail() {
+    await call<any, GetMissionDetail.ResponseBody>(Mission.GetMissionDetail, {missionId: props.mission.mission.id}, (response) => {
       const responseBody = GetMissionDetail.ResponseBody.fromJson(response.data);
       state.detail = responseBody.mission;
+      const missionState = state.detail.states.find(state => state.startAt === props.mission.startAt);
+      state.stateId = missionState?.id ?? 0;
+      state.status = missionState?.status ?? 0;
       backgroundStore.readyPopup();
       methods.countRemainTime();
     });
   }
 }
+
 const state = reactive({
   members: ownFamiliesStore.members.map(member => member.toSelectImageOption()),
   statusOptions: MissionStatus.values().filter(MissionStatus.NOT_DELETED_FILTER).map(MissionStatus.toSelectOption),
@@ -219,19 +125,20 @@ const state = reactive({
   features: [
     new ExecutableFeature('삭제', methods.deleteMission)
   ],
-  detail: {} as MissionDetail,
+  detail: null as MissionDetail | null,
+  stateId: 0,
+  status: 0,
   remainSeconds: 0,
   remainTimeStr: '00:00:00'
 });
-onMounted(() => {
-  methods.fetchMissionDetail();
+onBeforeMount(async () => {
+  await methods.fetchMissionDetail();
 });
 </script>
 <style scoped lang="scss">
 @import "@/assets/main";
 
 .mission-detail-container {
-  width: 568px;
 
   .detail-header-wrapper {
     display: flex;

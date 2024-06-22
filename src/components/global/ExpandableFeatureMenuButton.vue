@@ -59,7 +59,7 @@ const methods = {
 
   .expandable-features {
     position: absolute;
-    left: 3px;
+    right: 3px;
     bottom: -25px;
     border: 1px solid $standard-gray-in-white;
     border-radius: 5px;

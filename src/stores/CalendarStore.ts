@@ -26,7 +26,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     //NOTICE: Map<yyyyMM, Map<week, Array<스케쥴 목록>>>
     const calendarScheduleMap = ref<Map<string, Map<number, Array<WeekScheduleGeometry>>>>(new Map<string, Map<number, Array<WeekScheduleGeometry>>>())
     const holidaysMap = ref<Map<string, CalendarHoliday>>(new Map<string, CalendarHoliday>());
-    const anniversaryMap = ref<Map<string, Array<CalendarAnniversary>>>(new Map<string, Array<CalendarAnniversary>>());
+    const anniversaryMap = ref<Map<number, Array<CalendarAnniversary>>>(new Map<number, Array<CalendarAnniversary>>());
 
     const calendar = ref<Array<CalendarDate>>([]);
     const thisMonthKey = ref<string>('');
@@ -77,9 +77,7 @@ export const useCalendarStore = defineStore('calendar', () => {
 
                 //기념일
                 anniversaryMap.value = new Map();
-                responseBody.anniversaries.forEach((anniversary) => {
-                    addAnniversary(anniversary);
-                });
+                responseBody.anniversaries.forEach(addAnniversary);
             });
     }
 
@@ -96,15 +94,23 @@ export const useCalendarStore = defineStore('calendar', () => {
     function addAnniversary(value: AnniversaryValue) {
         const anniversaries = CalendarAnniversary.of(value, startOfCalendar.value, endOfCalendar.value);
         anniversaries.forEach((anniversary) => {
-            const date = anniversary.date;
-            if (anniversaryMap.value.has(date)) {
-                const anniversaries = anniversaryMap.value.get(date);
-                if (anniversaries) {
-                    anniversaries.push(anniversary);
+            const period = anniversary.period;
+            const days = TemporalUtil.getDiffDays(period.startAt, period.endAt);
+            const localDaysArray = TemporalUtil.getLocalDaysArray(period.startAt, days);
+            const originName = anniversary.name;
+            localDaysArray.map((date, index) => {
+                if (localDaysArray.length > 1) {
+                    anniversary.applyName(`${originName} ${index + 1}/${localDaysArray.length}`);
                 }
-            } else {
-                anniversaryMap.value.set(date, [anniversary]);
-            }
+                if (anniversaryMap.value.has(date.timestamp)) {
+                    const anniversaries = anniversaryMap.value.get(date.timestamp);
+                    if (anniversaries) {
+                        anniversaries.push(anniversary);
+                    }
+                } else {
+                    anniversaryMap.value.set(date.timestamp, [anniversary]);
+                }
+            });
         });
     }
 

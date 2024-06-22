@@ -1,7 +1,9 @@
 <template>
   <div class="modifiable-title-container">
-    <input class="blink-input" ref="input" type="text"
-           :value="state.value ?? props.title" v-on:focusout="methods.focusOut" :disabled="state.isHold"/>
+    <div class="input-wrapper">
+      <input class="blink-input" ref="input" type="text"
+             :value="state.value ?? props.title" v-on:focusout="methods.focusOut" :disabled="state.isHold"/>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -43,20 +45,29 @@ const methods = {
   display: flex;
   align-items: center;
   width: 100%;
+  padding: 10px 20px;
 
-  input {
-    font-size: 1.5rem;
-    font-weight: bold;
-    border: none;
-    background-color: transparent;
-    color: black;
 
-    &:hover {
-      cursor: default;
-    }
+  .input-wrapper {
+    width: 100%;
 
-    &:focus {
-      cursor: text;
+
+    input {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+      background-color: white;
+      transition: $duration;
+
+      &:hover {
+        background-color: $standard-light-gray-in-white !important;
+        cursor: pointer;
+      }
+
+      &:focus {
+        background-color: white !important;
+        cursor: text;
+      }
     }
   }
 }

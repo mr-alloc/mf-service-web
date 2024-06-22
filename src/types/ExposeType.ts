@@ -24,3 +24,8 @@ export type TemporalUnitIndicatorExpose = {
 export type TimePickerExpose = {
     getValue: () => number,
 }
+
+export type GetStringValueExpose = {
+    getValue: () => string,
+    getInput: () => HTMLTextAreaElement
+}

@@ -293,6 +293,7 @@ defineExpose({
   extractResult: methods.extractResult
 })
 onMounted(() => {
+  console.log(`timestamp: ${props.timestamp}`);
   const momentValue = TemporalUtil.toMoment(props.timestamp, true);
   state.calendarDays = DateUtil.getCalendarDays(momentValue);
   state.selected.add(props.timestamp);
@@ -320,6 +321,7 @@ onMounted(() => {
 
   .mini-calendar-area {
     padding: 5px 8px;
+    transition: .2s ease 0ms;
 
     .schedule-mode-group {
       display: flex;
@@ -406,12 +408,6 @@ onMounted(() => {
           }
         }
 
-        &.contain {
-          .day-text {
-            background-color: $signature-purple;
-            color: white;
-          }
-        }
 
         &.today {
           .day-text {
@@ -421,9 +417,15 @@ onMounted(() => {
             color: black;
 
             &:hover {
-              background-color: white;
               cursor: pointer;
             }
+          }
+        }
+
+        &.contain {
+          .day-text {
+            background-color: $signature-purple;
+            color: white;
           }
         }
 

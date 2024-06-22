@@ -77,7 +77,6 @@ onMounted(() => {
 
 $option-height: 25px;
 .blink-select-container {
-  width: 100%;
   padding: 0;
 
   .option-selector {

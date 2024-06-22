@@ -54,6 +54,10 @@ export default class MissionDetail {
         return this._assignee;
     }
 
+    findState(timestamp: number): MissionState | undefined {
+        return this._states?.find((state) => state.startAt <= timestamp && timestamp < state.endAt);
+    }
+
     static fromJson(json: any): MissionDetail {
         return new MissionDetail(
             json.id,

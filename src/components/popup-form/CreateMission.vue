@@ -23,6 +23,14 @@
         <OptionalTimePicker ref="scheduleTimeInput" id="schedule-time" name="scheduleTime" label="일정"
                             v-if="state.missionType.isIn(MissionType.SCHEDULE)"/>
       </div>
+      <div class="control-panel">
+        <div class="control-button" v-on:click="methods.createMission">
+          <span class="button-text">생성</span>
+        </div>
+        <div class="control-button" v-on:click="() => emitter.emit('resetComponent')">
+          <span class="button-text">취소</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -71,37 +79,12 @@ const ownFamiliesStore = useOwnFamiliesStore();
 const emitter: any = inject("emitter");
 
 onMounted(() => {
-  methods.setMembers()
-
-  emitter.on("validateCreateMissionForm", useThrottleFn(() => {
-    methods.checkAllInput();
-
-    if (!state.isSubmittable) {
-      PopupUtil.innerAlert(PopupType.INFO, "생성 실패", "입력값을 확인해주세요.");
-      return;
-    }
-
-    const requestBody = methods.getRequestBody();
-    if (ex(requestBody).no()) {
-      return;
-    }
-
-    call<CreateMission.RequestBody, CreateMission.ResponseBody>(Mission.CreateMission, requestBody, (response) => {
-      const responseBody = CreateMission.ResponseBody.fromJson(response.data);
-      alertStore.success("미션 생성 완료!", `"${requestBody.name}" 미션을 생성하였습니다.`);
-      emitter.emit("drawCalendar")
-      //이벤트 발행 취소
-      emitter.off("validateCreateMissionForm")
-      backgroundStore.returnGlobalPopup();
-    });
-
-  }, 2000))
+  methods.setMembers();
 });
 
 
 const props = defineProps<{
   timestamp: number,
-  days?: number
 }>();
 
 const inputValues = reactive({
@@ -201,7 +184,7 @@ const methods = {
         ? new MultipleModeOutput(new Set([props.timestamp]))
         : datePicker.value?.extractResult()!;
 
-    scheduleInfo?.applyToEachSelected((selected) => selected + inputValues.scheduleTime)
+    scheduleInfo.setScheduleTime(inputValues.scheduleTime);
 
     return new CreateMission.RequestBody(
         inputValues.missionTitle,
@@ -211,7 +194,31 @@ const methods = {
         scheduleInfo,
         deadline
     )
-  }
+  },
+  createMission: useThrottleFn(() => {
+    methods.checkAllInput();
+
+    if (!state.isSubmittable) {
+      PopupUtil.innerAlert(PopupType.INFO, "생성 실패", "입력값을 확인해주세요.");
+      return;
+    }
+
+    const requestBody = methods.getRequestBody();
+    if (ex(requestBody).no()) {
+      return;
+    }
+
+    call<CreateMission.RequestBody, CreateMission.ResponseBody>(Mission.CreateMission, requestBody, (response) => {
+      alertStore.success("미션 생성 완료!", `"${requestBody.name}" 미션을 생성하였습니다.`);
+      calendarStore.resetSelected();
+      emitter.emit("drawCalendar");
+      emitter.emit("resetComponent");
+      //이벤트 발행 취소
+      emitter.off("validateCreateMissionForm")
+      backgroundStore.returnGlobalPopup();
+    });
+
+  }, 2000)
 }
 </script>
 <style scoped lang="scss">
@@ -221,13 +228,32 @@ const methods = {
   display: flex;
   justify-content: center;
   padding: 20px;
-  max-height: 50vh;
   overflow-y: scroll;
 
   .container-body {
-    min-width: 400px;
 
-    .mission-from {
+    .control-panel {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      align-items: center;
+
+      .control-button {
+        transition: $duration;
+        border-radius: 5px;
+        padding: 5px 10px;
+        user-select: none;
+
+        .button-text {
+          padding: 0;
+        }
+
+        &:hover {
+          cursor: pointer;
+          background-color: $standard-light-gray-in-white;
+        }
+
+      }
     }
   }
 }

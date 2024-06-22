@@ -4,11 +4,19 @@
                 place-holder="여름 휴가" :validate="methods.validateName" warning-message="이름을 입력해주세요."/>
     <DatePicker ref="multipleDatePicker" id="anniversary-date" label="날짜" name="anniversaryDate"
                 :timestamp="props.timestamp" :after-change-mode="methods.handleChangeScheduleMode"/>
+    <div class="control-panel">
+      <div class="control-button" v-on:click="methods.createAnniversary">
+        <span class="button-text">생성</span>
+      </div>
+      <div class="control-button" v-on:click="() => emitter.emit('resetComponent')">
+        <span class="button-text">취소</span>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import BlinkInput from "@/components/global/BlinkInput.vue";
-import {inject, onMounted, reactive, ref} from "vue";
+import {inject, reactive, ref} from "vue";
 import DatePicker from "@/components/global/DatePicker.vue";
 import {useThrottleFn} from "@vueuse/core";
 import PopupUtil from "@/utils/PopupUtil";
@@ -22,7 +30,9 @@ import {useBackgroundStore} from "@/stores/BackgroundStore";
 import {call} from "@/utils/NetworkUtil";
 import Anniversary from "@/constant/api-meta/Anniversary";
 import MultipleModeOutput from "@/classes/component-protocol/MultipleModeOutput";
+import {useAlertStore} from "@/stores/AlertStore";
 
+const alertStore = useAlertStore();
 const calendarStore = useCalendarStore();
 const backgroundStore = useBackgroundStore();
 const emitter: any = inject("emitter");
@@ -65,11 +75,8 @@ const methods = {
   handleChangeScheduleMode(mode: ScheduleMode) {
     state.scheduleMode = mode;
     4
-  }
-}
-
-onMounted(() => {
-  emitter.on("validateCreateAnniversaryForm", useThrottleFn(() => {
+  },
+  createAnniversary: useThrottleFn(() => {
     methods.checkAllInput();
     if (!state.isSubmittable) {
       PopupUtil.innerAlert(PopupType.INFO, "생성 실패", "입력값을 확인해주세요.");
@@ -85,15 +92,45 @@ onMounted(() => {
       const responseBody = ResponseBody.fromJson(response.data);
       const created = responseBody.created;
       created.forEach(calendarStore.addAnniversary);
+      alertStore.success("기념일 생성 완료!", `"${requestBody.name}"이 등록 되었어요!`);
       calendarStore.resetSelected();
 
-      emitter.off("validateCreateMissionForm");
+      emitter.emit("drawCalendar");
+      emitter.emit("resetComponent");
       backgroundStore.returnGlobalPopup();
     });
 
-  }, 2000))
-})
+  }, 2000)
+}
 </script>
 <style scoped lang="scss">
+@import "@/assets/main";
 
+.create-anniversary-container {
+  padding: 20px;
+
+  .control-panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+
+    .control-button {
+      transition: $duration;
+      border-radius: 5px;
+      padding: 5px 10px;
+      user-select: none;
+
+      .button-text {
+        padding: 0;
+      }
+
+      &:hover {
+        cursor: pointer;
+        background-color: $standard-light-gray-in-white;
+      }
+
+    }
+  }
+}
 </style>

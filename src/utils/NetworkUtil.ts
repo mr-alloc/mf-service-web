@@ -64,7 +64,7 @@ const defaultError = (spec: Spec, error: any) => {
     alertStore.alert(AlertType.WARNING, "서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
 }
 
-export async function call<REQ, RES>(
+export async function call<REQ extends { toJSON?: () => any }, RES>(
     spec: Spec,
     body: REQ,
     success: ((value: AxiosResponse<RES, any>) => any) | null | undefined,
@@ -77,7 +77,8 @@ export async function call<REQ, RES>(
     const pathVariables = pathVariableRE.exec(bindPath);
     if (pathVariables) {
         //replace path variables
-        const bodyEntries = Object.entries(body);
+        const json = body.toJSON && body.toJSON();
+        const bodyEntries = Object.entries(json ?? body);
         for (const [key, value] of bodyEntries) {
             const beforeReplace = bindPath;
             bindPath = bindPath.replace(`{${key}}`, `${value}`);
