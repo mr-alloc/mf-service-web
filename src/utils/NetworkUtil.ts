@@ -8,17 +8,17 @@ import {
 } from "@/utils/LocalCache";
 import Spec from "@/constant/api-meta/ApiSpecification";
 import {HttpMethod} from "@/constant/HttpMethod";
-import {type AlertStore, AlertType, useAlertStore} from "@/stores/AlertStore";
+import {type AlertStore, useAlertStore} from "@/stores/AlertStore";
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
 axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
     response => response,
-    error => {
+    async error => {
         const alertStore = useAlertStore();
         if (error.response?.status === 401) {
-            handleUnAuthorized(error, alertStore);
+            await handleUnAuthorized(error, alertStore);
         } else if (error.response?.status === 403) {
             handleForbidden(error, alertStore);
         } else if (error.response?.status === 500) {
@@ -30,11 +30,10 @@ axios.interceptors.response.use(
     }
 )
 
-function handleUnAuthorized(error: AxiosError, alertStore: AlertStore) {
-    alertStore.warning("인증 실패", "로그인이 필요한 서비스입니다.");
+async function handleUnAuthorized(error: AxiosError, alertStore: AlertStore) {
     const memberInfoStore = useMemberInfoStore();
     memberInfoStore.removeMemberInfo();
-    removeTokens();
+    location.href = "/refresh";
 }
 
 function handleForbidden(error: AxiosError, alertStore: AlertStore) {
@@ -51,7 +50,7 @@ const pathVariableRE = /{(\w+)}/g;
 
 function getHeader(): AxiosHeaders {
     const headers = new AxiosHeaders();
-    noAccessToken() || headers.set("Authorization", `Bearer ${getAccessToken()}`)
+    noAccessToken() || headers.set("Authorization", `c ${getAccessToken()}`)
     headers.set("Selected-Family-Id", getSelectedFamilyId())
 
     return headers;
@@ -61,7 +60,7 @@ const defaultError = (spec: Spec, error: any) => {
     const alertStore = useAlertStore();
     const res = error.response;
 
-    alertStore.alert(AlertType.WARNING, "서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
+    alertStore.warning("서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
 }
 
 export async function call<REQ extends { toJSON?: () => any }, RES>(

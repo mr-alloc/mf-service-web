@@ -6,10 +6,12 @@
     <TransitionGroup name="fade" tag="ul" class="comments-wrapper">
       <li v-show="state.comments.length === 0" class="no-comment-text" :key="0">댓글이 없습니다.</li>
       <li class="comment-item" :class="{ me: memberInfoStore.memberInfo.id === comment.memberId}"
-          v-for="comment in state.comments.sort((a, b) => a.createdAt - b.createdAt)" :key="comment.id">
+          v-for="comment in state.comments.sort((a, b) => a.createdAt.timestamp - b.createdAt.timestamp)"
+          :key="comment.id">
         <ImageNicknamePair v-if="memberInfoStore.memberInfo.id !== comment.memberId"
                            :option="methods.getMemberInfo(comment.memberId)"/>
         <span class="comment-text">{{ comment.content }}</span>
+        <span class="timeline">{{ `${comment.createdAt.hour}:${comment.createdAt.minute}` }}</span>
       </li>
     </TransitionGroup>
     <div class="new-comment-area">
@@ -39,6 +41,7 @@ import type MissionComment from "@/classes/api-spec/MissionComment";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import LocalAsset from "@/constant/LocalAsset";
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
+import * as GetComments from "@/classes/api-spec/mission-state/GetComments";
 
 const ownFamiliesStore = useOwnFamiliesStore();
 const memberInfoStore = useMemberInfoStore();
@@ -63,6 +66,11 @@ const methods = {
     }
     state.isSubmittable = false;
   },
+  getStateId() {
+    return props.detail.schedule.mode.isRepeat()
+        ? props.detail.states.find((state) => state.startAt === props.mission.startAt)?.id ?? 0
+        : props.detail.states[0]?.id ?? 0;
+  },
   submitComment() {
     const comment = commentInput.value?.getValue() ?? "";
     if (comment.length === 0) {
@@ -70,9 +78,7 @@ const methods = {
     }
 
     //반복일 경우 stateId가 없을수도 있기때문에 찾아서 확인해야하고, 아닌경우는 stateId를 바로 가져다 쓴다.
-    const stateId = props.detail.schedule.mode.isRepeat()
-        ? props.detail.states.find((state) => state.startAt === props.mission.startAt)?.id ?? 0
-        : props.detail.states[0]?.id ?? 0;
+    const stateId = methods.getStateId();
 
     const requestBody = RequestBody.of(stateId, props.detail.id, comment, props.mission.startAt);
     call<RequestBody, ResponseBody>(MissionState.CreateComment, requestBody, (response) => {
@@ -92,6 +98,10 @@ const methods = {
 }
 onMounted(() => {
   state.currentMember = SelectImageOption.ofProfileMember(profileMemberStore.profileMember);
+  call<any, GetComments.ResponseBody>(MissionState.GetComments, {stateId: methods.getStateId()}, (response) => {
+    const responseBody = GetComments.ResponseBody.fromJson(response.data);
+    state.comments = responseBody.comments;
+  });
 })
 </script>
 <style scoped lang="scss">
@@ -133,6 +143,7 @@ onMounted(() => {
       display: flex;
       align-items: center;
       padding: 2px 5px;
+      position: relative;
 
       .comment-text {
         padding: 5px 10px;
@@ -148,6 +159,7 @@ onMounted(() => {
 
       }
 
+
       &.me {
         justify-content: flex-end;
 
@@ -155,6 +167,19 @@ onMounted(() => {
           border-top-right-radius: 3px;
           background-color: $standard-dark-gray-in-white;
           color: white;
+          transition: $duration;
+
+          &:hover {
+            background-color: $standard-clean-black;
+            cursor: pointer;
+          }
+        }
+
+        .timeline {
+          position: absolute;
+          font-size: .64rem;
+          right: 0.5rem;
+          bottom: -1rem;
         }
       }
     }

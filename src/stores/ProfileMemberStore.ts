@@ -17,6 +17,7 @@ export const useProfileMemberStore = defineStore("profileMember", () => {
 
 
 export interface IProfileMember {
+
     get familyName(): string;
 
     get nickname(): string;

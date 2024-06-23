@@ -16,7 +16,7 @@ import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 const ownFamiliesStore = useOwnFamiliesStore();
 const familiesViewStore = useFamiliesViewStore();
 const memberInfoStore = useMemberInfoStore();
-const emitter = inject("emitter");
+const emitter: any = inject("emitter");
 const state = reactive({
   buttons: [
     DefaultButtonValue.of("생성", ["fas", "users"], () => PopupUtil.popupCreateFamily(emitter)),
@@ -26,9 +26,8 @@ const state = reactive({
   ]
 });
 onMounted(() => {
-  emitter.on("fetchFamiliesView", () => {
-    //패밀리 멤버정보
-    familiesViewStore.fetchFamilyMembersAsync();
+
+  emitter.on("familyChanged", () => {
     //패밀리 가입요청
     familiesViewStore.fetchJoinRequestsAsync();
     //패밀리 목록

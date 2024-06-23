@@ -6,7 +6,6 @@ import CollectionUtil from "@/utils/CollectionUtil";
 import SelectFamilyOption from "@/classes/SelectFamilyOption";
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import * as GetOwnFamilies from "@/classes/api-spec/family/GetOwnFamilies";
-import * as GetFamilyMember from "@/classes/api-spec/family/GetFamilyMember";
 import {hasSelectedFamilyId, setSelectedFamilyId} from "@/utils/LocalCache";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
@@ -14,7 +13,6 @@ import {useFamilyMemberInfoStore} from "@/stores/FamilyMemberInfoStore";
 export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
     const notSelectedOption = new SelectFamilyOption(0, "", "NO_IMAGE", "본캐 선택");
     const families = ref<Array<GetOwnFamilies.FamilySummary>>([]);
-    const members = ref<Array<GetFamilyMember.FamilyMember>>([]);
     const selectorState = ref({
         defaultOption: notSelectedOption,
         selectedOption: notSelectedOption,
@@ -34,17 +32,6 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
         });
     }
 
-    async function fetchFamilyMembersAsync(forceFetch: boolean) {
-        const memberInfoStore = useMemberInfoStore();
-        if (memberInfoStore.needMemberInfo()) return;
-        if (!forceFetch && members.value.length > 0) return;
-
-        await call<any, GetFamilyMember.ResponseBody>(Family.GetFamilyMembers, {}, (response) => {
-            const responseBody = GetFamilyMember.ResponseBody.fromJson(response.data);
-            members.value = responseBody.members;
-        });
-    }
-
     function toSelectItemValue(): SelectFamilyOption [] {
         return CollectionUtil.convertList<SelectFamilyOption>(
             families.value,
@@ -61,14 +48,16 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
 
         //패밀리 선택시 갱신정보
         setSelectedFamilyId(item.id);
-        //캘린더 갱신
-        emitter.emit("drawCalendar")
-        emitter.emit("fetchFamiliesView")
+
+        emitter.emit("familyChanged");
+
         if (hasSelectedFamilyId()) {
+            //패밀리 멤버목록 정보
             await familiesViewStore.fetchFamilyMembersAsync();
+            //패밀리 정보
             await familiesViewStore.fetchFamilyInfoAsync();
+            //현재 패밀리 멤버정보
             await familyMemberInfoStore.fetchFamilyMemberAsync();
-            await fetchFamilyMembersAsync(true);
         } else {
             await memberInfoStore.fetchMemberInfo();
         }
@@ -77,10 +66,8 @@ export const useOwnFamiliesStore = defineStore("ownFamilies", () => {
 
     return {
         families,
-        members,
         selectorState,
         fetchOwnFamiliesAsync,
-        fetchFamilyMembersAsync,
         toSelectItemValue,
         changeFamily,
         hasSelectFamily

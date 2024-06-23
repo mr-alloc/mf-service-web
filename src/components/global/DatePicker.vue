@@ -33,7 +33,8 @@
                   end: state.scheduleMode.isNotIn(ScheduleMode.REPEAT) ? state.endTimestamp === calendarDay.timestamp : state.isRepeatEndActive && state.endTimestamp === calendarDay.timestamp
                 }"
                 v-for="(calendarDay, index) in state.calendarDays as Array<CalendarDate>"
-                :key="index" v-on:click="() => methods.selectDay(calendarDay)">
+                :key="index"
+                v-on:click="() => calendarDay.isSameMonth(state.thisMonth) && methods.selectDay(calendarDay)">
               <span class="day-text">{{ calendarDay.date }}</span>
             </li>
           </ul>

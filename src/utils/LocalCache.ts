@@ -1,12 +1,16 @@
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
+import Account from "@/constant/api-meta/Account";
+import {call} from "@/utils/NetworkUtil";
+import {useAlertStore} from "@/stores/AlertStore";
+import {useRouter} from "vue-router";
 
 const ACCESS_TOKEN = "mf_ac_tk";
 const REFRESH_TOKEN = "mf_rf_tk";
 const SELECTED_FAMILY_ID = "mf_sf_id";
 
 export const noAccessToken = () => {
-    return localStorage.getItem(ACCESS_TOKEN) == null
+    return getAccessToken() == null;
 }
 
 export const setAccessToken = (token: string) => {
@@ -19,6 +23,12 @@ export const getAccessToken = () => {
 
 export const removeAccessToken = () => {
     localStorage.removeItem(ACCESS_TOKEN)
+}
+export const noRefreshToken = () => {
+    return getRefreshToken() == null;
+}
+export const noTokens = () => {
+    return noAccessToken() && noRefreshToken();
 }
 
 
@@ -38,6 +48,25 @@ export const removeRefreshToken = () => {
 export const removeTokens = () => {
     removeAccessToken()
     removeRefreshToken()
+}
+
+export const refreshToken = async () => {
+    const router = useRouter();
+    const alertStore = useAlertStore();
+    const requestBody = {
+        deviceCode: 0,
+        refreshToken: getRefreshToken(),
+        accessToken: getAccessToken()
+    }
+    await call<any, any>(Account.RefreshToken, requestBody, (response) => {
+        response.data.accessToken && setAccessToken(response.data.accessToken)
+        alertStore.info("다시 오신걸 환영해요!", "기존정보로 자동로그인 합니다.");
+        router.push("/")
+    }, (spec, error) => {
+        alertStore.info("재로그인 필요", "자동로그인 기간이 만료되어, 재로그인이 필요해요! 로그인 화면으로 보내드릴게요!")
+        removeTokens()
+        router.push("/sign-in");
+    });
 }
 
 export const setSelectedFamilyId = (id: number) => {

@@ -39,11 +39,13 @@ import type MissionDetail from "@/classes/MissionDetail";
 import MissionState from "@/components/mission/MissionState.vue";
 import MissionComments from "@/components/mission/MissionComments.vue";
 import CalendarWeekMission from "@/classes/CalendarWeekMission";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
 
 const emitter: any = inject("emitter");
 const backgroundStore = useBackgroundStore();
 const ownFamiliesStore = useOwnFamiliesStore();
+const familiesViewStore = useFamiliesViewStore();
 const alertStore = useAlertStore();
 const props = defineProps<{
   mission: CalendarWeekMission
@@ -119,7 +121,7 @@ const methods = {
 }
 
 const state = reactive({
-  members: ownFamiliesStore.members.map(member => member.toSelectImageOption()),
+  members: familiesViewStore.members.map(member => member.toSelectImageOption()),
   statusOptions: MissionStatus.values().filter(MissionStatus.NOT_DELETED_FILTER).map(MissionStatus.toSelectOption),
   typeOptions: MissionType.values().map(MissionType.toSelectOption),
   features: [

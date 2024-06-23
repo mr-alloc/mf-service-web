@@ -21,8 +21,8 @@ const methods = {
           v-for="(member, index) in familiesViewStore.members as Array<FamilyMember>" :key="index">
         <div class="member-item">
           <div class="role-frame"
-               v-if="MemberRole.SUB_MASTER.isGrantedFrom(member.role)"
-               :class="[MemberRole.from(member.role).simpleName, { floating: MemberRole.SUB_MASTER.isGrantedFrom(member.role)}]">
+               v-if="MemberRole.from(member.role).isGrantedFrom(MemberRole.SUB_MASTER)"
+               :class="[MemberRole.from(member.role).simpleName, { floating: MemberRole.from(member.role).isGrantedFrom(MemberRole.SUB_MASTER)}]">
             <span class="role-name">{{ MemberRole.from(member.role).name }}</span>
           </div>
           <div class="image-frame-area">

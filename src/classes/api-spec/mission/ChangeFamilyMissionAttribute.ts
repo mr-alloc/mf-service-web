@@ -1,18 +1,18 @@
 import MissionDetail from "@/classes/MissionDetail";
 
 export class RequestBody {
-    readonly missionId: number;
-    readonly type: number | null;
-    readonly assignee: number;
-    readonly title: string | null;
-    readonly status: number | null;
+    readonly _missionId: number;
+    readonly _type: number | null;
+    readonly _assignee: number;
+    readonly _title: string | null;
+    readonly _status: number | null;
 
     constructor(missionId: number, type: number | null, assignee: number, title: string | null, status: number | null) {
-        this.missionId = missionId;
-        this.type = type;
-        this.assignee = assignee;
-        this.title = title;
-        this.status = status;
+        this._missionId = missionId;
+        this._type = type;
+        this._assignee = assignee;
+        this._title = title;
+        this._status = status;
     }
 
     static forAssignee(missionId: number, assignee: number): RequestBody {
@@ -33,6 +33,16 @@ export class RequestBody {
 
     static forType(missionId: number, type: number) {
         return new RequestBody(missionId, type, 0, null, null);
+    }
+
+    toJSON() {
+        return {
+            missionId: this._missionId,
+            type: this._type,
+            assignee: this._assignee,
+            title: this._title,
+            status: this._status
+        };
     }
 }
 

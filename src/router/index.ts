@@ -5,7 +5,7 @@ import {ProfileMember, useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {useBackgroundStore} from "@/stores/BackgroundStore";
-import {noAccessToken, removeAccessToken, removeTokens} from "@/utils/LocalCache";
+import {noAccessToken, noTokens} from "@/utils/LocalCache";
 import {useAlertStore} from "@/stores/AlertStore";
 import MemberProfile from "@/views/authorized/MemberProfile.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
@@ -14,6 +14,7 @@ import {useLeftMenuStore} from "@/stores/LeftMenuStore";
 import Missions from "@/views/authorized/Missions.vue";
 import Families from "@/views/authorized/Families.vue";
 import MainCalendar from "@/views/MainCalendar.vue";
+import RefreshToken from "@/views/RefreshToken.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,7 @@ const router = createRouter({
       {path: '/profile', name: 'profile', component: MemberProfile, meta: {role: 1}},
       {path: '/missions', name: 'missions', component: Missions, meta: {role: 1}},
       {path: '/families', name: 'families', component: Families, meta: {role: 1}},
+      {path: '/refresh', name: 'refresh', component: RefreshToken, meta: {role: 0}}
   ]
 });
 
@@ -55,9 +57,15 @@ router.beforeEach(async (to, from, next) => {
     const backgroundStore = useBackgroundStore();
     const alertStore = useAlertStore();
 
-    const onlyForGuest = ['/sign-in', '/sign-up'];
+    const onlyForGuest = ['/sign-in', '/sign-up', '/refresh'];
 
     console.debug(`${from.path} → ${to.path} [No Session: ${noAccessToken()} / No Member: ${memberInfoStore.needMemberInfo()}]`)
+
+
+    //토큰 재발급 페이지
+    if (!noTokens() && to.path === '/refresh') {
+        return next();
+    }
 
     //로그인 정보가 없는 경우
     if (noAccessToken() && to.meta.role !== 0) {
@@ -71,9 +79,8 @@ router.beforeEach(async (to, from, next) => {
       return next({ path: '/' })
     }
 
-    //미로그인이지만, 접근이 가능한 페이지 인경우
-    if (noAccessToken() && !onlyForGuest.includes(to.path) && to.meta.role === 0) {
-        console.debug('no session but, accessible page')
+    //미로그인, 접근이 가능한 페이지 인경우
+    if (noAccessToken() && onlyForGuest.includes(to.path) && to.meta.role === 0) {
         return next()
     }
 
@@ -92,16 +99,7 @@ router.beforeEach(async (to, from, next) => {
                 memberInfoStore.updateMemberInfo(new ProfileMember(id, nickname, role, profileImageUrl))
                 ownFamiliesStore.fetchOwnFamiliesAsync(true);
                 return;
-            },
-            (sepc, error) => {
-                const res = error.response;
-                //인증 실패
-                if (res?.status === 401) {
-                    removeTokens()
-                }
-                console.error(`${from.path}-> ${to.path} [Failed to Get Member Info] ${error}`);
-                removeAccessToken()
-            })
+            });
 
         const memberInfo = memberInfoStore.memberInfo;
         const authorityRole: number = memberInfo.role

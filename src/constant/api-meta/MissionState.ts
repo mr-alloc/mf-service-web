@@ -7,4 +7,5 @@ export default {
     CreateComment: createComment
         .whenFamily(createFamilyComment)
         .andDefaultMessage("댓글 추가에 실패 하였습니다."),
+    GetComments: Spec.of(HttpMethod.GET, `/v1/state/{stateId}/comment`)
 }

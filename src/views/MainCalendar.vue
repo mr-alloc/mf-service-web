@@ -26,6 +26,7 @@
     <Transition name="fade">
       <div class="component-control-panel" v-show="currentComponent">
         <Component v-if="currentComponent" :is="currentComponent?.componentName"
+                   v-bind:key="currentComponent.id"
                    v-bind="currentComponent?.componentProps"/>
       </div>
     </Transition>
@@ -132,6 +133,10 @@ onMounted(() => {
   methods.fetchMissionAndAnniversary();
 
   emitter.on('drawCalendar', () => {
+    methods.fetchMissionAndAnniversary();
+  });
+
+  emitter.on('familyChanged', () => {
     methods.fetchMissionAndAnniversary();
   });
 

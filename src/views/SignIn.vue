@@ -82,10 +82,12 @@ const methods = {
 
     //최초 로그인 전 패밀리 선택 초기화
     setSelectedFamilyId(0)
-    const signInResult = await call<any, any>(AccountAPI.VerifyAccount, {
-          email: emailInput.value,
-          password: passwordInput.value
-        },
+    const requestBody = {
+      deviceCode: 0,
+      email: emailInput.value,
+      password: passwordInput.value
+    };
+    const signInResult = await call<any, any>(AccountAPI.VerifyAccount, requestBody,
         async (response) => {
           if (response.status === 200) {
             const {accessToken, refreshToken} = response.data

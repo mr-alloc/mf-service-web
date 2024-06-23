@@ -16,6 +16,9 @@ export default class CalendarDate {
     private readonly _weekOfCalendar: number;
     private readonly _date: number;
     private readonly _dayOfWeek: DayOfWeek;
+    private readonly _hour: number;
+    private readonly _minute: number;
+    private readonly _second: number;
 
 
     constructor(timestamp: number, weekOfCalendar?: number) {
@@ -29,6 +32,9 @@ export default class CalendarDate {
         this._weekOfCalendar = weekOfCalendar ?? 0;
         this._date = current.date();
         this._dayOfWeek = DayOfWeek.fromSundayStartValue(current.day())!;
+        this._hour = current.hour();
+        this._minute = current.minute();
+        this._second = current.second();
     }
 
     get value(): Moment {
@@ -65,6 +71,18 @@ export default class CalendarDate {
 
     get dayOfWeek(): DayOfWeek {
         return this._dayOfWeek;
+    }
+
+    get hour(): number {
+        return this._hour;
+    }
+
+    get minute(): number {
+        return this._minute;
+    }
+
+    get second(): number {
+        return this._second;
     }
 
     isSameMonth(month: number): boolean {

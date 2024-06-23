@@ -1,15 +1,17 @@
+import CalendarDate from "@/classes/CalendarDate";
+
 export default class MissionComment {
 
     private readonly _id: number;
     private readonly _memberId: number;
     private readonly _content: string;
-    private readonly _createdAt: number;
+    private readonly _createdAt: CalendarDate;
 
     constructor(id: number, memberId: number, content: string, createdAt: number) {
         this._id = id;
         this._memberId = memberId;
         this._content = content;
-        this._createdAt = createdAt;
+        this._createdAt = new CalendarDate(createdAt);
     }
 
     get id(): number {
@@ -24,7 +26,7 @@ export default class MissionComment {
         return this._content;
     }
 
-    get createdAt(): number {
+    get createdAt(): CalendarDate {
         return this._createdAt;
     }
 

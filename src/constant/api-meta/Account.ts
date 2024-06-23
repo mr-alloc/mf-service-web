@@ -18,4 +18,6 @@ export default {
         .andPairs([
             [-4, "잘못된 계정 정보입니다."]
         ]),
+    RefreshToken: Spec.of(HttpMethod.POST, "/v1/account/refresh")
+        .andDefaultMessage("토큰 갱신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
 }

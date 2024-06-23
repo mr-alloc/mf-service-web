@@ -77,9 +77,11 @@ import {useAlertStore} from "@/stores/AlertStore";
 import {useProfileMemberStore} from "@/stores/ProfileMemberStore";
 import MissionStatusIndicator from "@/components/global/MissionStatusIndicator.vue";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
+import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
 
 const ownFamiliesStore = useOwnFamiliesStore();
+const familiesViewStore = useFamiliesViewStore();
 const alertStore = useAlertStore();
 const profileStore = useProfileMemberStore();
 const props = defineProps<{
@@ -91,7 +93,7 @@ const state = reactive({
   typeOptions: MissionType.values().map(MissionType.toSelectOption),
   openDetail: false,
   statusOptions: MissionStatus.values().filter(MissionStatus.NOT_DELETED_FILTER).map(MissionStatus.toSelectOption),
-  members: ownFamiliesStore.members.map(member => member.toSelectImageOption())
+  members: familiesViewStore.members.map(member => member.toSelectImageOption())
 });
 const methods = {
 

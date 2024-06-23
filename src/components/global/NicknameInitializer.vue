@@ -81,7 +81,6 @@ const methods = {
             notificationStore.alert(AlertType.SUCCESS, "닉네임 변경 성공!", `닉네임이 ${nicknameInput.value}로 변경 되었어요!`);
             if (hasSelectedFamilyId()) {
               await familiesViewStore.fetchFamilyMembersAsync();
-              await ownFamiliesStore.fetchFamilyMembersAsync(true);
               await familyMemberInfoStore.fetchFamilyMemberAsync();
               profileMemberStore.updateProfileMember(familyMemberInfoStore.familyMemberInfo);
             }

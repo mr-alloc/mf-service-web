@@ -30,7 +30,7 @@ function secondsToString(second: number, format: string): string {
 }
 
 function toKoreanString(second: number): string {
-    const now = moment().utc().unix();
+    const now = moment().utc(false).unix();
     const seconds = now - second;
 
     if (seconds < 60) return `방금 전`
