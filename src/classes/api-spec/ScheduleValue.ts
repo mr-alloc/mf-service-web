@@ -78,20 +78,19 @@ export default class ScheduleValue {
                     switch (repeatOption) {
                         case RepeatOption.WEEK:
                             return this._repeatValues.includes(calendarDay.dayOfWeek.value);
-                        case RepeatOption.MONTH: {
+                        case RepeatOption.MONTH:
                             return calendarDay.date === repeatDay.date;
-                        }
                         case RepeatOption.YEAR:
                             return calendarDay.month === repeatDay.month && calendarDay.date === repeatDay.date;
                         default:
                             throw new Error(`Invalid repeat option: ${repeatOption}`);
                     }
                 })
-                    .filter(date => this._startAt <= date.timestamp && date.timestamp <= this._endAt)
+                    .filter(date => this._startAt <= date.timestamp && (date.timestamp <= this._endAt || this._endAt === 0))
                     .map(date => Period.of(date.timestamp, date.timestamp + (TemporalUtil.SECONDS_IN_DAY - 1)));
             }
             default:
-                throw new Error(`Invalid schedule mode: ${this._mode}`);
+                throw new Error(`Invalid schedule mode: ${JSON.stringify(this._mode)}`);
         }
     }
 }

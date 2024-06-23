@@ -147,7 +147,7 @@ export const useCalendarStore = defineStore('calendar', () => {
             );
 
             //여기서 사용할 미션은 실제로 한개의 스케쥴이더라도 2주에 걸쳐있다면 2개의 미션으로 나누어지며, 요일의 시작일을 기준으로 미션의 시작시간이 다시 설정된다.
-            console.debug(`%c[%c${week}번째 주%c]`, Color.RED, Color.BLACK, Color.RED);
+            console.log(`%c[%c${week}번째 주%c]`, Color.RED, Color.BLACK, Color.RED);
             days.sort(CalendarDate.TIMESTAMP_ASCENDING_CONDITION).forEach((day) => {
                 //레이어를 할당하기위해 필요한 레이어를 구하는 조건은 다음과같다.
 
@@ -182,7 +182,7 @@ export const useCalendarStore = defineStore('calendar', () => {
                             .find((mission) => day.timestamp <= mission[1].startAt && mission[1].startAt < (day.timestamp + TemporalUtil.SECONDS_IN_DAY));
                         if (!entry) return;
 
-                        console.debug(`${day.dayOfWeek.name} ${layer}줄: ${entry[1].toString()}`);
+                        console.log(`${day.dayOfWeek.name} ${layer}줄: ${entry[1].toString()}`);
                         thisWeekSchedules.push(new WeekScheduleGeometry(day.dayOfWeek.sundayStartValue, layer, entry[1]));
                         thisWeekMissions.delete(entry[0]);
                     });
