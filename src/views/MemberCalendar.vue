@@ -97,7 +97,6 @@
 
 <script setup lang="ts">
 import {inject, onMounted, reactive} from "vue";
-import moment from "moment-timezone";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {type IMission,} from "@/classes/api-spec/mission/GetMemberCalendar"
 import DateUtil from "@/utils/DateUtil";
@@ -225,7 +224,8 @@ onMounted(() => {
   .calendar-wrapper {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    flex-shrink: 0;
+    width: 70%;
     position: relative;
 
 

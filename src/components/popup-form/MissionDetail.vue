@@ -141,6 +141,7 @@ onBeforeMount(async () => {
 @import "@/assets/main";
 
 .mission-detail-container {
+  overflow-y: scroll;
 
   .detail-header-wrapper {
     display: flex;

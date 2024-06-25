@@ -229,8 +229,8 @@ onMounted(() => {
   }
 
   .component-control-panel {
-    flex-shrink: 0;
     display: flex;
+    flex-shrink: 0;
   }
 
 
