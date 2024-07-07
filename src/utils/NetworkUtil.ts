@@ -12,7 +12,7 @@ import {type AlertStore, useAlertStore} from "@/stores/AlertStore";
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
-axios.defaults.baseURL = "http://localhost:9090";
+axios.defaults.baseURL = "http://mf-content-api";
 axios.interceptors.response.use(
     response => response,
     async error => {
