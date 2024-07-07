@@ -29,10 +29,6 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Build image
-        run: |
-          npm run build
-
       - name: Push image to GitHub Container Registry
         uses: docker/build-push-action@v4
         with:
