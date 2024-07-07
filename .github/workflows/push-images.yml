@@ -28,9 +28,6 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.15.0'
 
       - name: Build image
         run: |
