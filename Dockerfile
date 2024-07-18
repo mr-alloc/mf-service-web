@@ -2,7 +2,8 @@ FROM node:20.15.0-alpine
 LABEL authors="devisitem"
 
 # install simple http server for serving static content
-RUN npm install -g http-server
+RUN npm i -g http-server
+RUN npm i -g vite
 
 # make the 'app' folder the current working directory
 WORKDIR /app
@@ -16,7 +17,6 @@ RUN apk add make python3
 COPY . ./
 
 # build app for production with minification
-RUN yarn install
 RUN yarn build-only
 
 EXPOSE 5173
