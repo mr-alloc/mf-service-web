@@ -16,6 +16,7 @@ RUN apk add make python3
 COPY . ./
 
 # build app for production with minification
+RUN yarn install
 RUN yarn build-only
 
 EXPOSE 5173
