@@ -3,6 +3,7 @@ LABEL authors="devisitem"
 
 # install simple http server for serving static content
 RUN npm install -g http-server
+RUN npm install --global yarn
 
 # make the 'app' folder the current working directory
 WORKDIR /app
@@ -17,7 +18,8 @@ COPY . ./
 RUN ls -al
 
 # build app for production with minification
-RUN npm run build-only
+RUN yarn install
+RUN yarn build-only
 
 EXPOSE 5173
 CMD [ "http-server", "dist" ]
