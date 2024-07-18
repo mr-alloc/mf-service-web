@@ -2,8 +2,7 @@ FROM node:20.15.0-alpine
 LABEL authors="devisitem"
 
 # install simple http server for serving static content
-RUN npm i -g http-server
-RUN npm i -g vite
+RUN npm i -g http-server vite
 
 # make the 'app' folder the current working directory
 WORKDIR /app
