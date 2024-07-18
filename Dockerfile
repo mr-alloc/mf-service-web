@@ -14,7 +14,8 @@ COPY package*.json ./
 RUN apk add python3
 
 # copy project files and folders to the current working directory (i.e. 'app' folder)
-COPY . .
+RUN ls -al
+COPY . ./
 
 # build app for production with minification
 RUN npm run build-only
