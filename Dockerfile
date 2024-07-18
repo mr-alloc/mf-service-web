@@ -12,7 +12,7 @@ COPY package*.json ./
 
 # install project dependencies
 RUN npm install
-RUN apk add python-2.7.0
+RUN apk add python3
 RUN npm config set python /etc/bin/python2.7
 
 # copy project files and folders to the current working directory (i.e. 'app' folder)
