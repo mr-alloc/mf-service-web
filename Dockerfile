@@ -10,14 +10,12 @@ WORKDIR /app
 # copy both 'package.json' and 'package-lock.json' (if available)
 
 # install project dependencies
-RUN apk add python3
+RUN apk add make python3
 
 # copy project files and folders to the current working directory (i.e. 'app' folder)
 COPY . ./
-RUN ls -al
 
 # build app for production with minification
-RUN yarn install
 RUN yarn build-only
 
 EXPOSE 5173
