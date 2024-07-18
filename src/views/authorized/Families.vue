@@ -12,16 +12,18 @@ import FamilyInfo from "@/components/main/FamilyInfo.vue";
 import TappableView from "@/components/global/TappableView.vue";
 import {TabViewComponent} from "@/classes/TabViewComponent";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
+import { useFamilyMemberInfoStore } from '@/stores/FamilyMemberInfoStore'
 
 const ownFamiliesStore = useOwnFamiliesStore();
 const familiesViewStore = useFamiliesViewStore();
 const memberInfoStore = useMemberInfoStore();
+let familyMemberInfoStore = useFamilyMemberInfoStore()
 const emitter: any = inject("emitter");
 const state = reactive({
   buttons: [
     DefaultButtonValue.of("생성", ["fas", "users"], () => PopupUtil.popupCreateFamily(emitter)),
     DefaultButtonValue.of("초대", ["fas", "user-plus"], () => PopupUtil.popupInviteFamily(emitter),
-        () => hasSelectedFamilyId() && MemberRole.SUB_MASTER.isGrantedFrom(memberInfoStore.memberInfo.role)),
+        () => hasSelectedFamilyId() && familyMemberInfoStore.getCurrentMemberRole().isGrantedFrom(MemberRole.SUB_MASTER)),
     DefaultButtonValue.of("가입신청", ["far", "envelope"], () => PopupUtil.popupRequestJoinFamily(emitter))
   ]
 });
@@ -43,7 +45,7 @@ onMounted(() => {
       <FamilySelector/>
     </div>
     <FamilyInfo v-if="ownFamiliesStore.hasSelectFamily"/>
-    <PageButtonGroup :buttons="state.buttons.filter(button => button.visibleCondition())"/>
+    <PageButtonGroup :buttons="state.buttons.filter(button => button.visibleCondition()) as Array<DefaultButtonValue>"/>
     <TappableView v-if="ownFamiliesStore.hasSelectFamily" :components="[
         new TabViewComponent('멤버', 'FamilyMembers', familiesViewStore.members.length),
         new TabViewComponent('가입요청', 'JoinRequests', familiesViewStore.joinRequests.length)

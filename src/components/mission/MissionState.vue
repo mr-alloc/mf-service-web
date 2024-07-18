@@ -28,7 +28,7 @@
               <span>상태</span>
             </div>
             <div class="detail-content">
-              <SimpleRadio id="mission-status" :options="state.statusOptions" :before-change="methods.selectStatus"
+              <SimpleRadio id="mission-status" :options="state.statusOptions as Array<SelectOption>" :before-change="() => {}"
                            :current-index="state.statusOptions.findIndex(option => option.value === `${props.status ?? 0}`)"/>
             </div>
           </div>
@@ -39,7 +39,7 @@
             </div>
             <div class="detail-content">
               <SimpleSelector default-option-name="멤버 선택" :before-change="methods.selectMember" id="assignee"
-                              :options="state.members" v-if="ownFamiliesStore.hasSelectFamily"
+                              :options="state.members as Array<SelectImageOption>" v-if="ownFamiliesStore.hasSelectFamily"
                               :current-index="state.members.findIndex(member => member.id === props.detail.assignee)"/>
             </div>
           </div>
@@ -114,36 +114,36 @@ const methods = {
 
   },
 
-  selectStatus(option: SelectOption, afterChange: () => void) {
-    PopupUtil.confirm("미션 상태 변경", `${option.text}(으)로 변경하시겠습니까?`, () => {
-      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forStatus(props.missionId!, Number(option.value));
-      call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody,
-          (response) => {
-            const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
-            const changed = responseBody.changed;
-            const statusCode = changed.findState(props.timestamp)?.status ?? 0;
-            const status = MissionStatus.fromCode(statusCode);
-            switch (status) {
-              case MissionStatus.CREATED:
-                alertStore.info("미션 초기화", "미션이 사직 전 상태로 변경되었어요.")
-                methods.fetchMissionDetail();
-                break;
-              case MissionStatus.IN_PROGRESS:
-                alertStore.guide("상태 변경", `미션이 시작되었습니다. 남은 시간 안에 완료할 수 있도록 노력하세요!`);
-                methods.fetchMissionDetail();
-                emitter.emit("drawCalendar")
-                break;
-              case MissionStatus.COMPLETED:
-                alertStore.success("미션 클리어!", `"${state.detail.name}" 미션을 완료하였습니다.`);
-                emitter.emit("drawCalendar")
-                backgroundStore.returnGlobalPopup();
-                break;
-              default:
-                break;
-            }
-          });
-    });
-  },
+  // selectStatus(option: SelectOption, afterChange: () => void) {
+  //   PopupUtil.confirm("미션 상태 변경", `${option.text}(으)로 변경하시겠습니까?`, () => {
+  //     const requestBody = ChangeFamilyMissionAttribute.RequestBody.forStatus(props.missionId!, Number(option.value));
+  //     call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody,
+  //         (response) => {
+  //           const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
+  //           const changed = responseBody.changed;
+  //           const statusCode = changed.findState(props.timestamp)?.status ?? 0;
+  //           const status = MissionStatus.fromCode(statusCode);
+  //           switch (status) {
+  //             case MissionStatus.CREATED:
+  //               alertStore.info("미션 초기화", "미션이 사직 전 상태로 변경되었어요.")
+  //               methods.fetchMissionDetail();
+  //               break;
+  //             case MissionStatus.IN_PROGRESS:
+  //               alertStore.guide("상태 변경", `미션이 시작되었습니다. 남은 시간 안에 완료할 수 있도록 노력하세요!`);
+  //               methods.fetchMissionDetail();
+  //               emitter.emit("drawCalendar")
+  //               break;
+  //             case MissionStatus.COMPLETED:
+  //               alertStore.success("미션 클리어!", `"${state.detail.name}" 미션을 완료하였습니다.`);
+  //               emitter.emit("drawCalendar")
+  //               backgroundStore.returnGlobalPopup();
+  //               break;
+  //             default:
+  //               break;
+  //           }
+  //         });
+  //   });
+  // },
 
   selectMember(member: SelectImageOption, afterChange: () => void) {
     if (member.id === props.detail.assignee) {

@@ -2,10 +2,10 @@
   <div class="mission-detail-container">
     <div class="detail-header-wrapper" v-if="state.detail">
       <ModifiableTitle :title="state.detail.name" :before-change="methods.modifyTitle"/>
-      <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features"/>
+      <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features as Array<ExecutableFeature>"/>
     </div>
-    <MissionState v-if="state.detail" :detail="state.detail" :status="state.status" :members="state.members"/>
-    <MissionComments v-if="state.detail" :mission="props.mission" :detail="state.detail"/>
+    <MissionState v-if="state.detail" :detail="state.detail as MissionDetail" :status="state.status" :members="state.members as Array<SelectImageOption>"/>
+    <MissionComments v-if="state.detail" :mission="props.mission as CalendarWeekMission" :detail="state.detail"/>
     <div class="deadline-timer"
          v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
       <div class="timer-count-wrapper">
@@ -40,6 +40,7 @@ import MissionState from "@/components/mission/MissionState.vue";
 import MissionComments from "@/components/mission/MissionComments.vue";
 import CalendarWeekMission from "@/classes/CalendarWeekMission";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
+import SelectImageOption from '@/classes/api-spec/SelectImageOption'
 
 
 const emitter: any = inject("emitter");

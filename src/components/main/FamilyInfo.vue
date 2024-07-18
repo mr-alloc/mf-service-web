@@ -17,7 +17,7 @@ import {useAlertStore} from "@/stores/AlertStore";
 import IconButton from "@/components/global/IconButton.vue";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 
-const emitter = inject("emitter")!;
+const emitter: any = inject("emitter")!;
 const alertStore = useAlertStore();
 const familiesViewStore = useFamiliesViewStore();
 const methods = {

@@ -25,7 +25,7 @@
       </li>
     </TransitionGroup>
     <div class="new-comment-area">
-      <ImageNicknamePair :option="state.currentMember"/>
+      <ImageNicknamePair :option="state.currentMember as SelectImageOption"/>
       <div class="comments-input">
         <BlinkTextArea ref="commentInput" place-holder="타인을 존중하는 마음으로 댓글을 작성해요!" :on-input="methods.whenCommentInput"/>
         <SimpleButton button-name="작성" :submittable="state.isSubmittable" :click-behavior="methods.submitComment"/>

@@ -4,12 +4,14 @@ import PageButtonGroup from "@/components/PageButtonGroup.vue";
 import {DefaultButtonValue} from "@/classes/DefaultButtonValue";
 import {inject, reactive} from "vue";
 import PopupUtil from "@/utils/PopupUtil";
+import TemporalUtil from '@/utils/TemporalUtil'
 
 
 const emitter = inject("emitter");
 const state = reactive({
   buttons: [
-    new DefaultButtonValue("미션 생성", ["fas", "calendar-plus"], () => PopupUtil.popupCreateMission(emitter))
+    new DefaultButtonValue("미션 생성", ["fas", "calendar-plus"], () =>
+      PopupUtil.popupCreateMission(emitter, TemporalUtil.getEpochSecond(false)))
   ]
 });
 </script>
@@ -28,7 +30,7 @@ const state = reactive({
         </li>
       </ul>
     </div>
-    <PageButtonGroup :buttons="state.buttons"/>
+    <PageButtonGroup :buttons="state.buttons as Array<DefaultButtonValue>"/>
   </div>
 </template>
 

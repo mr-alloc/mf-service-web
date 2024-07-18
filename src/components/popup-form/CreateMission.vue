@@ -4,7 +4,7 @@
       <div class="mission-form" id="create-mission-form">
         <SimpleSelector ref="missionAssigneeInput" id="mission-assignee" name="assignee" title="수행자"
                         default-option-name="멤버 선택"
-                        :options="state.members"
+                        :options="state.members as Array<SelectImageOption>"
                         v-if="ownFamiliesStore.hasSelectFamily && state.missionType.isNotIn(MissionType.SCHEDULE)"/>
         <BlinkSelect ref="missionTypeInput" id="mission-type" title="미션종류" :options="state.missionOptions"
                      name="missionType"

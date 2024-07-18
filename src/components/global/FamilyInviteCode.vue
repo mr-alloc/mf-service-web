@@ -21,7 +21,7 @@ import BlinkTextArea from "@/components/global/BlinkTextArea.vue";
 
 const alertStore = useAlertStore();
 const backgroundStore = useBackgroundStore();
-const emitter = inject("emitter");
+const emitter: any = inject("emitter");
 
 const inviteCodeRE = /^[a-f0-9]{32}$/i
 const state = reactive({

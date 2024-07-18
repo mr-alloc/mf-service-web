@@ -1,14 +1,29 @@
 export class RequestBody {
-    readonly inviteCode: string;
-    readonly introduce: string;
+    private readonly _inviteCode: string;
+    private readonly _introduce: string;
 
     constructor(inviteCode: string, introduce: string) {
-        this.inviteCode = inviteCode;
-        this.introduce = introduce;
+        this._inviteCode = inviteCode;
+        this._introduce = introduce;
     }
 
     static of(inviteCode: string, introduce: string): RequestBody {
         return new RequestBody(inviteCode, introduce);
+    }
+
+    get inviteCode(): string {
+        return this._inviteCode;
+    }
+
+    get introduce(): string {
+        return this._introduce;
+    }
+
+    toJSON() {
+        return {
+            "invite_code": this._inviteCode,
+            "introduce": this._introduce
+        };
     }
 }
 
