@@ -3,7 +3,6 @@ LABEL authors="devisitem"
 
 # install simple http server for serving static content
 RUN npm install -g http-server
-RUN npm install --global yarn
 
 # make the 'app' folder the current working directory
 WORKDIR /app
