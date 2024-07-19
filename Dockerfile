@@ -10,7 +10,7 @@ WORKDIR /app
 # copy both 'package.json' and 'package-lock.json' (if available)
 
 # install project dependencies
-RUN apk add make python3
+RUN apk add --no-cache make gcc g++ python3
 
 # copy project files and folders to the current working directory (i.e. 'app' folder)
 COPY . ./
@@ -21,4 +21,4 @@ RUN yarn install
 RUN yarn build-only
 
 EXPOSE 5173
-CMD [ "http-server", "dist" ]
+CMD [ "http-server", "-p 5173", "dist" ]
