@@ -102,7 +102,7 @@ const props = defineProps({
   </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 
 .global-popup-area {
   position: relative;

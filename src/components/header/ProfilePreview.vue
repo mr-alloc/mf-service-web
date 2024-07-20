@@ -48,7 +48,7 @@ const methods = {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .user-session-info {
   padding: 3px;

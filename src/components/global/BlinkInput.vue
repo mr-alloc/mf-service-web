@@ -103,7 +103,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 .input-wrapper {
   padding: 5px 0;
   width: 100%;

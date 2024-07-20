@@ -22,7 +22,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .icon-button-container {
   margin: 0 5px;

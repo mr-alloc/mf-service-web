@@ -120,7 +120,7 @@ const methods = {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/main';
+@import '@assets/main';
 
 .sign-in-container {
   display: flex;

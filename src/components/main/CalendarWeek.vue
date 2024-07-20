@@ -61,7 +61,7 @@ const methods = {
 
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .calendar-week-container {
   position: relative;

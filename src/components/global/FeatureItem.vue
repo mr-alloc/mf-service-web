@@ -23,7 +23,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 
 .item-wrapper {
   width: 100%;

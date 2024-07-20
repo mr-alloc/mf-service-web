@@ -26,7 +26,7 @@ const props = defineProps({
 })
 </script>
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 
 .loading-spinner-wrapper {
   width: 250px;

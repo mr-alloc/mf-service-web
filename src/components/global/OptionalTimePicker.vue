@@ -112,7 +112,7 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .optional-time-picker-container {
   transition: $duration;

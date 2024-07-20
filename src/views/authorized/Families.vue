@@ -54,7 +54,7 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .families-container {
   max-width: 768px;

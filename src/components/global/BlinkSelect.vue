@@ -73,7 +73,7 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="scss">
-@import "@/assets/main.scss";
+@import "@assets/main.scss";
 
 $option-height: 25px;
 .blink-select-container {

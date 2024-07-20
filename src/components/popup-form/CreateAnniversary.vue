@@ -104,7 +104,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .create-anniversary-container {
   padding: 20px;

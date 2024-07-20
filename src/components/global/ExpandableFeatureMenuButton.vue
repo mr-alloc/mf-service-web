@@ -36,7 +36,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .expandable-feature-menu-button {
   display: flex;

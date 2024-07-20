@@ -139,7 +139,7 @@ onBeforeMount(async () => {
 });
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .mission-detail-container {
   overflow-y: scroll;

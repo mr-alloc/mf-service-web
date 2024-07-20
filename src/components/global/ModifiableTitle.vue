@@ -39,7 +39,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .modifiable-title-container {
   display: flex;

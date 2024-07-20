@@ -54,7 +54,7 @@ const state = reactive({
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 
 .notifications-wrapper {
   width: 250px;

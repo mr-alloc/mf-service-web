@@ -30,7 +30,7 @@ const memberInfoStore = useMemberInfoStore();
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/main';
+@import '@assets/main';
 
 header {
   display: flex;

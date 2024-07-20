@@ -33,7 +33,7 @@ defineExpose({
   </div>
 </template>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .blink-textarea-container {
   padding: 5px 8px;

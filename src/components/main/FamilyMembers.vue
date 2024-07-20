@@ -40,7 +40,7 @@ const methods = {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .family-members-container {
   margin: 34px 0;

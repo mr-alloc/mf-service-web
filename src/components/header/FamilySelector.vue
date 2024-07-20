@@ -78,7 +78,7 @@ const methods = {
   </div>
 </template>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .select-container {
   position: relative;

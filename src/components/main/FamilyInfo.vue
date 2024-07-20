@@ -35,7 +35,7 @@ onMounted(() => {
 });
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .family-info-container {
   margin: 1.5rem 0;

@@ -24,7 +24,7 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .status-indicator-container {
 

@@ -97,7 +97,7 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .simple-selector-container {
   padding: 0;

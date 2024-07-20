@@ -30,7 +30,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .main-container {
   background-color: $soft-dark;

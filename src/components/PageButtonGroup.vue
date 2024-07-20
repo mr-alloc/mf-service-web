@@ -27,7 +27,7 @@ const props = defineProps({
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .option-button-group {
   width: max-content;

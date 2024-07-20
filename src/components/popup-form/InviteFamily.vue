@@ -18,7 +18,7 @@ const state = reactive({
 
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .invite-family-container {
   display: flex;

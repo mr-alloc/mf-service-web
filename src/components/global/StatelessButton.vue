@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .stateless-button-container {
   padding: 5px;

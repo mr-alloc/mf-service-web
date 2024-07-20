@@ -42,7 +42,7 @@ const methods = {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 .simple-button {
   display: flex;
   justify-content: center;

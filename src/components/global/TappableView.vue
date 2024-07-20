@@ -28,7 +28,7 @@ const state = reactive({
 });
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .tappable-view-container {
   margin: 1.5rem 0;

@@ -105,7 +105,7 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/main.scss';
+@import '@assets/main.scss';
 
 .member-profile {
   padding: 30px 15px;

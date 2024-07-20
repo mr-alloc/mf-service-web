@@ -22,7 +22,7 @@ const props = defineProps({
 })
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .select-item {
   display: flex;

@@ -149,7 +149,7 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .mission-comments-container {
   display: flex;

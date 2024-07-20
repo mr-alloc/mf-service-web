@@ -117,7 +117,7 @@ const methods = {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/main";
+@import "@assets/main";
 
 .sign-up-container {
   max-width: 400px;

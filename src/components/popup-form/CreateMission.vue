@@ -222,7 +222,7 @@ const methods = {
 }
 </script>
 <style scoped lang="scss">
-@import "@/assets/main.scss";
+@import "@assets/main.scss";
 
 .create-mission-container {
   display: flex;

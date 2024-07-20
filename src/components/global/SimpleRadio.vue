@@ -89,7 +89,7 @@ defineExpose({
 })
 </script>
 <style scoped lang="scss">
-@import "@/assets/main.scss";
+@import "@assets/main.scss";
 
 .simple-radio-container {
   padding: 0;
