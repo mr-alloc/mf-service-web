@@ -58,7 +58,6 @@ export class CurrentPopup {
         if (timeoutSecond) {
             setTimeout(() => {
                 this._cancelConfirm = false;
-                console.log('Cancel confirm timeout')
             }, timeoutSecond * 1000);
         }
     }

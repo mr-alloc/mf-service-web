@@ -58,6 +58,7 @@ const methods = {
   }
 
   .expandable-features {
+    z-index: 1;
     position: absolute;
     right: 3px;
     bottom: -25px;

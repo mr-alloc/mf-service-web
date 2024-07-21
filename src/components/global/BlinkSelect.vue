@@ -68,6 +68,7 @@ defineExpose({
 onMounted(() => {
   state.selectOption = props.options?.[0] as SelectOption;
   if (props.currentIndex) {
+    state.selectOption = props.options?.[props.currentIndex] as SelectOption;
     Array.from(select.value?.options!).filter((opt, idx) => idx === props.currentIndex).forEach(opt => opt.selected = true);
   }
 })

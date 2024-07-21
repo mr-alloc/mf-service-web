@@ -79,8 +79,6 @@ function getCalendarWeeks(momentValue: Moment, calculatedWith?: (startOfCalendar
     const startOfCalendar = startOfThisMonth.clone().subtract(startOfThisMonth.day(), 'days');
     const endOfThisMonth = moment(momentValue).endOf('month');
     const endOfCalendar = endOfThisMonth.clone().add(7 - (endOfThisMonth.day() + 1), 'days');
-    console.log(`달력 ${startOfCalendar.format(DEFAULT_DATE_FORMAT)} ~ ${endOfCalendar.format(DEFAULT_DATE_FORMAT)}`);
-    console.log(`이번달 ${startOfThisMonth.format(DEFAULT_DATE_FORMAT)} ~ ${endOfThisMonth.format(DEFAULT_DATE_FORMAT)}`);
 
     calculatedWith && calculatedWith(startOfCalendar, startOfThisMonth, endOfThisMonth, endOfCalendar);
     const totalDays = [...new Array(endOfCalendar.diff(startOfCalendar, 'days') + 1).keys()]

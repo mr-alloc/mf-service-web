@@ -4,22 +4,22 @@
       <ModifiableTitle :title="state.detail.name" :before-change="methods.modifyTitle"/>
       <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features as Array<ExecutableFeature>"/>
     </div>
-    <MissionState v-if="state.detail" :detail="state.detail as MissionDetail" :status="state.status" :members="state.members as Array<SelectImageOption>"/>
+    <MissionState v-if="state.detail" :state-time="props.mission.startAt" :detail="state.detail as MissionDetail" :status="state.status" :state-id="state.stateId" :members="state.members as Array<SelectImageOption>"/>
+<!--    <div class="deadline-timer" v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">-->
+<!--      <div class="timer-count-wrapper">-->
+<!--        <span class="guide-text signature-shiny">남은 시간</span>-->
+<!--        <span class="remain-time">{{ state.remainTimeStr }}</span>-->
+<!--      </div>-->
+<!--      <div class="fuse-wire-wrapper">-->
+<!--        <span class="progress-fuse-wire"></span>-->
+<!--      </div>-->
+<!--    </div>-->
+    <MarkdownTextarea v-if="state.detail" :content="state.detail?.description" />
     <MissionComments v-if="state.detail" :mission="props.mission as CalendarWeekMission" :detail="state.detail"/>
-    <div class="deadline-timer"
-         v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
-      <div class="timer-count-wrapper">
-        <span class="guide-text signature-shiny">남은 시간</span>
-        <span class="remain-time">{{ state.remainTimeStr }}</span>
-      </div>
-      <div class="fuse-wire-wrapper">
-        <span class="progress-fuse-wire"></span>
-      </div>
-    </div>
   </div>
 </template>
 <script setup lang="ts">
-import {inject, onBeforeMount, reactive} from "vue";
+import { inject, onBeforeMount, onMounted, reactive } from 'vue'
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import PopupUtil from "@/utils/PopupUtil";
 import {useAlertStore} from "@/stores/AlertStore";
@@ -41,11 +41,12 @@ import MissionComments from "@/components/mission/MissionComments.vue";
 import CalendarWeekMission from "@/classes/CalendarWeekMission";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import SelectImageOption from '@/classes/api-spec/SelectImageOption'
+import BlinkTextArea from '@/components/global/BlinkTextArea.vue'
+import MarkdownTextarea from '@/components/MarkdownTextarea.vue'
 
 
 const emitter: any = inject("emitter");
 const backgroundStore = useBackgroundStore();
-const ownFamiliesStore = useOwnFamiliesStore();
 const familiesViewStore = useFamiliesViewStore();
 const alertStore = useAlertStore();
 const props = defineProps<{
@@ -63,7 +64,6 @@ const methods = {
       call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody, (response) => {
         const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
         const changed = responseBody.changed;
-        console.log(`changed: ${changed.name}, title: ${title} = ${changed.name === title}`);
         if (changed.name === title) {
           alertStore.success("이름 변경", '미션명이 변경 되었어요.');
           state.detail = responseBody.changed;
@@ -97,6 +97,7 @@ const methods = {
         state.remainTimeStr = '완료';
         return;
     }
+    if (state.remainSeconds <= 0) return;
     state.remainTimeStr = TemporalUtil.secondsToTimeStr(state.remainSeconds--);
   },
   countRemainTime() {
@@ -134,8 +135,12 @@ const state = reactive({
   remainSeconds: 0,
   remainTimeStr: '00:00:00'
 });
-onBeforeMount(async () => {
+onMounted(async () => {
   await methods.fetchMissionDetail();
+
+  emitter.on("fetchMissionDetail", async () => {
+    await methods.fetchMissionDetail();
+  });
 });
 </script>
 <style scoped lang="scss">
@@ -206,6 +211,7 @@ onBeforeMount(async () => {
   }
 
   .deadline-timer {
+    padding: 0 20px;
 
     .timer-count-wrapper {
       display: flex;

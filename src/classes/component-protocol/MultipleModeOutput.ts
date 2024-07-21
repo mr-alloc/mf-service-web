@@ -4,8 +4,8 @@ import ScheduleMode from "@/constant/ScheduleMode";
 export default class MultipleModeOutput implements IDatePickerOutput {
 
     private readonly _scheduleMode = ScheduleMode.MULTIPLE;
-    private _scheduleTime: number;
     private readonly _selectedTimestamps: Set<number>;
+    private _scheduleTime: number;
 
     constructor(selectedTimestamps: Set<number>) {
         this._selectedTimestamps = selectedTimestamps;
@@ -21,7 +21,7 @@ export default class MultipleModeOutput implements IDatePickerOutput {
     }
 
     setScheduleTime(scheduleTime: number): void {
-        this._selectedTimestamps.add(scheduleTime);
+        this._scheduleTime = scheduleTime;
     }
 
 

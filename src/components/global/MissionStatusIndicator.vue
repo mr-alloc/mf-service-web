@@ -33,7 +33,6 @@ onMounted(() => {
     width: max-content;
     padding: 2px 5px;
     border-radius: 5px;
-    border: 1px solid #ffa7a7;
 
     &.created {
       background-color: #ffdada;
@@ -42,6 +41,11 @@ onMounted(() => {
       .status-alias {
         color: #d13030;
       }
+    }
+
+    &.in-progress {
+      background-color: #cbeeff;
+      border: 1px solid #309fe3;
     }
 
     &.always {

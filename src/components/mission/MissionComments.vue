@@ -220,7 +220,7 @@ onMounted(() => {
               word-break: break-all;
               overflow-wrap: break-word; /* 내용이 넘칠 경우 줄바꿈 */
 
-              border-radius: 3px 15px 15px 15px;
+              border-radius: 3px 10px 10px 10px;
               display: inline-block;
               margin-left: 25px;
             }
@@ -254,7 +254,7 @@ onMounted(() => {
 
 
             .comment-text {
-              border-radius: 15px 3px 15px 15px;
+              border-radius: 10px 3px 10px 10px;
               background-color: $standard-dark-gray-in-white;
               color: white;
               transition: $duration;

@@ -294,7 +294,6 @@ defineExpose({
   extractResult: methods.extractResult
 })
 onMounted(() => {
-  console.log(`timestamp: ${props.timestamp}`);
   const momentValue = TemporalUtil.toMoment(props.timestamp, true);
   state.calendarDays = DateUtil.getCalendarDays(momentValue);
   state.selected.add(props.timestamp);
