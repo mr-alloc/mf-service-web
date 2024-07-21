@@ -18,6 +18,7 @@ COPY . ./
 # build app for production with minification
 RUN vite --version
 RUN yarn install
+RUN yarn build-only
 
 EXPOSE 5173
-CMD [ "yarn", "dev" ]
+CMD [ "yarn", "preview" ]
