@@ -21,4 +21,4 @@ RUN yarn install
 RUN yarn build-only
 
 EXPOSE 5173
-CMD ["yarn", "dev"]
+CMD [ "http-server", "-p 5173", "dist" ]
