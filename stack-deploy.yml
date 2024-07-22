@@ -1,0 +1,11 @@
+services:
+  web:
+    image: ghcr.io/devisitem/mf-service-api
+    ports:
+      - "5173:5173"
+    networks:
+      - mf_network
+
+networks:
+  mf_network:
+    external: true
