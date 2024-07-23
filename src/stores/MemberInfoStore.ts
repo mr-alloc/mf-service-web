@@ -3,7 +3,7 @@ import {ref} from "vue";
 import {call} from "@/utils/NetworkUtil";
 import MemberAPI from "@/constant/api-meta/Member";
 import {removeAccessToken} from "@/utils/LocalCache";
-import {useRouter} from "vue-router";
+import { useRoute, useRouter } from 'vue-router'
 import {type IProfileMember, useProfileMemberStore} from "@/stores/ProfileMemberStore";
 import LocalAsset from "@/constant/LocalAsset";
 import {AccountRole} from "@/constant/AccountRole";
@@ -27,12 +27,6 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
 
     function removeMemberInfo() {
         memberInfo.value = ProfileMember.ofDefault();
-    }
-
-    function removeMemberInfoAndGo(path: string) {
-        removeMemberInfo();
-        const router = useRouter();
-        router.push(path);
     }
 
     async function fetchMemberInfo() {
@@ -72,7 +66,6 @@ export const useMemberInfoStore = defineStore('memberInfo', () => {
         removeMemberInfo,
         fetchMemberInfo,
         getCurrentAccountRole,
-        removeMemberInfoAndGo
     }
 })
 

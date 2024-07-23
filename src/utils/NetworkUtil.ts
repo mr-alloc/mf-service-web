@@ -12,7 +12,7 @@ import {type AlertStore, useAlertStore} from "@/stores/AlertStore";
 import {useMemberInfoStore} from "@/stores/MemberInfoStore";
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 
-axios.defaults.baseURL = "http://mimily-api.dev.zibi.co";
+axios.defaults.baseURL = "http://localhost:9090";
 axios.interceptors.response.use(
     response => response,
     async error => {
@@ -32,7 +32,7 @@ axios.interceptors.response.use(
 
 async function handleUnAuthorized() {
     const memberInfoStore = useMemberInfoStore();
-    memberInfoStore.removeMemberInfoAndGo("/refresh");
+    memberInfoStore.removeMemberInfo();
 }
 
 function handleForbidden(error: AxiosError, alertStore: AlertStore) {

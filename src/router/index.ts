@@ -15,6 +15,8 @@ import Missions from "@/views/authorized/Missions.vue";
 import Families from "@/views/authorized/Families.vue";
 import MainCalendar from "@/views/MainCalendar.vue";
 import RefreshToken from "@/views/RefreshToken.vue";
+import type ApiSpecification from '@/constant/api-meta/ApiSpecification'
+import { AxiosError } from 'axios'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -99,7 +101,13 @@ router.beforeEach(async (to, from, next) => {
                 memberInfoStore.updateMemberInfo(new ProfileMember(id, nickname, role, profileImageUrl))
                 ownFamiliesStore.fetchOwnFamiliesAsync(true);
                 return;
-            });
+            },
+            (spec: ApiSpecification, error: AxiosError) => {
+                if (error.response?.status === 401) {
+                    return next({ path: '/refresh' });
+                }
+            }
+          );
 
         const memberInfo = memberInfoStore.memberInfo;
         const authorityRole: number = memberInfo.role

@@ -1,8 +1,13 @@
+version: '3.9'
+
 services:
   web:
     image: ghcr.io/devisitem/mf-service-web
     ports:
       - "5173:5173"
+    deploy:
+      update_config:
+        order: start-first
     networks:
       - mf_network
 
