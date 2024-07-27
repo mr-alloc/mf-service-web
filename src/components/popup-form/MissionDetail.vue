@@ -77,7 +77,7 @@ const methods = {
     }, () => afterChange(true));
   },
   deleteMission(event?: Event) {
-    PopupUtil.innerConfirm("미션 삭제", "미션을 삭제하시겠습니까?", () => {
+    PopupUtil.confirm("미션 삭제", "미션을 삭제하시겠습니까?", () => {
       call<any, DeleteMission.ResponseBody>(Mission.DeleteMission, {missionId: props.mission.mission.id},
           (response) => {
             const responseBody = DeleteMission.ResponseBody.fromJson(response.data);
