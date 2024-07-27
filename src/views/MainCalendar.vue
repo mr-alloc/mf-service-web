@@ -112,12 +112,14 @@ const methods = {
 
     state.thisMonthKey = state.localMonth.format(DateUtil.YYYYMM);
   },
-  fetchMissionAndAnniversary() {
+  fetchMissionAndAnniversary(keepDetail?: boolean) {
     //미션,공휴일
     calendarStore.fetchOwnCalendar(state.startOfCalendar, state.startOfMonth, state.endOfMonth, state.endOfCalendar);
     //기념일
     calendarStore.fetchOwnAnniversaries();
-    currentComponent.value = null;
+    if (keepDetail === undefined || !keepDetail) {
+      currentComponent.value = null;
+    }
   },
   fetchCalenderSchedules() {
     this.fetchCalendar();
@@ -132,8 +134,8 @@ onMounted(() => {
   methods.fetchCalendar();
   methods.fetchMissionAndAnniversary();
 
-  emitter.on('drawCalendar', () => {
-    methods.fetchMissionAndAnniversary();
+  emitter.on('drawCalendar', (keepDetail: boolean) => {
+    methods.fetchMissionAndAnniversary(keepDetail);
   });
 
   emitter.on('familyChanged', () => {

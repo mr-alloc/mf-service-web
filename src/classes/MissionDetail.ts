@@ -8,11 +8,11 @@ export default class MissionDetail {
     private readonly _type: number;
     private readonly _schedule: ScheduleValue
     private readonly _states: Array<MissionState>
-    private readonly _deadline?: number;
+    private readonly _deadline: number;
     private readonly _reporter?: number;
     private readonly _assignee?: number;
 
-    constructor(id: number, name: string, description: string, type: number, schedule: ScheduleValue, states: Array<MissionState>, deadline?: number, reporter?: number, assignee?: number) {
+    constructor(id: number, name: string, description: string, type: number, schedule: ScheduleValue, states: Array<MissionState>, deadline: number, reporter?: number, assignee?: number) {
         this._id = id;
         this._name = name;
         this._description = description;
@@ -48,7 +48,7 @@ export default class MissionDetail {
         return this._states;
     }
 
-    get deadline(): number | undefined {
+    get deadline(): number {
         return this._deadline;
     }
 

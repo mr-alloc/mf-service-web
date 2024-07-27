@@ -5,15 +5,15 @@
       <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features as Array<ExecutableFeature>"/>
     </div>
     <MissionState v-if="state.detail" :state-time="props.mission.startAt" :detail="state.detail as MissionDetail" :status="state.status" :state-id="state.stateId" :members="state.members as Array<SelectImageOption>"/>
-<!--    <div class="deadline-timer" v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">-->
-<!--      <div class="timer-count-wrapper">-->
-<!--        <span class="guide-text signature-shiny">남은 시간</span>-->
-<!--        <span class="remain-time">{{ state.remainTimeStr }}</span>-->
-<!--      </div>-->
-<!--      <div class="fuse-wire-wrapper">-->
-<!--        <span class="progress-fuse-wire"></span>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div class="deadline-timer" v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
+      <div class="timer-count-wrapper">
+        <span class="guide-text signature-shiny">남은 시간</span>
+        <span class="remain-time">{{ state.remainTimeStr }}</span>
+      </div>
+      <div class="fuse-wire-wrapper">
+        <span class="progress-fuse-wire"></span>
+      </div>
+    </div>
     <MarkdownTextarea v-if="state.detail" :content="state.detail?.description" />
     <MissionComments v-if="state.detail" :mission="props.mission as CalendarWeekMission" :detail="state.detail"/>
   </div>
@@ -43,10 +43,10 @@ import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import SelectImageOption from '@/classes/api-spec/SelectImageOption'
 import BlinkTextArea from '@/components/global/BlinkTextArea.vue'
 import MarkdownTextarea from '@/components/MarkdownTextarea.vue'
+import { ex } from '@/utils/Undefinable'
 
 
 const emitter: any = inject("emitter");
-const backgroundStore = useBackgroundStore();
 const familiesViewStore = useFamiliesViewStore();
 const alertStore = useAlertStore();
 const props = defineProps<{
@@ -92,18 +92,28 @@ const methods = {
     });
   },
   calcRemainTime(currentStatus: MissionStatus) {
+    methods.calcRemainSeconds();
     switch (currentStatus) {
       case MissionStatus.COMPLETED:
         state.remainTimeStr = '완료';
         return;
     }
     if (state.remainSeconds <= 0) return;
-    state.remainTimeStr = TemporalUtil.secondsToTimeStr(state.remainSeconds--);
+    state.remainTimeStr = TemporalUtil.secondsToTimeStr(state.remainSeconds);
+  },
+  calcRemainSeconds() {
+    if (state.status === MissionStatus.IN_PROGRESS.code) {
+      const currentState = state.detail?.findStateById(state.stateId);
+      const expectedDeadline = ex(currentState?.concreteStartAt).num() + ex(state.detail?.deadline).num();
+      const timestamp = TemporalUtil.getEpochSecond(false);
+      state.remainSeconds = expectedDeadline <= timestamp ? 0 : expectedDeadline - timestamp;
+    } else {
+      state.remainSeconds = ex(state.detail?.deadline).num();
+    }
   },
   countRemainTime() {
-    // state.remainSeconds = state.detail.remainSeconds;
-    state.remainSeconds = 0;
     const currentStatus = MissionStatus.fromCode(state.status);
+    methods.calcRemainSeconds();
     methods.calcRemainTime(currentStatus);
     if (currentStatus === MissionStatus.IN_PROGRESS) {
       setInterval(methods.calcRemainTime, 1000);
@@ -116,7 +126,6 @@ const methods = {
       const missionState = state.detail.states.find(state => state.startAt === props.mission.startAt);
       state.stateId = missionState?.id ?? 0;
       state.status = missionState?.status ?? 0;
-      backgroundStore.readyPopup();
       methods.countRemainTime();
     });
   }

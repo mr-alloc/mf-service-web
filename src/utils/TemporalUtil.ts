@@ -22,7 +22,6 @@ function isAfterNoon(seconds: number): boolean {
 function secondsToTimeStr(remainSeconds: number, ignoreSeconds?: boolean) {
     let absRemainSeconds = Math.abs(remainSeconds);
     const isNegative = remainSeconds < 0;
-
     const days = Math.floor(absRemainSeconds / SECONDS_IN_DAY);
     absRemainSeconds -= days * SECONDS_IN_DAY;
     const hasSecondsMod = absRemainSeconds > 0;
@@ -41,9 +40,8 @@ function secondsToTimeStr(remainSeconds: number, ignoreSeconds?: boolean) {
 
     const dayPrefix = negativeStr + daysStr;
     const timeSuffix = hasSecondsMod
-        ? [hour, minute, second].filter((temporal, idx) => (ignoreSeconds && idx !== 2)).join(":")
+        ? [hour, minute, second].filter((temporal, idx) => !ignoreSeconds || (ignoreSeconds && idx !== 2)).join(":")
         : "00:00";
-
     return dayPrefix + timeSuffix;
 }
 

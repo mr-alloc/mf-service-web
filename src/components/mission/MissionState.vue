@@ -28,7 +28,7 @@
               <span>상태</span>
             </div>
             <div class="detail-content">
-              <MissionStatusTimeline  :state-id="props.stateId" :status="props.status" :detail="props.detail"/>
+              <MissionStatusTimeline  :state-id="props.stateId" :status="props.status" :detail="props.detail" :start-stamp="props.stateTime"/>
             </div>
           </div>
           <div class="detail-pair"

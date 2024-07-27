@@ -119,6 +119,7 @@ onMounted(() => {
     border-radius: 10px;
     overflow: hidden;
     top: 60px;
+    z-index: 1;
 
     .option-item-group {
       list-style: none;

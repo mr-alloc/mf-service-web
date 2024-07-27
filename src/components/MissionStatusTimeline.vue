@@ -26,7 +26,8 @@ const emitter: any = inject("emitter");
 const props = defineProps<{
   detail: MissionDetail,
   stateId: number,
-  status: number
+  status: number,
+  startStamp: number,
 }>();
 const state = reactive({
   missionStatuses: [MissionStatus.CREATED, MissionStatus.IN_PROGRESS, MissionStatus.COMPLETED]
@@ -34,7 +35,7 @@ const state = reactive({
 const methods = {
   selectStatus(status: MissionStatus) {
     PopupUtil.confirm("미션 상태 변경", `${status.name}(으)로 변경하시겠습니까?`, () => {
-      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forStatus(props.detail.id, Number(status.code));
+      const requestBody = ChangeFamilyMissionAttribute.RequestBody.forStatus(props.stateId, props.detail.id, Number(status.code), props.startStamp);
       call<ChangeFamilyMissionAttribute.RequestBody, ChangeFamilyMissionAttribute.ResponseBody>(Mission.ChangeMissionAttribute, requestBody,
         (response) => {
           const responseBody = ChangeFamilyMissionAttribute.ResponseBody.fromJson(response.data);
@@ -49,7 +50,7 @@ const methods = {
             case MissionStatus.IN_PROGRESS:
               alertStore.guide("상태 변경", `미션이 시작되었습니다. 남은 시간 안에 완료할 수 있도록 노력하세요!`);
               emitter.emit("fetchMissionDetail");
-              emitter.emit("drawCalendar")
+              emitter.emit("drawCalendar", true)
               break;
             case MissionStatus.COMPLETED:
               alertStore.success("미션 클리어!", `"${props.detail.name}" 미션을 완료하였습니다.`);

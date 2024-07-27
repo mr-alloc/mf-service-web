@@ -76,4 +76,5 @@ export default class MissionStatus {
     static fromValue(status: number): MissionStatus {
         return MissionStatus.CACHED.get(status) ?? MissionStatus.CREATED;
     }
+
 }

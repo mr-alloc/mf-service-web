@@ -135,7 +135,7 @@ const methods = {
     }
     state.isValidAssignee = !ownFamiliesStore.hasSelectFamily || inputValues.assignee !== 0 || state.missionType.value === MissionType.SCHEDULE.value;
     if (!state.isValidAssignee) {
-      PopupUtil.innerAlert(PopupType.INFO, "수행자 미지정", "수행자를 선택해 주세요.");
+      PopupUtil.alert("수행자 미지정", "수행자를 선택해 주세요.");
     }
     return state.isValidAssignee;
   },
@@ -199,7 +199,6 @@ const methods = {
     methods.checkAllInput();
 
     if (!state.isSubmittable) {
-      PopupUtil.innerAlert(PopupType.INFO, "생성 실패", "입력값을 확인해주세요.");
       return;
     }
 

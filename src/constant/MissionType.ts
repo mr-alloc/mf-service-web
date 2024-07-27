@@ -6,8 +6,8 @@ export default class MissionType {
     static readonly NONE = new MissionType(-1, '');
     static readonly SCHEDULE = new MissionType(0, '일정');
     static readonly MISSION = new MissionType(1, '일반미션');
-    static readonly PACKAGE = new MissionType(2, '미션팩');
-    static readonly STEP = new MissionType(3, '단계미션');
+    // static readonly PACKAGE = new MissionType(2, '미션팩');
+    // static readonly STEP = new MissionType(3, '단계미션');
 
     private static readonly CACHED = CollectionUtil.toMap(MissionType.values(), (type) => type.value);
     static readonly toSelectOption = (type: MissionType) => new SelectOption(type.value.toString(), type.name);
@@ -43,8 +43,8 @@ export default class MissionType {
         return [
             MissionType.SCHEDULE,
             MissionType.MISSION,
-            MissionType.PACKAGE,
-            MissionType.STEP
+            // MissionType.PACKAGE,
+            // MissionType.STEP
         ];
     }
 
