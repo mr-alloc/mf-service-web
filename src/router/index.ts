@@ -48,9 +48,6 @@ router.afterEach((to, from) => {
         case '/missions':
             leftMenuStore.state.activeMissionMenu = true;
             break;
-        case '/new-calendar':
-            leftMenuStore.state.activeNewCalendarMenu = true;
-            break;
     }
 });
 router.beforeEach(async (to, from, next) => {
@@ -120,6 +117,6 @@ router.beforeEach(async (to, from, next) => {
     }
     console.debug('All pass router guard')
     return next()
-})
+});
 
 export default router
