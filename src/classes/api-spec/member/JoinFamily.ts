@@ -21,8 +21,8 @@ export class RequestBody {
 
     toJSON() {
         return {
-            "invite_code": this._inviteCode,
-            "introduce": this._introduce
+            inviteCode: this._inviteCode,
+            introduce: this._introduce
         };
     }
 }
