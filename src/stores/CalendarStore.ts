@@ -177,7 +177,12 @@ export const useCalendarStore = defineStore('calendar', () => {
                     .forEach((layer) => {
                         //레이어별로 그려줘야 하기때문에, 이미 레이어에 미션이 정해지면, 다음 레이어로 넘어간다.
                         const entry = [...thisWeekMissions.entries()]
-                            .sort((pre, cur) => pre[1].startAt - cur[1].startAt)
+                            .sort((pre, cur) => {
+                                const modularOfA = pre[1].mission.endAt - pre[1].mission.startAt
+                                const modularOfB = cur[1].mission.endAt - cur[1].mission.startAt
+                                //장기 일정 우선정렬 및 시작시간 정렬
+                                return modularOfB - modularOfA || pre[1].startAt - cur[1].startAt
+                            })
                             //오늘 시작하는 미션
                             .find((mission) => day.timestamp <= mission[1].startAt && mission[1].startAt < (day.timestamp + TemporalUtil.SECONDS_IN_DAY));
                         if (!entry) return;

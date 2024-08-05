@@ -6,12 +6,14 @@ export default {
         .andDefaultMessage("이메일 형식이 올바르지 않습니다.")
         .andPairs([
             [-1, "이메일 형식이 올바르지 않습니다."],
-            [-3, "이미 사용중인 이메일 입니다."]
+            [-3, "이미 사용중인 이메일 입니다."],
+            [-8, "사전가입 대상이 아닙니다."]
         ]),
     CreateAccount: Spec.of(HttpMethod.POST, "/v1/account/create")
         .andPairs([
             [-1, "이메일 형식이 올바르지 않습니다."],
-            [-3, "이미 사용중인 이메일 입니다."]
+            [-3, "이미 사용중인 이메일 입니다."],
+            [-8, "사전가입 대상이 아닙니다."]
         ]),
     VerifyAccount: Spec.of(HttpMethod.POST, "/v1/account/verify")
         .andDefaultMessage("계정 인증 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
