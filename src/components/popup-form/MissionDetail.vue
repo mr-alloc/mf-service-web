@@ -4,7 +4,10 @@
       <ModifiableTitle :title="state.detail.name" :before-change="methods.modifyTitle"/>
       <ExpandableFeatureMenuButton :icon="['fas', 'ellipsis-vertical']" :executable-features="state.features as Array<ExecutableFeature>"/>
     </div>
-    <MissionState v-if="state.detail" :state-time="props.mission.startAt" :detail="state.detail as MissionDetail" :status="state.status" :state-id="state.stateId" :members="state.members as Array<SelectImageOption>"/>
+    <MissionState v-if="state.detail" :state-time="props.mission.startAt"
+                  :detail="state.detail as MissionDetail"
+                  :status="MissionStatus.fromValue(state.status)" :state-id="state.stateId"
+                  :members="state.members as Array<SelectImageOption>"/>
     <div class="deadline-timer" v-if="state.detail && MissionType.fromValue(state.detail.type).isNotIn(MissionType.SCHEDULE)">
       <div class="timer-count-wrapper">
         <span class="guide-text signature-shiny">남은 시간</span>

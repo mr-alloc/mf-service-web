@@ -14,13 +14,12 @@
       </div>
       <Transition name="down-fade-smooth">
         <div class="collapse-area" v-show="state.openDetail">
-          <div class="detail-pair" v-if="MissionStatus.fromCode(props.status).isNotIn(MissionStatus.ALWAYS)">
+          <div class="detail-pair" v-if="props.status.isNotIn(MissionStatus.ALWAYS)">
             <div class="state-text">
               <span>미션 종류</span>
             </div>
             <div class="detail-content">
-              <BlinkSelect id="mission-type" :options="state.typeOptions" :before-change="methods.selectType"
-                           :current-index="state.typeOptions.findIndex(option => option.value === `${props.detail.type}`)"/>
+              {{ MissionType.fromValue(props.detail.type).name }}
             </div>
           </div>
           <div class="detail-pair" v-if="MissionType.fromValue(props.detail.type).isNotIn(MissionType.SCHEDULE)">
@@ -28,11 +27,11 @@
               <span>상태</span>
             </div>
             <div class="detail-content">
-              <MissionStatusTimeline  :state-id="props.stateId" :status="props.status" :detail="props.detail" :start-stamp="props.stateTime"/>
+              <MissionStatusTimeline :status="props.status" />
             </div>
           </div>
           <div class="detail-pair"
-               v-if="ownFamiliesStore.hasSelectFamily && MissionStatus.fromCode(props.status).isNotIn(MissionStatus.ALWAYS)">
+               v-if="ownFamiliesStore.hasSelectFamily && props.status.isNotIn(MissionStatus.ALWAYS)">
             <div class="state-text">
               <span>담당자</span>
             </div>
@@ -51,6 +50,7 @@
                   :option="props.members.find(member => member.id === props.detail.reporter) ?? SelectImageOption.of(0, profileStore.profileMember.nickname, LocalAsset.DEFAULT_USER_PROFILE)"/>
             </div>
           </div>
+          <MissionStatusChanger :status="props.status" :detail="props.detail" :state-id="props.stateId" :start-stamp="props.stateTime" />
         </div>
       </Transition>
     </div>
@@ -78,6 +78,7 @@ import MissionStatusIndicator from "@/components/global/MissionStatusIndicator.v
 import {useOwnFamiliesStore} from "@/stores/OwnFamiliesStore";
 import {useFamiliesViewStore} from "@/stores/FamiliesViewStore";
 import MissionStatusTimeline from '@/components/MissionStatusTimeline.vue'
+import MissionStatusChanger from '@/components/global/MissionStatusChanger.vue'
 
 const emitter: any = inject("emitter");
 const ownFamiliesStore = useOwnFamiliesStore();
@@ -86,7 +87,7 @@ const alertStore = useAlertStore();
 const profileStore = useProfileMemberStore();
 const props = defineProps<{
   detail: MissionDetail,
-  status: number,
+  status: MissionStatus,
   stateId: number,
   stateTime: number,
   members: SelectImageOption [],

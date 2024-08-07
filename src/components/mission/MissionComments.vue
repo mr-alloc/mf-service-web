@@ -278,7 +278,6 @@ onMounted(() => {
 
 
             .comment-text {
-              border-radius: 10px 3px 10px 10px;
               background-color: $standard-dark-gray-in-white;
               color: white;
               transition: $duration;
