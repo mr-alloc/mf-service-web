@@ -5,13 +5,16 @@
     </div>
     <TransitionGroup name="fade" tag="ul" class="comments-wrapper">
       <li v-show="state.comments.length === 0" class="no-comment-text" :key="0">댓글이 없습니다.</li>
-      <li class="comment-item" :class="{ me: memberInfoStore.memberInfo.id === comment.memberId}"
+      <li class="comment-item" :class="{ me: memberInfoStore.memberInfo.id === comment.memberId }"
           v-for="(comment, index) in state.comments"
           :key="index">
         <div class="chatting-balloons-layer">
           <ImageNicknamePair v-if="memberInfoStore.memberInfo.id !== comment.memberId"
                              :option="methods.getMemberInfo(comment.memberId)"/>
-          <TransitionGroup tag="ul" class="text-balloons">
+          <TransitionGroup tag="ul" class="text-balloons" :class="{
+            one: comment.comments.length === 1,
+            'more-than-two': comment.comments.length >= 2
+          }">
             <li class="balloon-item" v-show="commentText" v-for="(commentText, index) in comment.comments" :key="index">
               <span class="comment-text">{{ commentText.content }}</span>
             </li>
@@ -217,13 +220,36 @@ onMounted(() => {
               white-space: pre-wrap;
               word-break: break-all;
               overflow-wrap: break-word; /* 내용이 넘칠 경우 줄바꿈 */
-
-              border-radius: 3px 10px 10px 10px;
               display: inline-block;
               margin-left: 25px;
             }
           }
 
+          &.one {
+            .balloon-item {
+              .comment-text {
+                border-radius: 10px;
+              }
+            }
+          }
+
+          &.more-than-two {
+            .balloon-item {
+              .comment-text {
+                border-radius: 3px 10px 10px 3px;
+              }
+              &:first-child {
+                .comment-text {
+                  border-radius: 10px 10px 10px 3px;
+                }
+              }
+              &:last-child {
+                .comment-text {
+                  border-radius: 3px 10px 10px 10px;
+                }
+              }
+            }
+          }
         }
 
         .time-area {
@@ -263,6 +289,23 @@ onMounted(() => {
               }
             }
 
+            &.more-than-two {
+              .balloon-item {
+                .comment-text {
+                  border-radius: 10px 3px 3px 10px;
+                }
+                &:first-child {
+                  .comment-text {
+                    border-radius: 10px 10px 3px 10px;
+                  }
+                }
+                &:last-child {
+                  .comment-text {
+                    border-radius: 10px 3px 10px 10px;
+                  }
+                }
+              }
+            }
           }
 
           .time-area {
@@ -273,6 +316,26 @@ onMounted(() => {
             }
           }
         }
+      }
+
+      &.one {
+        border-top-right-radius: 10px;
+      }
+
+      &.more-than-two {
+
+        .comment-text {
+          border-radius: 10px 3px 3px 10px;
+        }
+
+        :first-child {
+          border-radius: 10px 10px 3px 10px;
+        }
+
+        :last-child {
+          border-radius: 10px 3px 10px 10px;
+        }
+
       }
     }
   }
