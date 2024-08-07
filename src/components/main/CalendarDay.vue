@@ -1,10 +1,11 @@
 <template>
   <div class="each-day-item" :class="{
     anniversary: calendarStore.anniversaryMap.has(day.timestamp),
+    holiday: props.holidays.has(state.today.format('MM-DD'))
   }">
     <div class="item-header">
       <span class="date" :class="{ today: state.today.format('MMD') === state.now.format('MMD') }">
-        {{ methods.getCalendarDate() }}
+        {{ state.today.date() === 1 ? state.today.format('M/D') : state.today.format('D') }}
       </span>
     </div>
     <div class="item-body">
@@ -18,11 +19,13 @@ import moment from "moment-timezone";
 import type CalendarDate from "@/classes/CalendarDate";
 import {useCalendarStore} from "@/stores/CalendarStore";
 import type CalendarAnniversary from "@/classes/CalendarAnniversary";
+import type { CalendarHoliday } from '@/classes/api-spec/mission/GetMemberCalendar'
 
 const calendarStore = useCalendarStore();
 const props = defineProps<{
   timestamp: number,
   day: CalendarDate
+  holidays: Map<string, CalendarHoliday>
 }>();
 
 const state = reactive({
@@ -32,12 +35,6 @@ const state = reactive({
 });
 
 const methods = {
-  getCalendarDate() {
-    return state.today.date() === 1
-        ? state.today.format('M/D')
-        : state.today.format('D');
-
-  }
 }
 onMounted(() => {
 })
@@ -52,7 +49,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  flex: 1 1 0%;
+  flex: 1 1 0;
 
   &.selected {
     background-color: $super-light-signature-purple;
@@ -63,7 +60,23 @@ onMounted(() => {
   }
 
   &.anniversary {
-    background-color: #D8F4D7;
+    background-color: #dfe7fc;
+
+    .item-header {
+      .date {
+        color: $soft-blue;
+      }
+    }
+  }
+
+  &.holiday {
+    background-color: rgba(255, 0, 0, 0.11);
+
+    .item-header {
+      .date {
+        color: $soft-red;
+      }
+    }
   }
 
   .item-header {

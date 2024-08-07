@@ -20,6 +20,7 @@
                       v-for="([week, days]) in state.calendarWeeks.entries()"
                       :week="week"
                       :geometries="calendarStore.calendarScheduleMap.get(state.thisMonthKey)?.get(week) ?? []"
+                      :holidays="calendarStore.holidaysMap"
         />
       </div>
     </div>

@@ -4,17 +4,17 @@ import SelectImageOption from "@/classes/api-spec/SelectImageOption";
 import LocalAsset from "@/constant/LocalAsset";
 
 const select = ref<HTMLSelectElement | null>(null);
-const props = defineProps({
-  id: String,
-  name: String,
-  title: String,
+const props = defineProps<{
+  id: string,
+  name: string,
+  title: string,
   options: Array<SelectImageOption>,
-  defaultOptionName: String,
-  allowNoImage: Boolean,
-  defaultSelected: Number,
-  currentIndex: Number,
-  beforeChange: Function
-});
+  defaultOptionName: string,
+  allowNoImage: boolean,
+  defaultSelected: number,
+  currentIndex: number,
+  beforeChange: (option: SelectImageOption, afterChange: () => void) => void
+}>();
 const state = reactive({
   isSelectMode: false,
   selectedOption: SelectImageOption.ofDefault()
@@ -47,6 +47,7 @@ defineExpose({
 onMounted(() => {
   state.selectedOption = props.options?.[0] as SelectImageOption;
   if (props.currentIndex) {
+    state.selectedOption = props.options?.[props.currentIndex] as SelectImageOption
     Array.from(select.value?.options!).filter((opt, idx) => idx === props.currentIndex).forEach(opt => opt.selected = true);
   }
 })

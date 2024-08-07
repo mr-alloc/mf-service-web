@@ -1,14 +1,17 @@
 <template>
   <div class="calendar-week-container">
     <div class="background-area">
-      <CalendarDay v-for="day in props.days" :key="day.timestamp" :day="day" :timestamp="day.timestamp"/>
+      <CalendarDay v-for="day in props.days" :key="day.timestamp" :day="day" :timestamp="day.timestamp" :holidays="holidays"/>
     </div>
     <UseElementSize ref="scheduleArea" class="schedule-area" v-slot="{ width }">
       <div class="which-day-position">
         <div class="day-position" v-for="day in props.days" :key="day.timestamp"
              v-on:click="() => calendarStore.selectDate(day)"
-             :class="{ selected: calendarStore.timestamp === day.timestamp }">
-          <span class="specify-day-description">{{ methods.getAnniversaryName(day.timestamp) }}</span>
+             :class="{
+               selected: calendarStore.timestamp === day.timestamp,
+               holiday: holidays.has(day.value.format('MM-DD'))
+             }">
+          <span class="specify-day-description">{{ ex(holidays.get(day.value.format('MM-DD'))?.name).str() }}</span>
         </div>
       </div>
       <TransitionGroup name="fade">
@@ -20,7 +23,7 @@
                top: ((geometry.y * 20) - 20) +'px',
                width: ((width / 7) * geometry.width)+'px'
              }">
-          <div class="schedule-item-title">
+          <div class="schedule-item-title" :class="MissionType.fromValue(geometry.mission.mission.type).simpleName">
             <span class="title-text">{{ geometry.mission.mission.name }}</span>
           </div>
         </div>
@@ -36,6 +39,9 @@ import {WeekScheduleGeometry} from "@/classes/WeekScheduleGeometry";
 import {UseElementSize} from "@vueuse/components";
 import {useCalendarStore} from "@/stores/CalendarStore";
 import type CalendarAnniversary from "@/classes/CalendarAnniversary";
+import MissionType from '@/constant/MissionType'
+import type { CalendarHoliday } from '@/classes/api-spec/mission/GetMemberCalendar'
+import { ex } from '../../utils/Undefinable'
 
 const emitter: any = inject('emitter');
 const calendarStore = useCalendarStore();
@@ -44,6 +50,7 @@ const props = defineProps<{
   days: Array<CalendarDate>,
   week: number,
   geometries: Array<WeekScheduleGeometry>
+  holidays: Map<string, CalendarHoliday>
 }>();
 const methods = {
   clickSchedule(geometry: WeekScheduleGeometry, event: MouseEvent) {
@@ -103,21 +110,26 @@ const methods = {
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        flex: 1 1 0%;
+        flex: 1 1 0;
 
         &.selected {
           background-color: #c185e54f;
         }
 
         .specify-day-description {
-          text-wrap: no-wrap;
+          text-wrap: nowrap;
           overflow: hidden;
           padding-left: 30px;
           width: 100%;
           height: 20px;
-          font-size: .84rem;
+          font-size: .72rem;
           font-weight: bold;
           color: black;
+        }
+
+
+        &.holiday .specify-day-description {
+          color: $soft-red;
         }
       }
     }
@@ -146,6 +158,14 @@ const methods = {
 
         .title-text {
           user-select: none;
+        }
+
+        &.schedule {
+          background-color: #0a900a;
+        }
+
+        &.mission {
+          background-color: #113caa;
         }
       }
     }

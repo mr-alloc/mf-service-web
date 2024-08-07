@@ -194,7 +194,7 @@ const methods = {
     position: absolute;
     background-color: white;
     top: 35px;
-    z-index: 4;
+    z-index: 3;
     width: max-content;
     max-height: 180px;
     overflow-y: scroll;

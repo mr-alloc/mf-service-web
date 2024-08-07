@@ -3,9 +3,9 @@ import SelectOption from "@/classes/SelectOption";
 
 export default class MissionType {
 
-    static readonly NONE = new MissionType(-1, '');
-    static readonly SCHEDULE = new MissionType(0, '일정');
-    static readonly MISSION = new MissionType(1, '일반미션');
+    public static readonly NONE = new MissionType(-1, '', '');
+    public static readonly SCHEDULE = new MissionType(0, '일정', 'schedule');
+    public static readonly MISSION = new MissionType(1, '일반미션', 'mission');
     // static readonly PACKAGE = new MissionType(2, '미션팩');
     // static readonly STEP = new MissionType(3, '단계미션');
 
@@ -13,10 +13,12 @@ export default class MissionType {
     static readonly toSelectOption = (type: MissionType) => new SelectOption(type.value.toString(), type.name);
     private readonly _value: number;
     private readonly _name: string;
+    private readonly _simpleName: string
 
-    private constructor(value: number, name: string) {
+    private constructor(value: number, name: string, simpleName: string) {
         this._value = value;
         this._name = name;
+        this._simpleName = simpleName
     }
 
     get value(): number {
@@ -25,6 +27,10 @@ export default class MissionType {
 
     get name(): string {
         return this._name;
+    }
+
+    get simpleName(): string {
+        return this._simpleName;
     }
 
     isIn(...others: MissionType[]) {

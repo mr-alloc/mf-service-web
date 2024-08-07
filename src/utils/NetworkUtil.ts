@@ -62,7 +62,7 @@ const defaultError = (spec: Spec, error: any) => {
     alertStore.warning("서버 에러", spec.getMessage(res?.code) ?? spec.defaultMessage);
 }
 
-export async function call<REQ extends { toJSON?: () => any }, RES>(
+export async function call<REQ extends { [key: string]: any, toJSON?: () => any }, RES>(
     spec: Spec,
     body: REQ,
     success: ((value: AxiosResponse<RES, any>) => any) | null | undefined,

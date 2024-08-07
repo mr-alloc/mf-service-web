@@ -70,7 +70,6 @@ const state = reactive({
   isSubmittable: false,
   comments: [] as Array<UserComments>,
   notFoundUserOption: SelectImageOption.of(0, "알수없는 유저", LocalAsset.DEFAULT_NO_IMAGE),
-  commentGroup: new Map<string, Map<number, MissionComment []>>()
 });
 const methods = {
   whenCommentInput(event: InputEvent) {
@@ -138,8 +137,7 @@ const methods = {
 
             return users;
           }, new Array<UserComments>);
-
-
+        console.log(`response comments: ${responseBody.comments}, state.comments: ${state.comments}`);
     });
   }
 }
